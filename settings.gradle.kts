@@ -1,4 +1,10 @@
+rootProject.name = "BookSearch"
+
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+enableFeaturePreview("STABLE_CONFIGURATION_CACHE")
+
 pluginManagement {
+    includeBuild("build-logic")
     repositories {
         google {
             content {
@@ -19,6 +25,22 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "BookSearch"
-include(":app")
+include(
+    ":app",
+
+    ":core:network",
+    ":core:database",
+    ":core:data",
+    ":core:common",
+    ":core:designsystem",
+    ":core:domain",
+    ":core:navigation",
+
+    ":feature:search",
+    ":feature:favorites",
+    ":feature:detail",
+    ":feature:main",
+)
+
+
  

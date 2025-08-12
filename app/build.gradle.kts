@@ -1,59 +1,68 @@
+@file:Suppress("INLINE_FROM_HIGHER_PLATFORM")
+
+import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+import java.util.Properties
+
 plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.booksearch.android.application)
+    alias(libs.plugins.booksearch.android.application.compose)
+    alias(libs.plugins.booksearch.android.hilt)
 }
 
 android {
     namespace = "com.easyhooon.booksearch"
-    compileSdk = 36
-
-    defaultConfig {
-        applicationId = "com.easyhooon.booksearch"
-        minSdk = 28
-        targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    }
 
     buildTypes {
-        release {
-            isMinifyEnabled = false
+        getByName("debug") {
+            isDebuggable = true
+            applicationIdSuffix = ".dev"
+            manifestPlaceholders += mapOf(
+                "appName" to "@string/app_name_dev",
+            )
+        }
+
+        getByName("release") {
+            isDebuggable = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+            manifestPlaceholders += mapOf(
+                "appName" to "@string/app_name",
+            )
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
     }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+
+    defaultConfig {
+        buildConfigField("String", "KAKAO_NATIVE_APP_KEY", getApiKey("KAKAO_NATIVE_APP_KEY"))
+        manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] = getApiKey("KAKAO_NATIVE_APP_KEY").trim('"')
     }
-    kotlinOptions {
-        jvmTarget = "11"
-    }
+
     buildFeatures {
-        compose = true
+        buildConfig = true
     }
 }
 
 dependencies {
+    implementation(projects.core.common)
+    implementation(projects.core.data)
+    implementation(projects.core.designsystem)
+    implementation(projects.core.domain)
+    implementation(projects.core.network)
 
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(projects.feature.detail)
+    implementation(projects.feature.search)
+    implementation(projects.feature.favorites)
+    implementation(projects.feature.main)
+
     implementation(libs.androidx.activity.compose)
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.ui)
-    implementation(libs.androidx.ui.graphics)
-    implementation(libs.androidx.ui.tooling.preview)
-    implementation(libs.androidx.material3)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.ui.test.junit4)
-    debugImplementation(libs.androidx.ui.tooling)
-    debugImplementation(libs.androidx.ui.test.manifest)
+    implementation(libs.androidx.startup)
+    implementation(libs.coil.compose)
+    implementation(libs.logger)
+}
+
+fun getApiKey(propertyKey: String): String {
+    return gradleLocalProperties(rootDir, providers).getProperty(propertyKey) ?: "\"\""
 }
