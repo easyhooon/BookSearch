@@ -1,3 +1,5 @@
+rootProject.name = "build-logic"
+
 dependencyResolutionManagement {
     repositories {
         google()
@@ -10,5 +12,3 @@ dependencyResolutionManagement {
         }
     }
 }
-
-rootProject.name = "build-logic"

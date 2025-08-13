@@ -1,5 +1,3 @@
-@file:Suppress("INLINE_FROM_HIGHER_PLATFORM")
-
 plugins {
     alias(libs.plugins.booksearch.android.feature)
     alias(libs.plugins.booksearch.kotlin.library.serialization)

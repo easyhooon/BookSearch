@@ -1,4 +1,4 @@
-package com.easyhooon.booksearch.ui.theme
+package com.easyhooon.booksearch.theme
 
 import androidx.compose.ui.graphics.Color
 
