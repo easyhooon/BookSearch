@@ -4,7 +4,7 @@
     <application>
 
         <activity
-            android:name="com.easyhooon.booksearch.MainActivity"
+            android:name=".MainActivity"
             android:exported="true"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.BookSearch">
