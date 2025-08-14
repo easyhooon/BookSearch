@@ -13,6 +13,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
 import com.easyhooon.booksearch.core.navigation.MainTabRoute
 import com.easyhooon.booksearch.core.navigation.Route
+import com.easyhooon.booksearch.feature.detail.navigateToDetail
 import com.easyhooon.booksearch.feature.favorites.navigateToFavorites
 import com.easyhooon.booksearch.feature.search.navigateToSearch
 
@@ -42,6 +43,10 @@ internal class MainNavController(
             MainTab.SEARCH -> navController.navigateToSearch(navOptions)
             MainTab.FAVORITES -> navController.navigateToFavorites(navOptions)
         }
+    }
+
+    fun navigateToDetail(isbn: String) {
+        navController.navigateToDetail(isbn)
     }
 
     // https://github.com/droidknights/DroidKnights2023_App/pull/243/commits/4bfb6d13908eaaab38ab3a59747d628efa3893cb
