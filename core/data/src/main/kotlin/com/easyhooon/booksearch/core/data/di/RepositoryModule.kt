@@ -1,5 +1,6 @@
 package com.easyhooon.booksearch.core.data.di
 
+import com.easyhooon.booksearch.core.data.DefaultBookRepository
 import com.easyhooon.booksearch.core.domain.BookRepository
 import dagger.Binds
 import dagger.Module

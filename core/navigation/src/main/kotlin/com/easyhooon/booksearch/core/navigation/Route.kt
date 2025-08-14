@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 sealed interface Route {
     @Serializable
-    data class BookDetail(val bookId: String) : Route
+    data class Detail(val isbn: String) : Route
 }
 
 sealed interface MainTabRoute : Route {

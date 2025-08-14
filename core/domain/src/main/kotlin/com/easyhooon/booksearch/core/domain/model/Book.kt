@@ -1,11 +1,4 @@
-package com.easyhooon.booksearch.core.domain.entity
-
-data class SearchBook(
-    val totalCount: Int,
-    val pageableCount: Int,
-    val isEnd: Boolean,
-    val books: List<Book>
-)
+package com.easyhooon.booksearch.core.domain.model
 
 data class Book(
     val title: String,

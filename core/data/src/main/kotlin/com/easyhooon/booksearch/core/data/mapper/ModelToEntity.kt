@@ -1,7 +1,7 @@
 package com.easyhooon.booksearch.core.data.mapper
 
 import com.easyhooon.booksearch.core.database.entity.BookEntity
-import com.easyhooon.booksearch.core.domain.entity.Book
+import com.easyhooon.booksearch.core.domain.model.Book
 
 internal fun Book.toBookEntity(): BookEntity {
     return BookEntity(

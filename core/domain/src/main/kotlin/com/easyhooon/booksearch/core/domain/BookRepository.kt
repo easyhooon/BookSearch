@@ -1,6 +1,6 @@
 package com.easyhooon.booksearch.core.domain
 
-import java.awt.print.Book
+import com.easyhooon.booksearch.core.domain.model.Book
 
 interface BookRepository {
     suspend fun searchBook(

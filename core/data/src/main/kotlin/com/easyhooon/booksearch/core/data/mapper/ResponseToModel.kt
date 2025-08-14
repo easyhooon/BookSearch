@@ -1,9 +1,9 @@
 package com.easyhooon.booksearch.core.data.mapper
 
-import com.easyhooon.booksearch.core.domain.entity.Book
+import com.easyhooon.booksearch.core.domain.model.Book
 import com.easyhooon.booksearch.core.network.response.BookResponse
 
-internal fun BookResponse.toEntity(): Book {
+internal fun BookResponse.toModel(): Book {
     return Book(
         title = title,
         contents = contents,
