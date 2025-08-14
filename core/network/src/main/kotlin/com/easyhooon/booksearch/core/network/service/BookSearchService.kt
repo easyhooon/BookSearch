@@ -5,7 +5,7 @@ import retrofit2.http.GET
 
 interface BookSearchService {
     @GET("search/book")
-    suspend fun searchBooks(
+    suspend fun searchBook(
         query: String,
         sort: String = "accuracy",
         page: Int = 1,

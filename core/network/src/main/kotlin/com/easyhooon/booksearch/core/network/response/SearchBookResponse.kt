@@ -8,7 +8,7 @@ data class SearchBookResponse(
     @SerialName("meta")
     val meta: Meta,
     @SerialName("documents")
-    val documents: List<Book>
+    val documents: List<BookResponse>
 )
 
 @Serializable
@@ -22,7 +22,7 @@ data class Meta(
 )
 
 @Serializable
-data class Book(
+data class BookResponse(
     @SerialName("title")
     val title: String,
     @SerialName("contents")
@@ -42,7 +42,7 @@ data class Book(
     @SerialName("price")
     val price: String,
     @SerialName("sale_price")
-    val sale_price: String,
+    val salePrice: String,
     @SerialName("thumbnail")
     val thumbnail: String,
     @SerialName("status")
