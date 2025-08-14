@@ -16,7 +16,7 @@ android {
 
     buildTypes {
         debug {
-            buildConfigField("String", "SERVER_BASE_URL", getServerBaseUrl("DEBUG_SERVER_BASE_URL"))
+            buildConfigField("String", "KAKAO_API_BASE_URL", getServerBaseUrl("KAKAO_API_BASE_URL"))
         }
     }
 }
