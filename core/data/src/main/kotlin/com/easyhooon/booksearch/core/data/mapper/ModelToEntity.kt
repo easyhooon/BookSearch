@@ -16,6 +16,6 @@ internal fun Book.toBookEntity(): BookEntity {
         price = price,
         salePrice = salePrice,
         thumbnail = thumbnail,
-        status = status
+        status = status,
     )
 }

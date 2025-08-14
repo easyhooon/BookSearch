@@ -8,7 +8,7 @@ data class SearchBookResponse(
     @SerialName("meta")
     val meta: Meta,
     @SerialName("documents")
-    val documents: List<BookResponse>
+    val documents: List<BookResponse>,
 )
 
 @Serializable
@@ -18,7 +18,7 @@ data class Meta(
     @SerialName("pageable_count")
     val pageableCount: Int,
     @SerialName("is_end")
-    val isEnd: Boolean
+    val isEnd: Boolean,
 )
 
 @Serializable
@@ -48,4 +48,3 @@ data class BookResponse(
     @SerialName("status")
     val status: String,
 )
-

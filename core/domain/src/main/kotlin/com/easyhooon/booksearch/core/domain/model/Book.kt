@@ -12,5 +12,5 @@ data class Book(
     val price: String,
     val salePrice: String,
     val thumbnail: String,
-    val status: String
+    val status: String,
 )

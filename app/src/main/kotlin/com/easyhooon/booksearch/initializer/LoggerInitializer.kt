@@ -8,11 +8,13 @@ import com.orhanobut.logger.Logger
 
 class LoggerInitializer : Initializer<Unit> {
     override fun create(context: Context) {
-        Logger.addLogAdapter(object : AndroidLogAdapter() {
-            override fun isLoggable(priority: Int, tag: String?): Boolean {
-                return BuildConfig.DEBUG
-            }
-        })
+        Logger.addLogAdapter(
+            object : AndroidLogAdapter() {
+                override fun isLoggable(priority: Int, tag: String?): Boolean {
+                    return BuildConfig.DEBUG
+                }
+            },
+        )
     }
 
     override fun dependencies(): List<Class<out Initializer<*>?>?> {

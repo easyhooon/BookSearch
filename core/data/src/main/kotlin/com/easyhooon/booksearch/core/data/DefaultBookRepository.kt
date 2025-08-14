@@ -14,13 +14,13 @@ internal class DefaultBookRepository @Inject constructor(
         query: String,
         sort: String,
         page: Int,
-        size: Int
+        size: Int,
     ) = cancellableRunCatching {
         service.searchBook(
             query = query,
             sort = sort,
             page = page,
-            size = size
+            size = size,
         ).documents.map { it.toModel() }
     }
 }

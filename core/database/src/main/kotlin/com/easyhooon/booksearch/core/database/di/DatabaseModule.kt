@@ -21,6 +21,6 @@ object DatabaseModule {
         Room.databaseBuilder(
             context.applicationContext,
             FavoritesDatabase::class.java,
-            FavoritesDatabase.DATABASE_NAME
+            FavoritesDatabase.DATABASE_NAME,
         ).build()
 }

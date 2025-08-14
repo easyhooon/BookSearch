@@ -2,6 +2,7 @@ package com.easyhooon.booksearch.core.data.util
 
 import kotlinx.coroutines.CancellationException
 
+@Suppress("TooGenericExceptionCaught")
 inline fun <T, R> T.cancellableRunCatching(block: T.() -> R): Result<R> {
     return try {
         Result.success(block())

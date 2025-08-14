@@ -16,6 +16,6 @@ internal fun BookResponse.toModel(): Book {
         price = price,
         salePrice = salePrice,
         thumbnail = thumbnail,
-        status = status
+        status = status,
     )
 }

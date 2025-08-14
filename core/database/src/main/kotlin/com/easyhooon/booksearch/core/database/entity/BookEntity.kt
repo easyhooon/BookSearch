@@ -30,5 +30,5 @@ data class BookEntity(
     @ColumnInfo(name = "thumbnail")
     val thumbnail: String,
     @ColumnInfo(name = "status")
-    val status: String
+    val status: String,
 )
