@@ -35,6 +35,7 @@ include(
     ":core:designsystem",
     ":core:domain",
     ":core:navigation",
+    ":core:ui",
 
     ":feature:search",
     ":feature:favorites",

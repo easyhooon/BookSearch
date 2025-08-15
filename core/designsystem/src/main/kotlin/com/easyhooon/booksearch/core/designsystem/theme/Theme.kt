@@ -1,4 +1,4 @@
-package com.easyhooon.booksearch.theme
+package com.easyhooon.booksearch.core.designsystem.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
