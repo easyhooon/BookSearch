@@ -35,13 +35,11 @@ internal fun MainScreen(
         ) {
             searchGraph(
                 padding = innerPadding,
-                popBackStack = navigator::popBackStackIfNotSearch,
                 navigateToDetail = {}
             )
 
             favoritesGraph(
                 padding = innerPadding,
-                popBackStack = navigator::popBackStackIfNotSearch,
                 navigateToDetail = {}
             )
 

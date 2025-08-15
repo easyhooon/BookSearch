@@ -39,11 +39,6 @@ import com.easyhooon.booksearch.core.designsystem.theme.Neutral400
 import com.easyhooon.booksearch.core.designsystem.theme.Neutral800
 import com.easyhooon.booksearch.core.designsystem.theme.body1SemiBold
 import com.easyhooon.booksearch.core.designsystem.theme.label1Medium
-import com.ninecraft.booket.core.designsystem.theme.ReedTheme
-import com.skydoves.compose.effects.RememberedEffect
-import kotlin.collections.addAll
-import kotlin.collections.lastOrNull
-import kotlin.ranges.until
 
 // 기기에서 평균적으로 한 화면에 보이는 아이템 개수
 private const val LIMIT_COUNT = 6

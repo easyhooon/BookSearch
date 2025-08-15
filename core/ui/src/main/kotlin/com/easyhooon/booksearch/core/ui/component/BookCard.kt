@@ -23,7 +23,7 @@ import com.easyhooon.booksearch.core.designsystem.theme.Neutral500
 import com.easyhooon.booksearch.core.designsystem.theme.body1Medium
 
 @Composable
-fun BookSearchItem(
+fun BookCard(
     query: String,
     onQueryClick: (String) -> Unit,
     onRemoveIconClick: (String) -> Unit,
@@ -63,7 +63,7 @@ fun BookSearchItem(
 @Composable
 private fun SearchItemPreview() {
     BookSearchTheme {
-        BookSearchItem(
+        BookCard(
             query = "검색어 검색어 검색어 검색어 검색어",
             onQueryClick = {},
             onRemoveIconClick = {},

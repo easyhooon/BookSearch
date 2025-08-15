@@ -23,6 +23,7 @@ internal class AndroidFeatureConventionPlugin : Plugin<Project> {
                 implementation(project(path = ":core:designsystem"))
                 implementation(project(path = ":core:domain"))
                 implementation(project(path = ":core:navigation"))
+                implementation(project(path = ":core:ui"))
 
                 implementation(libs.androidx.navigation.compose)
                 implementation(libs.androidx.hilt.navigation.compose)

@@ -13,13 +13,11 @@ fun NavController.navigateToFavorites(navOptions: NavOptions) {
 
 fun NavGraphBuilder.favoritesGraph(
     padding: PaddingValues,
-    popBackStack: () -> Unit,
     navigateToDetail: (String) -> Unit,
 ) {
     composable<MainTabRoute.Favorites> {
         FavoritesRoute(
             padding = padding,
-            popBackStack = popBackStack,
             navigateToDetail = navigateToDetail
         )
     }

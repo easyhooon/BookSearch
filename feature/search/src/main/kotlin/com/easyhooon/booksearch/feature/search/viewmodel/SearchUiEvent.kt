@@ -1,3 +1,5 @@
 package com.easyhooon.booksearch.feature.search.viewmodel
 
-sealed interface SearchUiEvent
+sealed interface SearchUiEvent {
+    data class NavigateToDetail(val isbn: String) : SearchUiEvent
+}

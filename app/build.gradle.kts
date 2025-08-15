@@ -1,7 +1,4 @@
-@file:Suppress("INLINE_FROM_HIGHER_PLATFORM")
-
 import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
-import java.util.Properties
 
 plugins {
     alias(libs.plugins.booksearch.android.application)

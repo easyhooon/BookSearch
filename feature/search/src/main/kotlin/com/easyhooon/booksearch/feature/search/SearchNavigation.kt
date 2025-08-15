@@ -13,13 +13,11 @@ fun NavController.navigateToSearch(navOptions: NavOptions) {
 
 fun NavGraphBuilder.searchGraph(
     padding: PaddingValues,
-    popBackStack: () -> Unit,
     navigateToDetail: (String) -> Unit,
 ) {
     composable<MainTabRoute.Search> {
         SearchRoute(
             padding = padding,
-            popBackStack = popBackStack,
             navigateToDetail = navigateToDetail
         )
     }
