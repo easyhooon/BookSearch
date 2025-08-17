@@ -30,6 +30,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import com.easyhooon.booksearch.core.common.extensions.toFormattedPrice
 import com.easyhooon.booksearch.core.common.model.BookUiModel
 import com.easyhooon.booksearch.core.designsystem.ComponentPreview
 import com.easyhooon.booksearch.core.designsystem.component.NetworkImage
@@ -53,6 +54,7 @@ fun BookCard(
     Box(
         modifier = modifier
             .fillMaxWidth()
+            .clip(RoundedCornerShape(size = 8.dp))
             .background(White)
             .clickable { onBookClick(book) }
             .padding(8.dp),
@@ -153,7 +155,7 @@ fun BookCard(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "${book.price}${stringResource(designR.string.won)}",
+                        text = "${book.price.toFormattedPrice()}${stringResource(designR.string.won)}",
                         style = label1Medium,
                         color = Neutral400,
                         textDecoration = TextDecoration.LineThrough,
@@ -163,7 +165,8 @@ fun BookCard(
             }
 
             Text(
-                text = "${if (book.salePrice == "-1") book.price else book.salePrice}${stringResource(designR.string.won)}",
+                text = "${if (book.salePrice == "-1") book.price.toFormattedPrice()
+                else book.salePrice.toFormattedPrice()}${stringResource(designR.string.won)}",
                 style = heading2Bold,
                 color = Neutral600,
             )

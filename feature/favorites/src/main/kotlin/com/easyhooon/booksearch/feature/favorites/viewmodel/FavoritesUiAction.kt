@@ -6,4 +6,6 @@ sealed interface FavoritesUiAction {
     data class OnBookClick(val book: BookUiModel) : FavoritesUiAction
     data object OnSearchClick : FavoritesUiAction
     data object OnClearClick : FavoritesUiAction
+    data object OnSortClick : FavoritesUiAction
+    data object OnFilterClick : FavoritesUiAction
 }

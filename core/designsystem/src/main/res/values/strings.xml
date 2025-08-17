@@ -10,4 +10,6 @@
     <string name="won">원</string>
     <string name="price_format">%s원</string>
     <string name="discount_percent">%d%%</string>
+    <string name="sort_label">정렬</string>
+    <string name="filter_label">필터</string>
 </resources>

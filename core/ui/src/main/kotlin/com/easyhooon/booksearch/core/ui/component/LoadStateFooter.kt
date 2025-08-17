@@ -16,7 +16,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.easyhooon.booksearch.core.designsystem.R
-import com.easyhooon.booksearch.core.designsystem.theme.Green500
 import com.easyhooon.booksearch.core.designsystem.theme.Neutral500
 import com.easyhooon.booksearch.core.designsystem.theme.Red500
 import com.easyhooon.booksearch.core.designsystem.theme.body2Regular
@@ -37,7 +36,7 @@ fun LoadStateFooter(
             is FooterState.Loading -> {
                 CircularProgressIndicator(
                     modifier = Modifier.size(24.dp),
-                    color = Green500,
+                    color = Neutral500,
                 )
             }
 

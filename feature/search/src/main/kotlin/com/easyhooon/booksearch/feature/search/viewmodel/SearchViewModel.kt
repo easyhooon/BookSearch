@@ -52,6 +52,7 @@ class SearchViewModel @Inject constructor(
             is SearchUiAction.OnClearClick -> clearQuery()
             is SearchUiAction.OnLoadMore -> loadMore()
             is SearchUiAction.OnRetryClick -> {}
+            is SearchUiAction.OnSortClick -> {}
         }
     }
 

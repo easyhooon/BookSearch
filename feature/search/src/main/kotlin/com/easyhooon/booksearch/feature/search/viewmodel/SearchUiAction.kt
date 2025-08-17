@@ -8,4 +8,5 @@ sealed interface SearchUiAction {
     data object OnClearClick : SearchUiAction
     data object OnLoadMore : SearchUiAction
     data object OnRetryClick : SearchUiAction
+    data object OnSortClick : SearchUiAction
 }

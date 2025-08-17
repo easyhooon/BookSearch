@@ -2,6 +2,7 @@ package com.easyhooon.booksearch.feature.search.viewmodel
 
 import androidx.compose.foundation.text.input.TextFieldState
 import com.easyhooon.booksearch.core.common.model.BookUiModel
+import com.easyhooon.booksearch.core.common.model.SortType
 import com.easyhooon.booksearch.core.ui.component.FooterState
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -25,9 +26,4 @@ data class SearchUiState(
 ) {
     val isEmptySearchResult: Boolean
         get() = searchState is SearchState.Success && books.isEmpty()
-}
-
-enum class SortType(val value: String) {
-    ACCURACY("accuracy"),
-    LATEST("latest"),
 }

@@ -74,7 +74,7 @@ fun BookSearchTopAppBar(
                 Icon(
                     painter = painterResource(id = endIconRes),
                     contentDescription = endIconDescription,
-                    tint = if (isDark) White else Color.Unspecified,
+                    tint = Color.Unspecified,
                 )
             }
         } else {

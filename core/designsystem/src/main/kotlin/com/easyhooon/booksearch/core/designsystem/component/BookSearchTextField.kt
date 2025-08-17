@@ -36,16 +36,16 @@ import androidx.compose.ui.unit.dp
 import com.easyhooon.booksearch.core.designsystem.ComponentPreview
 import com.easyhooon.booksearch.core.designsystem.R
 import com.easyhooon.booksearch.core.designsystem.theme.BookSearchTheme
-import com.easyhooon.booksearch.core.designsystem.theme.Green500
 import com.easyhooon.booksearch.core.designsystem.theme.Neutral400
+import com.easyhooon.booksearch.core.designsystem.theme.Neutral500
 import com.easyhooon.booksearch.core.designsystem.theme.Neutral50
 import com.easyhooon.booksearch.core.designsystem.theme.Neutral800
 import com.easyhooon.booksearch.core.designsystem.theme.body2Medium
 import com.easyhooon.booksearch.core.designsystem.theme.body2Regular
 
 val bookSearchTextSelectionColors = TextSelectionColors(
-    handleColor = Green500,
-    backgroundColor = Green500,
+    handleColor = Neutral500,
+    backgroundColor = Neutral500,
 )
 
 @Composable

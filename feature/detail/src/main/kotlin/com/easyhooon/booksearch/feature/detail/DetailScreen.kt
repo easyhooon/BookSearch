@@ -1,5 +1,7 @@
 package com.easyhooon.booksearch.feature.detail
 
+import android.R.attr.text
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -26,6 +29,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.easyhooon.booksearch.core.common.ObserveAsEvents
+import com.easyhooon.booksearch.core.common.extensions.toFormattedDate
+import com.easyhooon.booksearch.core.common.extensions.toFormattedPrice
 import com.easyhooon.booksearch.core.common.model.BookUiModel
 import com.easyhooon.booksearch.core.designsystem.DevicePreview
 import com.easyhooon.booksearch.core.designsystem.component.NetworkImage
@@ -46,21 +51,23 @@ import com.easyhooon.booksearch.core.designsystem.R as designR
 internal fun DetailRoute(
     innerPadding: PaddingValues,
     popBackStack: () -> Unit,
-    book: BookUiModel,
     viewModel: DetailViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
 
     ObserveAsEvents(flow = viewModel.uiEvent) { event ->
         when (event) {
             is DetailUiEvent.NavigateBack -> popBackStack()
+            is DetailUiEvent.ShowToast -> {
+                Toast.makeText(context, event.message.asString(context), Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
     DetailScreen(
         innerPadding = innerPadding,
         uiState = uiState,
-        book = book,
         onAction = viewModel::onAction,
     )
 }
@@ -69,7 +76,6 @@ internal fun DetailRoute(
 internal fun DetailScreen(
     innerPadding: PaddingValues,
     uiState: DetailUiState,
-    book: BookUiModel,
     onAction: (DetailUiAction) -> Unit,
 ) {
     Column(
@@ -82,13 +88,13 @@ internal fun DetailScreen(
             startIconOnClick = {
                 onAction(DetailUiAction.OnBackClick)
             },
-            endIconRes = if (uiState.isFavorite) designR.drawable.ic_favorite_filled_red
+            endIconRes = if (uiState.book.isFavorites) designR.drawable.ic_favorite_filled_red
             else designR.drawable.ic_selected_favorites,
             endIconOnClick = {
-                onAction(DetailUiAction.OnFavoritesClick(book))
+                onAction(DetailUiAction.OnFavoritesClick)
             },
         )
-        DetailContent(book = book)
+        DetailContent(book = uiState.book)
     }
 }
 
@@ -137,6 +143,7 @@ internal fun DetailContent(
                     },
                     style = body1Medium,
                 )
+                Spacer(Modifier.height(4.dp))
                 Text(
                     text = buildAnnotatedString {
                         withStyle(style = SpanStyle(color = Black)) {
@@ -149,6 +156,7 @@ internal fun DetailContent(
                     },
                     style = body1Medium,
                 )
+                Spacer(Modifier.height(4.dp))
                 Text(
                     text = buildAnnotatedString {
                         withStyle(style = SpanStyle(color = Black)) {
@@ -156,11 +164,12 @@ internal fun DetailContent(
                         }
                         append(" ")
                         withStyle(style = SpanStyle(color = Neutral600)) {
-                            append(book.datetime)
+                            append(book.datetime.toFormattedDate())
                         }
                     },
                     style = body1Medium,
                 )
+                Spacer(Modifier.height(4.dp))
                 Text(
                     text = buildAnnotatedString {
                         withStyle(style = SpanStyle(color = Black)) {
@@ -173,6 +182,7 @@ internal fun DetailContent(
                     },
                     style = body1Medium,
                 )
+                Spacer(Modifier.height(4.dp))
                 Text(
                     text = buildAnnotatedString {
                         withStyle(style = SpanStyle(color = Black)) {
@@ -180,11 +190,12 @@ internal fun DetailContent(
                         }
                         append(" ")
                         withStyle(style = SpanStyle(color = Neutral600)) {
-                            append("${book.price}${stringResource(R.string.won)}")
+                            append("${book.price.toFormattedPrice()}${stringResource(R.string.won)}")
                         }
                     },
                     style = body1Medium,
                 )
+                Spacer(Modifier.height(4.dp))
                 Text(
                     text = buildAnnotatedString {
                         withStyle(style = SpanStyle(color = Black)) {
@@ -192,7 +203,7 @@ internal fun DetailContent(
                         }
                         append(" ")
                         withStyle(style = SpanStyle(color = Neutral600)) {
-                            append("${book.salePrice}${stringResource(R.string.won)}")
+                            append("${book.salePrice.toFormattedPrice()}${stringResource(R.string.won)}")
                         }
                     },
                     style = body1Medium,
@@ -209,11 +220,12 @@ internal fun DetailContent(
         Spacer(Modifier.height(16.dp))
         Box(
             modifier = Modifier
-                .background(Neutral100)
-                .clip(RoundedCornerShape(8.dp)),
+                .fillMaxWidth()
+                .background(Neutral100, RoundedCornerShape(8.dp))
+                .padding(16.dp),
         ) {
             Text(
-                text = book.contents,
+                text = "${book.contents}...",
                 modifier = Modifier.fillMaxWidth(),
                 color = Neutral600,
                 style = body1Medium,
@@ -229,20 +241,6 @@ private fun DetailScreenPreview() {
         DetailScreen(
             innerPadding = PaddingValues(),
             uiState = DetailUiState(),
-            book = BookUiModel(
-                title = "도서 제목",
-                contents = "책 소개",
-                url = "",
-                isbn = "ISBN",
-                datetime = "출간일",
-                authors = listOf("저자"),
-                publisher = "출판사",
-                translators = listOf("번역가"),
-                price = "N",
-                salePrice = "N",
-                thumbnail = "https://example.com/thumbnail.jpg",
-                status = "",
-            ),
             onAction = {},
         )
     }

@@ -46,7 +46,7 @@ class FavoritesViewModel @Inject constructor(
             }
         }
         .map { book ->
-            book.map { it.toUiModel() }
+            book.map { it.toUiModel().copy(isFavorites = true) }
         }
         .map { it.toImmutableList() }
         .stateIn(
@@ -60,6 +60,8 @@ class FavoritesViewModel @Inject constructor(
             is FavoritesUiAction.OnBookClick -> navigateToBookDetail(action.book)
             is FavoritesUiAction.OnSearchClick -> updateSearchQuery()
             is FavoritesUiAction.OnClearClick -> clearQuery()
+            is FavoritesUiAction.OnSortClick -> {}
+            is FavoritesUiAction.OnFilterClick -> {}
         }
     }
 
