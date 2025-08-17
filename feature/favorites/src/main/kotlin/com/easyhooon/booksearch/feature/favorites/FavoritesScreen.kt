@@ -1,5 +1,6 @@
 package com.easyhooon.booksearch.feature.favorites
 
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -23,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
@@ -57,10 +59,14 @@ internal fun FavoritesRoute(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val favoriteBooks by viewModel.favoriteBooks.collectAsStateWithLifecycle()
+    val context = LocalContext.current
 
     ObserveAsEvents(flow = viewModel.uiEvent) { event ->
         when (event) {
             is FavoritesUiEvent.NavigateToDetail -> navigateToDetail(event.book)
+            is FavoritesUiEvent.ShowToast -> {
+                Toast.makeText(context, event.message.asString(context), Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -211,6 +217,9 @@ internal fun FavoritesContent(
                     onAction(FavoritesUiAction.OnBookClick(book))
                 },
                 isPriceFilterEnabled = isPriceFilterEnabled,
+                onFavoritesClick = { book ->
+                    onAction(FavoritesUiAction.OnFavoritesClick(book))
+                },
             )
         }
     }

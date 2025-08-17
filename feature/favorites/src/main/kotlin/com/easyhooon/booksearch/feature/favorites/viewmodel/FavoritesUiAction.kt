@@ -8,4 +8,5 @@ sealed interface FavoritesUiAction {
     data object OnClearClick : FavoritesUiAction
     data object OnSortClick : FavoritesUiAction
     data object OnFilterClick : FavoritesUiAction
+    data class OnFavoritesClick(val book: BookUiModel) : FavoritesUiAction
 }

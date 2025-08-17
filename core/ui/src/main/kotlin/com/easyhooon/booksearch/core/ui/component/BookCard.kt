@@ -51,6 +51,7 @@ fun BookCard(
     onBookClick: (BookUiModel) -> Unit,
     modifier: Modifier = Modifier,
     isPriceFilterEnabled: Boolean = true,
+    onFavoritesClick: (BookUiModel) -> Unit = {},
 ) {
     Box(
         modifier = modifier
@@ -123,7 +124,10 @@ fun BookCard(
                 tint = Color.Unspecified,
                 modifier = Modifier
                     .size(32.dp)
-                    .align(Alignment.TopEnd),
+                    .align(Alignment.TopEnd)
+                    .clickable {
+                        onFavoritesClick(book)
+                    },
             )
         } else {
             Icon(
