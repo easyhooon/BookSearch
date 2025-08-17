@@ -37,18 +37,25 @@ class FavoritesViewModel @Inject constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val favoriteBooks: StateFlow<ImmutableList<BookUiModel>> = _uiState
-        .map { it.searchQuery }
-        .flatMapLatest { query ->
-            if (query.isBlank()) {
+        .flatMapLatest { state ->
+            val query = state.searchQuery
+            val sortType = state.sortType
+
+            val booksFlow = if (query.isBlank()) {
                 repository.favoriteBooks
             } else {
                 repository.searchFavoritesByTitle(query)
             }
+
+            booksFlow.map { books ->
+                val uiBooks = books.map { it.toUiModel().copy(isFavorites = true) }
+
+                when (sortType) {
+                    FavoritesSortType.TITLE_ASC -> uiBooks.sortedBy { it.title }
+                    FavoritesSortType.TITLE_DESC -> uiBooks.sortedByDescending { it.title }
+                }.toImmutableList()
+            }
         }
-        .map { book ->
-            book.map { it.toUiModel().copy(isFavorites = true) }
-        }
-        .map { it.toImmutableList() }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000L),
@@ -60,7 +67,7 @@ class FavoritesViewModel @Inject constructor(
             is FavoritesUiAction.OnBookClick -> navigateToBookDetail(action.book)
             is FavoritesUiAction.OnSearchClick -> updateSearchQuery()
             is FavoritesUiAction.OnClearClick -> clearQuery()
-            is FavoritesUiAction.OnSortClick -> {}
+            is FavoritesUiAction.OnSortClick -> toggleSortType()
             is FavoritesUiAction.OnFilterClick -> {}
         }
     }
@@ -79,8 +86,15 @@ class FavoritesViewModel @Inject constructor(
 
     private fun clearQuery() {
         _uiState.value.queryState.clearText()
+
         _uiState.update { currentState ->
             currentState.copy(searchQuery = "")
+        }
+    }
+
+    private fun toggleSortType() {
+        _uiState.update { currentState ->
+            currentState.copy(sortType = currentState.sortType.toggle())
         }
     }
 }
