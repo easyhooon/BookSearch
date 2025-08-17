@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import androidx.navigation.toRoute
 import com.easyhooon.booksearch.core.common.model.BookUiModel
 import com.easyhooon.booksearch.core.navigation.BookType
 import com.easyhooon.booksearch.core.navigation.Route
@@ -20,12 +19,10 @@ fun NavGraphBuilder.detailGraph(
 ) {
     composable<Route.Detail>(
         typeMap = mapOf(typeOf<BookUiModel>() to BookType),
-    ) { navBackStackEntry ->
-        val book = navBackStackEntry.toRoute<Route.Detail>().book
+    ) {
         DetailRoute(
             innerPadding = innerPadding,
             popBackStack = popBackStack,
-            book = book,
         )
     }
 }

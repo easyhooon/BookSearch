@@ -3,11 +3,11 @@ package com.easyhooon.booksearch.feature.search.viewmodel
 import androidx.compose.foundation.text.input.clearText
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.easyhooon.booksearch.core.common.mapper.toUiModel
+import com.easyhooon.booksearch.core.common.model.BookUiModel
 import com.easyhooon.booksearch.core.domain.BookRepository
 import com.easyhooon.booksearch.core.domain.model.Book
 import com.easyhooon.booksearch.core.ui.component.FooterState
-import com.easyhooon.booksearch.core.common.mapper.toUiModel
-import com.easyhooon.booksearch.core.common.model.BookUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -22,7 +22,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import com.orhanobut.logger.Logger
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
@@ -52,7 +51,7 @@ class SearchViewModel @Inject constructor(
             is SearchUiAction.OnClearClick -> clearQuery()
             is SearchUiAction.OnLoadMore -> loadMore()
             is SearchUiAction.OnRetryClick -> {}
-            is SearchUiAction.OnSortClick -> {}
+            is SearchUiAction.OnSortClick -> toggleSortType()
         }
     }
 
@@ -90,10 +89,6 @@ class SearchViewModel @Inject constructor(
                 page = page,
                 size = PAGE_SIZE,
             ).onSuccess { searchResult ->
-                favoriteBooks.value.forEach { favorite ->
-                    Logger.d("Favorite book: '${favorite.title}' ISBN: '${favorite.isbn}'")
-                }
-
                 val searchBooks = searchResult.documents.map { book ->
                     val isFavorite = favoriteBooks.value.any { it.isbn == book.isbn }
                     book.toUiModel().copy(isFavorites = isFavorite)
@@ -146,5 +141,26 @@ class SearchViewModel @Inject constructor(
         }
 
         searchBook(currentState.currentQuery)
+    }
+
+    private fun toggleSortType() {
+        val currentState = _uiState.value
+        val newSortType = currentState.sortType.toggle()
+
+        _uiState.update { state ->
+            state.copy(
+                sortType = newSortType,
+                books = persistentListOf(),
+                currentPage = 1,
+                isLastPage = false,
+                searchState = SearchState.Idle,
+                footerState = FooterState.Idle,
+            )
+        }
+
+        // 현재 검색어가 있으면 새로운 정렬로 다시 검색
+        if (currentState.currentQuery.isNotBlank()) {
+            searchBook(currentState.currentQuery)
+        }
     }
 }

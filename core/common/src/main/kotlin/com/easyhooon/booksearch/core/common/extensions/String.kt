@@ -14,8 +14,8 @@ fun String.toFormattedPrice(): String {
             val number = this.toLong()
             DecimalFormat("#,###").format(number)
         } catch (e: NumberFormatException) {
-            Logger.e("Failed to format price: '$this'")
-            this
+            Logger.e("Failed to format price: ", e)
+            ""
         }
     }
 }
@@ -30,6 +30,7 @@ fun String.toFormattedDate(): String {
         val parsedDate = ZonedDateTime.parse(normalizedDatetime, inputFormatter)
         parsedDate.format(outputFormatter)
     } catch (e: DateTimeParseException) {
+        Logger.e("Failed to format date: ", e)
         ""
     }
 }
