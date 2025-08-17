@@ -1,4 +1,4 @@
-package com.easyhooon.booksearch.core.ui.component
+package com.easyhooon.booksearch.feature.search.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box

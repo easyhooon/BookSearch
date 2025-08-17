@@ -2,7 +2,7 @@ package com.easyhooon.booksearch.feature.search.viewmodel
 
 import androidx.compose.foundation.text.input.TextFieldState
 import com.easyhooon.booksearch.core.common.model.BookUiModel
-import com.easyhooon.booksearch.core.ui.component.FooterState
+import com.easyhooon.booksearch.feature.search.component.FooterState
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 

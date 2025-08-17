@@ -4,6 +4,7 @@ import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -40,6 +41,7 @@ import com.easyhooon.booksearch.core.designsystem.theme.Neutral100
 import com.easyhooon.booksearch.core.designsystem.theme.Neutral200
 import com.easyhooon.booksearch.core.designsystem.theme.Neutral500
 import com.easyhooon.booksearch.core.designsystem.theme.White
+import com.easyhooon.booksearch.core.designsystem.theme.body1Medium
 import com.easyhooon.booksearch.core.designsystem.theme.body1SemiBold
 import com.easyhooon.booksearch.core.ui.component.BookCard
 import com.easyhooon.booksearch.core.ui.component.BookSearchTopAppBar
@@ -201,26 +203,39 @@ internal fun FavoritesContent(
     isPriceFilterEnabled: Boolean,
     onAction: (FavoritesUiAction) -> Unit,
 ) {
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize(),
-        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        items(
-            count = favoriteBooks.size,
-            key = { index -> favoriteBooks[index].isbn },
-        ) { index ->
-            BookCard(
-                book = favoriteBooks[index],
-                onBookClick = { book ->
-                    onAction(FavoritesUiAction.OnBookClick(book))
-                },
-                isPriceFilterEnabled = isPriceFilterEnabled,
-                onFavoritesClick = { book ->
-                    onAction(FavoritesUiAction.OnFavoritesClick(book))
-                },
+    if (favoriteBooks.isEmpty()) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = stringResource(R.string.empty_favorites),
+                color = Black,
+                style = body1Medium,
             )
+        }
+    } else {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize(),
+            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            items(
+                count = favoriteBooks.size,
+                key = { index -> favoriteBooks[index].isbn },
+            ) { index ->
+                BookCard(
+                    book = favoriteBooks[index],
+                    onBookClick = { book ->
+                        onAction(FavoritesUiAction.OnBookClick(book))
+                    },
+                    isPriceFilterEnabled = isPriceFilterEnabled,
+                    onFavoritesClick = { book ->
+                        onAction(FavoritesUiAction.OnFavoritesClick(book))
+                    },
+                )
+            }
         }
     }
 }

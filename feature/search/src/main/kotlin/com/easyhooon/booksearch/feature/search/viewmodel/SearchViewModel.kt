@@ -7,7 +7,7 @@ import com.easyhooon.booksearch.core.common.mapper.toUiModel
 import com.easyhooon.booksearch.core.common.model.BookUiModel
 import com.easyhooon.booksearch.core.domain.BookRepository
 import com.easyhooon.booksearch.core.domain.model.Book
-import com.easyhooon.booksearch.core.ui.component.FooterState
+import com.easyhooon.booksearch.feature.search.component.FooterState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList

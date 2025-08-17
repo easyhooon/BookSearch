@@ -1,4 +1,4 @@
-package com.easyhooon.booksearch.core.ui.component
+package com.easyhooon.booksearch.feature.search.component
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
@@ -76,7 +76,7 @@ fun InfinityLazyColumn(
 @SuppressLint("ComposableNaming")
 @Composable
 private fun LazyListState.onLoadMore(
-    limitCount: Int = 6,
+    limitCount: Int = 4,
     loadOnBottom: Boolean = true,
     action: () -> Unit,
 ) {
@@ -139,8 +139,8 @@ private fun InfinityLazyColumnPreview() {
                             ) {
                                 Box(
                                     modifier = Modifier
-                                        .width(68.dp)
-                                        .height(100.dp)
+                                        .width(100.dp)
+                                        .height(150.dp)
                                         .background(
                                             color = Neutral400,
                                             shape = RoundedCornerShape(8.dp),
