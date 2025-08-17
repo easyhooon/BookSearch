@@ -4,9 +4,11 @@ import androidx.compose.foundation.text.input.clearText
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.easyhooon.booksearch.core.common.UiText
+import com.easyhooon.booksearch.core.common.mapper.toModel
 import com.easyhooon.booksearch.core.common.mapper.toUiModel
 import com.easyhooon.booksearch.core.common.model.BookUiModel
 import com.easyhooon.booksearch.core.domain.BookRepository
+import com.easyhooon.booksearch.core.domain.usecase.ToggleFavoriteUseCase
 import com.easyhooon.booksearch.feature.favorites.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.ImmutableList
@@ -30,6 +32,7 @@ import javax.inject.Inject
 @HiltViewModel
 class FavoritesViewModel @Inject constructor(
     private val repository: BookRepository,
+    private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(FavoritesUiState())
     val uiState: StateFlow<FavoritesUiState> = _uiState.asStateFlow()
@@ -109,7 +112,7 @@ class FavoritesViewModel @Inject constructor(
 
     private fun toggleFavorites(book: BookUiModel) {
         viewModelScope.launch {
-            repository.deleteBook(book.isbn)
+            toggleFavoriteUseCase(book.toModel())
             _uiEvent.send(FavoritesUiEvent.ShowToast(UiText.StringResource(R.string.delete_favorites)))
         }
     }

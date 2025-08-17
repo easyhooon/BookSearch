@@ -6,8 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.easyhooon.booksearch.core.common.UiText
 import com.easyhooon.booksearch.core.common.mapper.toModel
-import com.easyhooon.booksearch.core.common.model.BookUiModel
-import com.easyhooon.booksearch.core.domain.BookRepository
+import com.easyhooon.booksearch.core.domain.usecase.ToggleFavoriteUseCase
 import com.easyhooon.booksearch.core.navigation.Route
 import com.easyhooon.booksearch.feature.detail.R
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,24 +22,16 @@ import javax.inject.Inject
 
 @HiltViewModel
 class DetailViewModel @Inject constructor(
-    private val repository: BookRepository,
+    private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     private val book = savedStateHandle.toRoute<Route.Detail>(typeMap = Route.Detail.typeMap).book
 
-    private val _uiState = MutableStateFlow(DetailUiState())
+    private val _uiState = MutableStateFlow(DetailUiState(book = book))
     val uiState: StateFlow<DetailUiState> = _uiState.asStateFlow()
 
     private val _uiEvent = Channel<DetailUiEvent>()
     val uiEvent: Flow<DetailUiEvent> = _uiEvent.receiveAsFlow()
-
-    init {
-        initBook(book)
-    }
-
-    private fun initBook(book: BookUiModel) {
-        _uiState.update { it.copy(book = book) }
-    }
 
     fun onAction(action: DetailUiAction) {
         when (action) {
@@ -58,14 +49,14 @@ class DetailViewModel @Inject constructor(
     private fun toggleFavorites() {
         viewModelScope.launch {
             val currentBook = _uiState.value.book
-            if (currentBook.isFavorites) {
-                repository.deleteBook(currentBook.isbn)
-                _uiEvent.send(DetailUiEvent.ShowToast(UiText.StringResource(R.string.delete_favorites)))
-                _uiState.update { it.copy(book = currentBook.copy(isFavorites = false)) }
-            } else {
-                repository.insertBook(currentBook.toModel())
+            val isFavoritesAfterToggle = toggleFavoriteUseCase(currentBook.toModel())
+
+            if (isFavoritesAfterToggle) {
                 _uiEvent.send(DetailUiEvent.ShowToast(UiText.StringResource(R.string.insert_favorites)))
                 _uiState.update { it.copy(book = currentBook.copy(isFavorites = true)) }
+            } else {
+                _uiEvent.send(DetailUiEvent.ShowToast(UiText.StringResource(R.string.delete_favorites)))
+                _uiState.update { it.copy(book = currentBook.copy(isFavorites = false)) }
             }
         }
     }
