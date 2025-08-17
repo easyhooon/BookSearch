@@ -1,12 +1,16 @@
 package com.easyhooon.booksearch.feature.search.component
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -16,8 +20,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.easyhooon.booksearch.core.designsystem.R
+import com.easyhooon.booksearch.core.designsystem.theme.Black
+import com.easyhooon.booksearch.core.designsystem.theme.Neutral200
 import com.easyhooon.booksearch.core.designsystem.theme.Neutral500
-import com.easyhooon.booksearch.core.designsystem.theme.Red500
+import com.easyhooon.booksearch.core.designsystem.theme.White
 import com.easyhooon.booksearch.core.designsystem.theme.body2Regular
 
 @Composable
@@ -47,10 +53,18 @@ fun LoadStateFooter(
                 ) {
                     Text(
                         text = footerState.message,
-                        color = Red500,
+                        color = Black,
                         style = body2Regular,
                     )
-                    Button(onClick = onRetryClick) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Button(
+                        onClick = onRetryClick,
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            containerColor = White,
+                            contentColor = Black,
+                        ),
+                        border = BorderStroke(width = 1.dp, color = Neutral200),
+                    ) {
                         Text(text = stringResource(R.string.retry))
                     }
                 }

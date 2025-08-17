@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.easyhooon.booksearch.core.common.mapper.toUiModel
 import com.easyhooon.booksearch.core.common.model.BookUiModel
+import com.easyhooon.booksearch.core.common.util.handleException
 import com.easyhooon.booksearch.core.domain.BookRepository
 import com.easyhooon.booksearch.core.domain.model.Book
 import com.easyhooon.booksearch.feature.search.component.FooterState
@@ -120,9 +121,7 @@ class SearchViewModel @Inject constructor(
                 } else {
                     _uiState.update { state ->
                         state.copy(
-                            footerState = FooterState.Error(
-                                exception.message ?: "Unknown error occurred",
-                            ),
+                            footerState = FooterState.Error(handleException(exception)),
                         )
                     }
                 }
