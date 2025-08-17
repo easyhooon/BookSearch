@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -29,6 +30,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import com.easyhooon.booksearch.core.common.model.BookUiModel
 import com.easyhooon.booksearch.core.designsystem.ComponentPreview
 import com.easyhooon.booksearch.core.designsystem.component.NetworkImage
 import com.easyhooon.booksearch.core.designsystem.theme.Black
@@ -37,16 +39,15 @@ import com.easyhooon.booksearch.core.designsystem.theme.Neutral400
 import com.easyhooon.booksearch.core.designsystem.theme.Neutral600
 import com.easyhooon.booksearch.core.designsystem.theme.White
 import com.easyhooon.booksearch.core.designsystem.theme.body1SemiBold
-import com.easyhooon.booksearch.core.designsystem.theme.heading1Bold
+import com.easyhooon.booksearch.core.designsystem.theme.heading2Bold
 import com.easyhooon.booksearch.core.designsystem.theme.headline1Bold
 import com.easyhooon.booksearch.core.designsystem.theme.label1Medium
-import com.easyhooon.booksearch.core.domain.model.Book
 import com.easyhooon.booksearch.core.designsystem.R as designR
 
 @Composable
 fun BookCard(
-    book: Book,
-    onBookClick: (Book) -> Unit,
+    book: BookUiModel,
+    onBookClick: (BookUiModel) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -61,8 +62,8 @@ fun BookCard(
                 imageUrl = book.thumbnail,
                 contentDescription = "Book Thumbnail Image",
                 modifier = Modifier
-                    .width(102.dp)
-                    .height(150.dp)
+                    .width(100.dp)
+                    .height(160.dp)
                     .clip(RoundedCornerShape(size = 8.dp)),
                 placeholder = painterResource(designR.drawable.ic_placeholder),
             )
@@ -79,7 +80,7 @@ fun BookCard(
                     text = book.title,
                     color = Black,
                     overflow = TextOverflow.Ellipsis,
-                    maxLines = 1,
+                    maxLines = 2,
                     style = headline1Bold,
                 )
                 Spacer(Modifier.height(4.dp))
@@ -95,7 +96,6 @@ fun BookCard(
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1,
                     style = label1Medium,
-                    modifier = Modifier.weight(1f, fill = false),
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
@@ -113,13 +113,25 @@ fun BookCard(
                 )
             }
         }
-        Icon(
-            imageVector = ImageVector.vectorResource(designR.drawable.ic_favorite_filled_red),
-            contentDescription = "Favorites Icon",
-            modifier = Modifier
-                .size(32.dp)
-                .align(Alignment.TopEnd),
-        )
+        if (book.isFavorites) {
+            Icon(
+                imageVector = ImageVector.vectorResource(designR.drawable.ic_favorite_filled_red),
+                contentDescription = "Favorited book",
+                tint = Color.Unspecified,
+                modifier = Modifier
+                    .size(32.dp)
+                    .align(Alignment.TopEnd),
+            )
+        } else {
+            Icon(
+                imageVector = ImageVector.vectorResource(designR.drawable.ic_selected_favorites),
+                contentDescription = "Not favorited book",
+                tint = Color.Unspecified,
+                modifier = Modifier
+                    .size(32.dp)
+                    .align(Alignment.TopEnd),
+            )
+        }
         Column(
             modifier = Modifier.align(Alignment.BottomEnd),
             horizontalAlignment = Alignment.End,
@@ -151,8 +163,8 @@ fun BookCard(
             }
 
             Text(
-                text = "${book.salePrice}${stringResource(designR.string.won)}",
-                style = heading1Bold,
+                text = "${if (book.salePrice == "-1") book.price else book.salePrice}${stringResource(designR.string.won)}",
+                style = heading2Bold,
                 color = Neutral600,
             )
         }
@@ -164,7 +176,7 @@ fun BookCard(
 private fun BookItemPreview() {
     BookSearchTheme {
         BookCard(
-            book = Book(
+            book = BookUiModel(
                 title = "도서 제목",
                 contents = "",
                 url = "",

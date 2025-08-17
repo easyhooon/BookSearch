@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.easyhooon.booksearch.core.common.ObserveAsEvents
+import com.easyhooon.booksearch.core.common.model.BookUiModel
 import com.easyhooon.booksearch.core.designsystem.DevicePreview
 import com.easyhooon.booksearch.core.designsystem.component.NetworkImage
 import com.easyhooon.booksearch.core.designsystem.theme.Black
@@ -34,7 +35,6 @@ import com.easyhooon.booksearch.core.designsystem.theme.Neutral100
 import com.easyhooon.booksearch.core.designsystem.theme.Neutral600
 import com.easyhooon.booksearch.core.designsystem.theme.body1Medium
 import com.easyhooon.booksearch.core.designsystem.theme.heading1Bold
-import com.easyhooon.booksearch.core.domain.model.Book
 import com.easyhooon.booksearch.core.ui.component.BookSearchTopAppBar
 import com.easyhooon.booksearch.feature.detail.viewmodel.DetailUiAction
 import com.easyhooon.booksearch.feature.detail.viewmodel.DetailUiEvent
@@ -46,7 +46,7 @@ import com.easyhooon.booksearch.core.designsystem.R as designR
 internal fun DetailRoute(
     innerPadding: PaddingValues,
     popBackStack: () -> Unit,
-    book: Book,
+    book: BookUiModel,
     viewModel: DetailViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -69,7 +69,7 @@ internal fun DetailRoute(
 internal fun DetailScreen(
     innerPadding: PaddingValues,
     uiState: DetailUiState,
-    book: Book,
+    book: BookUiModel,
     onAction: (DetailUiAction) -> Unit,
 ) {
     Column(
@@ -94,7 +94,7 @@ internal fun DetailScreen(
 
 @Composable
 internal fun DetailContent(
-    book: Book,
+    book: BookUiModel,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -229,7 +229,7 @@ private fun DetailScreenPreview() {
         DetailScreen(
             innerPadding = PaddingValues(),
             uiState = DetailUiState(),
-            book = Book(
+            book = BookUiModel(
                 title = "도서 제목",
                 contents = "책 소개",
                 url = "",

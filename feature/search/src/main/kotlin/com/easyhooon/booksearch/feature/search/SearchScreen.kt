@@ -15,9 +15,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.easyhooon.booksearch.core.common.ObserveAsEvents
+import com.easyhooon.booksearch.core.common.model.BookUiModel
 import com.easyhooon.booksearch.core.designsystem.component.BookSearchTextField
 import com.easyhooon.booksearch.core.designsystem.theme.Green500
-import com.easyhooon.booksearch.core.domain.model.Book
 import com.easyhooon.booksearch.core.ui.component.BookCard
 import com.easyhooon.booksearch.core.ui.component.BookSearchTopAppBar
 import com.easyhooon.booksearch.core.ui.component.InfinityLazyColumn
@@ -31,7 +31,7 @@ import com.easyhooon.booksearch.core.designsystem.R as designR
 @Composable
 internal fun SearchRoute(
     innerPadding: PaddingValues,
-    navigateToDetail: (Book) -> Unit,
+    navigateToDetail: (BookUiModel) -> Unit,
     viewModel: SearchViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()

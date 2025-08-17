@@ -3,18 +3,18 @@ package com.easyhooon.booksearch.feature.main
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.navigation.NavDestination
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.currentBackStackEntryAsState
-import com.easyhooon.booksearch.feature.main.component.MainTab
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
-import com.easyhooon.booksearch.core.domain.model.Book
+import com.easyhooon.booksearch.core.common.model.BookUiModel
 import com.easyhooon.booksearch.core.navigation.MainTabRoute
 import com.easyhooon.booksearch.core.navigation.Route
 import com.easyhooon.booksearch.feature.detail.navigateToDetail
 import com.easyhooon.booksearch.feature.favorites.navigateToFavorites
+import com.easyhooon.booksearch.feature.main.component.MainTab
 import com.easyhooon.booksearch.feature.search.navigateToSearch
 
 internal class MainNavController(
@@ -45,7 +45,7 @@ internal class MainNavController(
         }
     }
 
-    fun navigateToDetail(book: Book) {
+    fun navigateToDetail(book: BookUiModel) {
         navController.navigateToDetail(book)
     }
 

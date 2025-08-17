@@ -5,7 +5,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
-import com.easyhooon.booksearch.core.domain.model.Book
+import com.easyhooon.booksearch.core.common.model.BookUiModel
 import com.easyhooon.booksearch.core.navigation.MainTabRoute
 
 fun NavController.navigateToSearch(navOptions: NavOptions) {
@@ -14,7 +14,7 @@ fun NavController.navigateToSearch(navOptions: NavOptions) {
 
 fun NavGraphBuilder.searchGraph(
     innerPadding: PaddingValues,
-    navigateToDetail: (Book) -> Unit,
+    navigateToDetail: (BookUiModel) -> Unit,
 ) {
     composable<MainTabRoute.Search> {
         SearchRoute(

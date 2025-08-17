@@ -3,8 +3,9 @@ package com.easyhooon.booksearch.feature.favorites.viewmodel
 import androidx.compose.foundation.text.input.clearText
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.easyhooon.booksearch.core.common.mapper.toUiModel
+import com.easyhooon.booksearch.core.common.model.BookUiModel
 import com.easyhooon.booksearch.core.domain.BookRepository
-import com.easyhooon.booksearch.core.domain.model.Book
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -35,7 +36,7 @@ class FavoritesViewModel @Inject constructor(
     val uiEvent: Flow<FavoritesUiEvent> = _uiEvent.receiveAsFlow()
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val favoriteBooks: StateFlow<ImmutableList<Book>> = _uiState
+    val favoriteBooks: StateFlow<ImmutableList<BookUiModel>> = _uiState
         .map { it.searchQuery }
         .flatMapLatest { query ->
             if (query.isBlank()) {
@@ -43,6 +44,9 @@ class FavoritesViewModel @Inject constructor(
             } else {
                 repository.searchFavoritesByTitle(query)
             }
+        }
+        .map { book ->
+            book.map { it.toUiModel() }
         }
         .map { it.toImmutableList() }
         .stateIn(
@@ -59,7 +63,7 @@ class FavoritesViewModel @Inject constructor(
         }
     }
 
-    private fun navigateToBookDetail(book: Book) {
+    private fun navigateToBookDetail(book: BookUiModel) {
         viewModelScope.launch {
             _uiEvent.send(FavoritesUiEvent.NavigateToDetail(book))
         }

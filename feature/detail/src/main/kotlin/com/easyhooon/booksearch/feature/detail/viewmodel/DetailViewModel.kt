@@ -2,8 +2,9 @@ package com.easyhooon.booksearch.feature.detail.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.easyhooon.booksearch.core.common.mapper.toModel
+import com.easyhooon.booksearch.core.common.model.BookUiModel
 import com.easyhooon.booksearch.core.domain.BookRepository
-import com.easyhooon.booksearch.core.domain.model.Book
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -38,13 +39,13 @@ class DetailViewModel @Inject constructor(
         }
     }
 
-    private fun toggleFavorites(book: Book) {
+    private fun toggleFavorites(book: BookUiModel) {
         viewModelScope.launch {
             val currentState = _uiState.value
             if (currentState.isFavorite) {
                 repository.deleteBook(book.isbn)
             } else {
-                repository.insertBook(book)
+                repository.insertBook(book.toModel())
             }
 
             _uiState.update { it.copy(isFavorite = !currentState.isFavorite) }

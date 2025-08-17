@@ -5,12 +5,12 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
-import com.easyhooon.booksearch.core.domain.model.Book
+import com.easyhooon.booksearch.core.common.model.BookUiModel
 import com.easyhooon.booksearch.core.navigation.BookType
 import com.easyhooon.booksearch.core.navigation.Route
 import kotlin.reflect.typeOf
 
-fun NavController.navigateToDetail(book: Book) {
+fun NavController.navigateToDetail(book: BookUiModel) {
     navigate(Route.Detail(book))
 }
 
@@ -19,7 +19,7 @@ fun NavGraphBuilder.detailGraph(
     popBackStack: () -> Unit,
 ) {
     composable<Route.Detail>(
-        typeMap = mapOf(typeOf<Book>() to BookType),
+        typeMap = mapOf(typeOf<BookUiModel>() to BookType),
     ) { navBackStackEntry ->
         val book = navBackStackEntry.toRoute<Route.Detail>().book
         DetailRoute(

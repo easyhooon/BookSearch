@@ -1,6 +1,7 @@
 package com.easyhooon.booksearch.feature.favorites
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,9 +15,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.easyhooon.booksearch.core.common.ObserveAsEvents
+import com.easyhooon.booksearch.core.common.model.BookUiModel
 import com.easyhooon.booksearch.core.designsystem.component.BookSearchTextField
 import com.easyhooon.booksearch.core.designsystem.theme.Green500
-import com.easyhooon.booksearch.core.domain.model.Book
 import com.easyhooon.booksearch.core.ui.component.BookCard
 import com.easyhooon.booksearch.core.ui.component.BookSearchTopAppBar
 import com.easyhooon.booksearch.feature.favorites.viewmodel.FavoritesUiAction
@@ -29,7 +30,7 @@ import com.easyhooon.booksearch.core.designsystem.R as designR
 @Composable
 internal fun FavoritesRoute(
     innerPadding: PaddingValues,
-    navigateToDetail: (Book) -> Unit,
+    navigateToDetail: (BookUiModel) -> Unit,
     viewModel: FavoritesViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -53,7 +54,7 @@ internal fun FavoritesRoute(
 internal fun FavoritesScreen(
     innerPadding: PaddingValues,
     uiState: FavoritesUiState,
-    favoriteBooks: ImmutableList<Book>,
+    favoriteBooks: ImmutableList<BookUiModel>,
     onAction: (FavoritesUiAction) -> Unit,
 ) {
     Column(
@@ -77,8 +78,9 @@ internal fun FavoritesScreen(
         )
         LazyColumn(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
+                .fillMaxSize(),
+            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             items(
                 count = favoriteBooks.size,

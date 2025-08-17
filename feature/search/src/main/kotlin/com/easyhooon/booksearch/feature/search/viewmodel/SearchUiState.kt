@@ -1,7 +1,7 @@
 package com.easyhooon.booksearch.feature.search.viewmodel
 
 import androidx.compose.foundation.text.input.TextFieldState
-import com.easyhooon.booksearch.core.domain.model.Book
+import com.easyhooon.booksearch.core.common.model.BookUiModel
 import com.easyhooon.booksearch.core.ui.component.FooterState
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -17,7 +17,7 @@ data class SearchUiState(
     val searchState: SearchState = SearchState.Idle,
     val footerState: FooterState = FooterState.Idle,
     val queryState: TextFieldState = TextFieldState(),
-    val books: ImmutableList<Book> = persistentListOf(),
+    val books: ImmutableList<BookUiModel> = persistentListOf(),
     val sortType: SortType = SortType.ACCURACY,
     val currentPage: Int = 1,
     val currentQuery: String = "",
@@ -27,7 +27,7 @@ data class SearchUiState(
         get() = searchState is SearchState.Success && books.isEmpty()
 }
 
-enum class SortType {
-    ACCURACY,
-    LATEST,
+enum class SortType(val value: String) {
+    ACCURACY("accuracy"),
+    LATEST("latest"),
 }

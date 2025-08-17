@@ -6,18 +6,23 @@ import androidx.lifecycle.viewModelScope
 import com.easyhooon.booksearch.core.domain.BookRepository
 import com.easyhooon.booksearch.core.domain.model.Book
 import com.easyhooon.booksearch.core.ui.component.FooterState
+import com.easyhooon.booksearch.core.common.mapper.toUiModel
+import com.easyhooon.booksearch.core.common.model.BookUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.orhanobut.logger.Logger
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
@@ -33,6 +38,13 @@ class SearchViewModel @Inject constructor(
     private val _uiEvent = Channel<SearchUiEvent>()
     val uiEvent: Flow<SearchUiEvent> = _uiEvent.receiveAsFlow()
 
+    val favoriteBooks: StateFlow<List<Book>> = repository.favoriteBooks
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = persistentListOf(),
+        )
+
     fun onAction(action: SearchUiAction) {
         when (action) {
             is SearchUiAction.OnBookClick -> navigateToBookDetail(action.book)
@@ -43,7 +55,7 @@ class SearchViewModel @Inject constructor(
         }
     }
 
-    private fun navigateToBookDetail(book: Book) {
+    private fun navigateToBookDetail(book: BookUiModel) {
         viewModelScope.launch {
             _uiEvent.send(SearchUiEvent.NavigateToDetail(book))
         }
@@ -69,23 +81,27 @@ class SearchViewModel @Inject constructor(
             } else {
                 _uiState.update { it.copy(footerState = FooterState.Loading) }
             }
-
             val page = if (isFirstPage) 1 else currentState.currentPage
-            val sortType = when (currentState.sortType) {
-                SortType.ACCURACY -> "accuracy"
-                SortType.LATEST -> "recency"
-            }
 
             repository.searchBook(
                 query = query,
-                sort = sortType,
+                sort = currentState.sortType.value,
                 page = page,
                 size = PAGE_SIZE,
             ).onSuccess { searchResult ->
+                favoriteBooks.value.forEach { favorite ->
+                    Logger.d("Favorite book: '${favorite.title}' ISBN: '${favorite.isbn}'")
+                }
+
+                val searchBooks = searchResult.documents.map { book ->
+                    val isFavorite = favoriteBooks.value.any { it.isbn == book.isbn }
+                    book.toUiModel().copy(isFavorites = isFavorite)
+                }
+
                 val newBooks = if (isFirstPage) {
-                    searchResult.documents
+                    searchBooks
                 } else {
-                    currentState.books + searchResult.documents
+                    currentState.books + searchBooks
                 }
 
                 _uiState.update { state ->
