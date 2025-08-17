@@ -2,4 +2,12 @@
     <string name="no_more_result">더 이상 결과가 없습니다</string>
     <string name="retry">다시 시도</string>
     <string name="search_book_hint">도서를 검색하세요</string>
+    <string name="search_label">검색</string>
+    <string name="favorites_label">즐겨찾기</string>
+    <string name="book">도서</string>
+    <string name="publisher_label">출판사:</string>
+    <string name="author_label">저자:</string>
+    <string name="won">원</string>
+    <string name="price_format">%s원</string>
+    <string name="discount_percent">%d%%</string>
 </resources>

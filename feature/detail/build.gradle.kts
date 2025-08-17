@@ -4,9 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.easyhooon.booksearch.feature.home"
+    namespace = "com.easyhooon.booksearch.feature.detail"
 }
 
 dependencies {
+    implementation(libs.kotlinx.collections.immutable)
+
     implementation(libs.logger)
 }

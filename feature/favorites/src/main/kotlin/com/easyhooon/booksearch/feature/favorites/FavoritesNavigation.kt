@@ -5,6 +5,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
+import com.easyhooon.booksearch.core.domain.model.Book
 import com.easyhooon.booksearch.core.navigation.MainTabRoute
 
 fun NavController.navigateToFavorites(navOptions: NavOptions) {
@@ -12,13 +13,13 @@ fun NavController.navigateToFavorites(navOptions: NavOptions) {
 }
 
 fun NavGraphBuilder.favoritesGraph(
-    padding: PaddingValues,
-    navigateToDetail: (String) -> Unit,
+    innerPadding: PaddingValues,
+    navigateToDetail: (Book) -> Unit,
 ) {
     composable<MainTabRoute.Favorites> {
         FavoritesRoute(
-            padding = padding,
-            navigateToDetail = navigateToDetail
+            innerPadding = innerPadding,
+            navigateToDetail = navigateToDetail,
         )
     }
 }

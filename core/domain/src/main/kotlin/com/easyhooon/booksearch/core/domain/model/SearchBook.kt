@@ -1,5 +1,19 @@
 package com.easyhooon.booksearch.core.domain.model
 
+import kotlinx.serialization.Serializable
+
+data class SearchBook(
+    val meta: Meta,
+    val documents: List<Book>,
+)
+
+data class Meta(
+    val totalCount: Int,
+    val pageableCount: Int,
+    val isEnd: Boolean,
+)
+
+@Serializable
 data class Book(
     val title: String,
     val contents: String,

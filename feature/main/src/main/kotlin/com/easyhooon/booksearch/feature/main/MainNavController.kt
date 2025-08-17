@@ -2,7 +2,6 @@ package com.easyhooon.booksearch.feature.main
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -11,6 +10,7 @@ import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
+import com.easyhooon.booksearch.core.domain.model.Book
 import com.easyhooon.booksearch.core.navigation.MainTabRoute
 import com.easyhooon.booksearch.core.navigation.Route
 import com.easyhooon.booksearch.feature.detail.navigateToDetail
@@ -45,8 +45,8 @@ internal class MainNavController(
         }
     }
 
-    fun navigateToDetail(isbn: String) {
-        navController.navigateToDetail(isbn)
+    fun navigateToDetail(book: Book) {
+        navController.navigateToDetail(book)
     }
 
     // https://github.com/droidknights/DroidKnights2023_App/pull/243/commits/4bfb6d13908eaaab38ab3a59747d628efa3893cb

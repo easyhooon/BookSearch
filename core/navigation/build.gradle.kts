@@ -8,4 +8,8 @@ android {
     namespace = "com.easyhooon.booksearch.core.navigation"
 }
 
-dependencies {}
+dependencies {
+    implementation(projects.core.domain)
+
+    implementation(libs.androidx.navigation.compose)
+}

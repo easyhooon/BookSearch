@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.booksearch.jvm.library)
+    alias(libs.plugins.booksearch.kotlin.library.serialization)
 }
 
 dependencies {

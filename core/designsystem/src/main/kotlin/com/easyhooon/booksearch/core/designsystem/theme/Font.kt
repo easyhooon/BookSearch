@@ -51,10 +51,22 @@ val heading1SemiBold = TextStyle(
     fontSize = 22.sp,
 )
 
+val heading2Bold = TextStyle(
+    fontFamily = pretendardFamily,
+    fontWeight = FontWeight.Bold,
+    fontSize = 20.sp,
+)
+
 val heading2SemiBold = TextStyle(
     fontFamily = pretendardFamily,
     fontWeight = FontWeight.SemiBold,
     fontSize = 20.sp,
+)
+
+val headline1Bold = TextStyle(
+    fontFamily = pretendardFamily,
+    fontWeight = FontWeight.Bold,
+    fontSize = 18.sp,
 )
 
 val headline1SemiBold = TextStyle(

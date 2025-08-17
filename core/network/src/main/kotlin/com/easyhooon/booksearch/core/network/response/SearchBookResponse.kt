@@ -6,13 +6,13 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class SearchBookResponse(
     @SerialName("meta")
-    val meta: Meta,
+    val meta: MetaResponse,
     @SerialName("documents")
     val documents: List<BookResponse>,
 )
 
 @Serializable
-data class Meta(
+data class MetaResponse(
     @SerialName("total_count")
     val totalCount: Int,
     @SerialName("pageable_count")

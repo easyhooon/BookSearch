@@ -42,6 +42,3 @@ include(
     ":feature:detail",
     ":feature:main",
 )
-
-
- 

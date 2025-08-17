@@ -1,0 +1,10 @@
+<resources>
+    <string name="book_introduce">책 소개</string>
+    <string name="author_label">저자:</string>
+    <string name="publisher_label">출판사:</string>
+    <string name="publish_date_label">출간일:</string>
+    <string name="isbn_label">ISBN:</string>
+    <string name="price_label">정상가:</string>
+    <string name="sale_price_label">할인가:</string>
+    <string name="won">원</string>
+</resources>

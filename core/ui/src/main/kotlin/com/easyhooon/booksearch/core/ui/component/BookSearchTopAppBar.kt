@@ -21,7 +21,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.easyhooon.booksearch.core.designsystem.R
 import com.easyhooon.booksearch.core.designsystem.theme.BookSearchTheme
 import com.easyhooon.booksearch.core.designsystem.theme.Neutral950
 import com.easyhooon.booksearch.core.designsystem.theme.headline2SemiBold
@@ -84,38 +83,11 @@ fun BookSearchTopAppBar(
     }
 }
 
-@Composable
-fun BookSearchBackTopAppBar(
-    modifier: Modifier = Modifier,
-    isDark: Boolean = false,
-    title: String = "",
-    onBackClick: () -> Unit = {},
-) {
-    BookSearchTopAppBar(
-        modifier = modifier,
-        isDark = isDark,
-        title = title,
-        startIconRes = R.drawable.ic_chevron_left,
-        startIconDescription = "Back",
-        startIconOnClick = onBackClick,
-    )
-}
-
 @Preview
 @Composable
 private fun BookSearchTopAppBarPreview() {
     BookSearchTheme {
         BookSearchTopAppBar(
-            title = "title",
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun BookSearchBackTopAppBarPreview() {
-    BookSearchTheme {
-        BookSearchBackTopAppBar(
             title = "title",
         )
     }

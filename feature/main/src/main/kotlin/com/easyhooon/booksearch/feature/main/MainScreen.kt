@@ -14,7 +14,7 @@ import kotlinx.collections.immutable.toImmutableList
 
 @Composable
 internal fun MainScreen(
-    navigator: MainNavController = rememberMainNavController()
+    navigator: MainNavController = rememberMainNavController(),
 ) {
     BookSearchScaffold(
         bottomBar = {
@@ -24,28 +24,28 @@ internal fun MainScreen(
                 currentTab = navigator.currentTab,
                 onTabSelected = {
                     navigator.navigate(it)
-                }
+                },
             )
-        }
+        },
     ) { innerPadding ->
         NavHost(
             navController = navigator.navController,
             startDestination = navigator.startDestination,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
         ) {
             searchGraph(
-                padding = innerPadding,
-                navigateToDetail = {}
+                innerPadding = innerPadding,
+                navigateToDetail = navigator::navigateToDetail,
             )
 
             favoritesGraph(
-                padding = innerPadding,
-                navigateToDetail = {}
+                innerPadding = innerPadding,
+                navigateToDetail = navigator::navigateToDetail,
             )
 
             detailGraph(
-                padding = innerPadding,
-                popBackStack = navigator::popBackStackIfNotSearch
+                innerPadding = innerPadding,
+                popBackStack = navigator::popBackStackIfNotSearch,
             )
         }
     }

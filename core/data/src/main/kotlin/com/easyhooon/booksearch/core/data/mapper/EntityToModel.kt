@@ -3,7 +3,7 @@ package com.easyhooon.booksearch.core.data.mapper
 import com.easyhooon.booksearch.core.database.entity.BookEntity
 import com.easyhooon.booksearch.core.domain.model.Book
 
-internal fun BookEntity.toBook(): Book {
+internal fun BookEntity.toModel(): Book {
     return Book(
         title = title,
         contents = contents,

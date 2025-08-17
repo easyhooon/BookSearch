@@ -9,11 +9,11 @@ android {
 
 dependencies {
     implementation(projects.core.common)
-    
+
     implementation(libs.androidx.splash)
-    
+
     implementation(libs.coil.compose)
     implementation(libs.logger)
-    
+
     implementation(libs.bundles.landscapist)
 }

@@ -19,7 +19,7 @@ android {
 
 dependencies {
     implementation(projects.core.domain)
-    
+
     implementation(libs.logger)
 
     androidTestImplementation(libs.junit)

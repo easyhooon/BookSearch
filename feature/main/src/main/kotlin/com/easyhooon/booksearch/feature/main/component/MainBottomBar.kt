@@ -15,9 +15,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -40,15 +38,15 @@ internal fun MainBottomBar(
     visible: Boolean,
     tabs: ImmutableList<MainTab>,
     currentTab: MainTab?,
-    onTabSelected: (MainTab) -> Unit
+    onTabSelected: (MainTab) -> Unit,
 ) {
     AnimatedVisibility(
         visible = visible,
         enter = fadeIn() + slideIn { IntOffset(0, it.height) },
-        exit = fadeOut() + slideOut { IntOffset(0, it.height) }
+        exit = fadeOut() + slideOut { IntOffset(0, it.height) },
     ) {
         Box(
-            modifier = Modifier.background(Color.White)
+            modifier = Modifier.background(Color.White),
         ) {
             Column {
                 HorizontalDivider(color = MaterialTheme.colorScheme.outline)
@@ -67,7 +65,7 @@ internal fun MainBottomBar(
                                 if (tab != currentTab) {
                                     onTabSelected(tab)
                                 }
-                            }
+                            },
                         )
                     }
                 }
@@ -91,9 +89,9 @@ private fun RowScope.MainBottomBarItem(
                 indication = null,
                 role = null,
                 interactionSource = remember { MutableInteractionSource() },
-                onClick = onClick
+                onClick = onClick,
             ),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,

@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import com.easyhooon.booksearch.core.navigation.MainTabRoute
 import com.easyhooon.booksearch.core.navigation.Route
 import com.easyhooon.booksearch.feature.main.R
+import com.easyhooon.booksearch.core.designsystem.R as designR
 
 internal enum class MainTab(
     @DrawableRes val iconResId: Int,
@@ -17,14 +18,14 @@ internal enum class MainTab(
     SEARCH(
         iconResId = R.drawable.ic_search,
         selectedResId = R.drawable.ic_selected_search,
-        labelResId = R.string.search_label,
+        labelResId = designR.string.search_label,
         contentDescription = "Search Icon",
         route = MainTabRoute.Search,
     ),
     FAVORITES(
         iconResId = R.drawable.ic_favorites,
-        selectedResId = R.drawable.ic_selected_favorites,
-        labelResId = R.string.favorites_label,
+        selectedResId = designR.drawable.ic_selected_favorites,
+        labelResId = designR.string.favorites_label,
         contentDescription = "Favorites Icon",
         route = MainTabRoute.Favorites,
     ),
