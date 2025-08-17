@@ -17,14 +17,14 @@ data class SearchUiState(
     val searchState: SearchState = SearchState.Idle,
     val footerState: FooterState = FooterState.Idle,
     val queryState: TextFieldState = TextFieldState(),
-    val books: ImmutableList<BookUiModel> = persistentListOf(),
     val sortType: SortType = SortType.ACCURACY,
     val currentPage: Int = 1,
     val currentQuery: String = "",
     val isLastPage: Boolean = false,
+    val totalCount: Int = 0,
 ) {
     val isEmptySearchResult: Boolean
-        get() = searchState is SearchState.Success && books.isEmpty()
+        get() = searchState is SearchState.Success && totalCount == 0
 }
 
 enum class SortType(val value: String, val label: String) {

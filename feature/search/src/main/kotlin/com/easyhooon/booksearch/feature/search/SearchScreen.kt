@@ -51,6 +51,8 @@ import com.easyhooon.booksearch.feature.search.viewmodel.SearchUiAction
 import com.easyhooon.booksearch.feature.search.viewmodel.SearchUiEvent
 import com.easyhooon.booksearch.feature.search.viewmodel.SearchUiState
 import com.easyhooon.booksearch.feature.search.viewmodel.SearchViewModel
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import com.easyhooon.booksearch.core.designsystem.R as designR
 
 @Composable
@@ -60,6 +62,7 @@ internal fun SearchRoute(
     viewModel: SearchViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val searchBooks by viewModel.searchBooks.collectAsStateWithLifecycle()
 
     ObserveAsEvents(flow = viewModel.uiEvent) { event ->
         when (event) {
@@ -70,6 +73,7 @@ internal fun SearchRoute(
     SearchScreen(
         innerPadding = innerPadding,
         uiState = uiState,
+        searchBooks = searchBooks,
         onAction = viewModel::onAction,
     )
 }
@@ -78,6 +82,7 @@ internal fun SearchRoute(
 internal fun SearchScreen(
     innerPadding: PaddingValues,
     uiState: SearchUiState,
+    searchBooks: ImmutableList<BookUiModel>,
     onAction: (SearchUiAction) -> Unit,
 ) {
     Column(
@@ -94,6 +99,7 @@ internal fun SearchScreen(
         )
         SearchContent(
             uiState = uiState,
+            searchBooks = searchBooks,
             onAction = onAction,
         )
     }
@@ -165,6 +171,7 @@ internal fun SearchHeader(
 @Composable
 internal fun SearchContent(
     uiState: SearchUiState,
+    searchBooks: ImmutableList<BookUiModel>,
     onAction: (SearchUiAction) -> Unit,
 ) {
     when (uiState.searchState) {
@@ -239,7 +246,7 @@ internal fun SearchContent(
                     loadMore = { onAction(SearchUiAction.OnLoadMore) },
                 ) {
                     items(
-                        items = uiState.books,
+                        items = searchBooks,
                         key = { it.isbn },
                     ) { book ->
                         BookCard(
@@ -267,6 +274,7 @@ private fun SearchScreenPreview() {
         SearchScreen(
             innerPadding = PaddingValues(),
             uiState = SearchUiState(),
+            searchBooks = persistentListOf(),
             onAction = {},
         )
     }

@@ -10,6 +10,7 @@ import com.easyhooon.booksearch.core.domain.BookRepository
 import com.easyhooon.booksearch.core.domain.model.Book
 import com.easyhooon.booksearch.feature.search.component.FooterState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.channels.Channel
@@ -18,6 +19,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -44,6 +46,21 @@ class SearchViewModel @Inject constructor(
             started = SharingStarted.Eagerly,
             initialValue = persistentListOf(),
         )
+
+    private val _searchResults = MutableStateFlow<List<BookUiModel>>(persistentListOf())
+
+    val searchBooks: StateFlow<ImmutableList<BookUiModel>> = combine(
+        _searchResults,
+        favoriteBooks
+    ) { searchResults, favorites ->
+        searchResults.map { book ->
+            book.copy(isFavorites = favorites.any { it.isbn == book.isbn })
+        }.toImmutableList()
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.Lazily,
+        initialValue = persistentListOf(),
+    )
 
     fun onAction(action: SearchUiAction) {
         when (action) {
@@ -75,8 +92,8 @@ class SearchViewModel @Inject constructor(
                         searchState = SearchState.Loading,
                         currentQuery = query,
                         currentPage = 1,
-                        books = persistentListOf(),
                         isLastPage = false,
+                        totalCount = 0,
                     )
                 }
             } else {
@@ -91,23 +108,23 @@ class SearchViewModel @Inject constructor(
                 size = PAGE_SIZE,
             ).onSuccess { searchResult ->
                 val searchBooks = searchResult.documents.map { book ->
-                    val isFavorite = favoriteBooks.value.any { it.isbn == book.isbn }
-                    book.toUiModel().copy(isFavorites = isFavorite)
+                    book.toUiModel()
                 }
 
                 val newBooks = if (isFirstPage) {
                     searchBooks
                 } else {
-                    currentState.books + searchBooks
+                    _searchResults.value + searchBooks
                 }
 
+                _searchResults.update { newBooks }
                 _uiState.update { state ->
                     state.copy(
                         searchState = SearchState.Success,
                         footerState = FooterState.Idle,
-                        books = newBooks.toImmutableList(),
                         currentPage = page + 1,
                         isLastPage = searchResult.meta.isEnd,
+                        totalCount = if (isFirstPage) searchResult.meta.totalCount else state.totalCount,
                     )
                 }
             }.onFailure { exception ->
@@ -153,10 +170,10 @@ class SearchViewModel @Inject constructor(
         val currentState = _uiState.value
         val newSortType = currentState.sortType.toggle()
 
+        _searchResults.update { persistentListOf() }
         _uiState.update { state ->
             state.copy(
                 sortType = newSortType,
-                books = persistentListOf(),
                 currentPage = 1,
                 isLastPage = false,
                 searchState = SearchState.Idle,
