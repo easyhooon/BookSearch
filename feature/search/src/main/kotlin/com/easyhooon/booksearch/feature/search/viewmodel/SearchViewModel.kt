@@ -50,7 +50,7 @@ class SearchViewModel @Inject constructor(
             is SearchUiAction.OnSearchClick -> searchBook(action.query)
             is SearchUiAction.OnClearClick -> clearQuery()
             is SearchUiAction.OnLoadMore -> loadMore()
-            is SearchUiAction.OnRetryClick -> {}
+            is SearchUiAction.OnRetryClick -> retry()
             is SearchUiAction.OnSortClick -> toggleSortType()
         }
     }
@@ -141,6 +141,13 @@ class SearchViewModel @Inject constructor(
         }
 
         searchBook(currentState.currentQuery)
+    }
+
+    private fun retry() {
+        val query = _uiState.value.currentQuery
+        if (query.isNotEmpty()) {
+            searchBook(query)
+        }
     }
 
     private fun toggleSortType() {
