@@ -6,8 +6,9 @@ import androidx.lifecycle.viewModelScope
 import com.easyhooon.booksearch.core.common.mapper.toUiModel
 import com.easyhooon.booksearch.core.common.model.BookUiModel
 import com.easyhooon.booksearch.core.common.util.handleException
-import com.easyhooon.booksearch.core.domain.BookRepository
 import com.easyhooon.booksearch.core.domain.model.Book
+import com.easyhooon.booksearch.core.domain.usecase.CombineBooksWithFavoritesUseCase
+import com.easyhooon.booksearch.core.domain.usecase.SearchBooksUseCase
 import com.easyhooon.booksearch.feature.search.component.FooterState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.ImmutableList
@@ -19,7 +20,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -28,10 +29,11 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
-    private val repository: BookRepository,
+    private val searchBooksUseCase: SearchBooksUseCase,
+    combineBooksWithFavoritesUseCase: CombineBooksWithFavoritesUseCase,
 ) : ViewModel() {
     companion object {
-        private const val PAGE_SIZE = 10
+        private const val PAGE_SIZE = 20
     }
 
     private val _uiState = MutableStateFlow(SearchUiState())
@@ -40,27 +42,19 @@ class SearchViewModel @Inject constructor(
     private val _uiEvent = Channel<SearchUiEvent>()
     val uiEvent: Flow<SearchUiEvent> = _uiEvent.receiveAsFlow()
 
-    val favoriteBooks: StateFlow<List<Book>> = repository.favoriteBooks
+    private val _searchResults = MutableStateFlow<List<Book>>(persistentListOf())
+
+    val searchBooks: StateFlow<ImmutableList<BookUiModel>> = combineBooksWithFavoritesUseCase(_searchResults)
+        .map { books ->
+            books.map { book ->
+                book.toUiModel()
+            }.toImmutableList()
+        }
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.Eagerly,
+            started = SharingStarted.WhileSubscribed(5000L),
             initialValue = persistentListOf(),
         )
-
-    private val _searchResults = MutableStateFlow<List<BookUiModel>>(persistentListOf())
-
-    val searchBooks: StateFlow<ImmutableList<BookUiModel>> = combine(
-        _searchResults,
-        favoriteBooks
-    ) { searchResults, favorites ->
-        searchResults.map { book ->
-            book.copy(isFavorites = favorites.any { it.isbn == book.isbn })
-        }.toImmutableList()
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.Lazily,
-        initialValue = persistentListOf(),
-    )
 
     fun onAction(action: SearchUiAction) {
         when (action) {
@@ -87,6 +81,7 @@ class SearchViewModel @Inject constructor(
             val isFirstPage = query != currentState.currentQuery
 
             if (isFirstPage) {
+                _searchResults.update { persistentListOf() }
                 _uiState.update { state ->
                     state.copy(
                         searchState = SearchState.Loading,
@@ -99,32 +94,25 @@ class SearchViewModel @Inject constructor(
             } else {
                 _uiState.update { it.copy(footerState = FooterState.Loading) }
             }
+
             val page = if (isFirstPage) 1 else currentState.currentPage
 
-            repository.searchBook(
+            searchBooksUseCase(
                 query = query,
                 sort = currentState.sortType.value,
                 page = page,
                 size = PAGE_SIZE,
-            ).onSuccess { searchResult ->
-                val searchBooks = searchResult.documents.map { book ->
-                    book.toUiModel()
-                }
-
-                val newBooks = if (isFirstPage) {
-                    searchBooks
-                } else {
-                    _searchResults.value + searchBooks
-                }
-
-                _searchResults.update { newBooks }
+                currentBooks = _searchResults.value,
+                isFirstPage = isFirstPage,
+            ).onSuccess { result ->
+                _searchResults.update { result.books }
                 _uiState.update { state ->
                     state.copy(
                         searchState = SearchState.Success,
                         footerState = FooterState.Idle,
-                        currentPage = page + 1,
-                        isLastPage = searchResult.meta.isEnd,
-                        totalCount = if (isFirstPage) searchResult.meta.totalCount else state.totalCount,
+                        currentPage = result.nextPage,
+                        isLastPage = result.isEnd,
+                        totalCount = result.totalCount,
                     )
                 }
             }.onFailure { exception ->

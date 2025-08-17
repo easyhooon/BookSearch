@@ -17,6 +17,6 @@ fun Book.toUiModel(): BookUiModel {
         salePrice = salePrice,
         thumbnail = thumbnail,
         status = status,
-        isFavorites = false,
+        isFavorites = isFavorite,
     )
 }

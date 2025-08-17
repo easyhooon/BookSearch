@@ -2,7 +2,6 @@ package com.easyhooon.booksearch.core.data
 
 import com.easyhooon.booksearch.core.data.mapper.toEntity
 import com.easyhooon.booksearch.core.data.mapper.toModel
-import com.easyhooon.booksearch.core.data.util.cancellableRunCatching
 import com.easyhooon.booksearch.core.database.FavoritesDao
 import com.easyhooon.booksearch.core.domain.BookRepository
 import com.easyhooon.booksearch.core.domain.model.Book
@@ -21,14 +20,12 @@ internal class DefaultBookRepository @Inject constructor(
         sort: String,
         page: Int,
         size: Int,
-    ) = cancellableRunCatching {
-        service.searchBook(
-            query = query,
-            sort = sort,
-            page = page,
-            size = size,
-        ).toModel()
-    }
+    ) = service.searchBook(
+        query = query,
+        sort = sort,
+        page = page,
+        size = size,
+    ).toModel()
 
     override fun searchFavoritesByTitle(query: String) = favoritesDao.searchFavoritesByTitle(query)
         .map { entities -> entities.map { it.toModel() } }

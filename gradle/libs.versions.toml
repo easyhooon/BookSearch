@@ -116,6 +116,8 @@ androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version
 androidx-test-core = { group = "androidx.test", name = "core", version.ref = "androidx-test-core" }
 androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "androidx-test-core" }
 
+javax-inject = { group = "javax.inject", name = "javax.inject", version = "1" }
+
 [plugins]
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
@@ -141,7 +143,6 @@ booksearch-android-library-compose = { id = "booksearch.android.library.compose"
 booksearch-android-retrofit = { id = "booksearch.android.retrofit", version = "unspecified" }
 booksearch-android-room = { id = "booksearch.android.room", version = "unspecified" }
 booksearch-android-feature = { id = "booksearch.android.feature", version = "unspecified" }
-booksearch-android-firebase = { id = "booksearch.android.firebase", version = "unspecified" }
 booksearch-android-hilt = { id = "booksearch.android.hilt", version = "unspecified" }
 booksearch-jvm-library = { id = "booksearch.jvm.library", version = "unspecified" }
 booksearch-kotlin-library-serialization = { id = "booksearch.kotlin.library.serialization", version = "unspecified" }

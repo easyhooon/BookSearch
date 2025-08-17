@@ -1,11 +1,10 @@
 package com.easyhooon.booksearch.feature.search.viewmodel
 
 import androidx.compose.foundation.text.input.TextFieldState
-import com.easyhooon.booksearch.core.common.model.BookUiModel
+import androidx.compose.runtime.Immutable
 import com.easyhooon.booksearch.feature.search.component.FooterState
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
 
+@Immutable
 sealed interface SearchState {
     data object Idle : SearchState
     data object Loading : SearchState

@@ -24,4 +24,5 @@ data class Book(
     val salePrice: String,
     val thumbnail: String,
     val status: String,
+    val isFavorite: Boolean = false,
 )

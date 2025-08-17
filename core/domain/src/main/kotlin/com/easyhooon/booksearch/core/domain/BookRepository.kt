@@ -10,7 +10,7 @@ interface BookRepository {
         sort: String,
         page: Int,
         size: Int,
-    ): Result<SearchBook>
+    ): SearchBook
 
     fun searchFavoritesByTitle(query: String): Flow<List<Book>>
 

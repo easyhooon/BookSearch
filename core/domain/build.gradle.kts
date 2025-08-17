@@ -5,4 +5,7 @@ plugins {
 
 dependencies {
     implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.collections.immutable)
+
+    implementation(libs.javax.inject)
 }
