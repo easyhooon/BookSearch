@@ -68,7 +68,7 @@ class FavoritesViewModel @Inject constructor(
             is FavoritesUiAction.OnSearchClick -> updateSearchQuery()
             is FavoritesUiAction.OnClearClick -> clearQuery()
             is FavoritesUiAction.OnSortClick -> toggleSortType()
-            is FavoritesUiAction.OnFilterClick -> {}
+            is FavoritesUiAction.OnFilterClick -> togglePriceFilter()
         }
     }
 
@@ -95,6 +95,12 @@ class FavoritesViewModel @Inject constructor(
     private fun toggleSortType() {
         _uiState.update { currentState ->
             currentState.copy(sortType = currentState.sortType.toggle())
+        }
+    }
+
+    private fun togglePriceFilter() {
+        _uiState.update { currentState ->
+            currentState.copy(isPriceFilterEnabled = !currentState.isPriceFilterEnabled)
         }
     }
 }

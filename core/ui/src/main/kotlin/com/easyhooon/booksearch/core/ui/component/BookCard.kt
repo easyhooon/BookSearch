@@ -50,6 +50,7 @@ fun BookCard(
     book: BookUiModel,
     onBookClick: (BookUiModel) -> Unit,
     modifier: Modifier = Modifier,
+    isPriceFilterEnabled: Boolean = true,
 ) {
     Box(
         modifier = modifier
@@ -134,42 +135,46 @@ fun BookCard(
                     .align(Alignment.TopEnd),
             )
         }
-        Column(
-            modifier = Modifier.align(Alignment.BottomEnd),
-            horizontalAlignment = Alignment.End,
-        ) {
-            val originalPrice = book.price.toIntOrNull() ?: 0
-            val salePrice = book.salePrice.toIntOrNull() ?: 0
-            val hasDiscount = originalPrice > 0 && salePrice > 0 && originalPrice != salePrice
+        if (!isPriceFilterEnabled) {
+            Column(
+                modifier = Modifier.align(Alignment.BottomEnd),
+                horizontalAlignment = Alignment.End,
+            ) {
+                val originalPrice = book.price.toIntOrNull() ?: 0
+                val salePrice = book.salePrice.toIntOrNull() ?: 0
+                val hasDiscount = originalPrice > 0 && salePrice > 0 && originalPrice != salePrice
 
-            if (hasDiscount) {
-                val discountPercent = ((originalPrice - salePrice) * 100) / originalPrice
+                if (hasDiscount) {
+                    val discountPercent = ((originalPrice - salePrice) * 100) / originalPrice
 
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        text = "$discountPercent%",
-                        style = label1Medium,
-                        color = com.easyhooon.booksearch.core.designsystem.theme.Red500,
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = "${book.price.toFormattedPrice()}${stringResource(designR.string.won)}",
-                        style = label1Medium,
-                        color = Neutral400,
-                        textDecoration = TextDecoration.LineThrough,
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            text = "$discountPercent%",
+                            style = label1Medium,
+                            color = com.easyhooon.booksearch.core.designsystem.theme.Red500,
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "${book.price.toFormattedPrice()}${stringResource(designR.string.won)}",
+                            style = label1Medium,
+                            color = Neutral400,
+                            textDecoration = TextDecoration.LineThrough,
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(2.dp))
                 }
-                Spacer(modifier = Modifier.height(2.dp))
-            }
 
-            Text(
-                text = "${if (book.salePrice == "-1") book.price.toFormattedPrice()
-                else book.salePrice.toFormattedPrice()}${stringResource(designR.string.won)}",
-                style = heading2Bold,
-                color = Neutral600,
-            )
+                Text(
+                    text = "${
+                        if (book.salePrice == "-1") book.price.toFormattedPrice()
+                        else book.salePrice.toFormattedPrice()
+                    }${stringResource(designR.string.won)}",
+                    style = heading2Bold,
+                    color = Neutral600,
+                )
+            }
         }
     }
 }

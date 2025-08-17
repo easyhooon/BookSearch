@@ -7,11 +7,12 @@ data class FavoritesUiState(
     val queryState: TextFieldState = TextFieldState(),
     val searchQuery: String = "",
     val sortType: FavoritesSortType = FavoritesSortType.TITLE_ASC,
+    val isPriceFilterEnabled: Boolean = false,
 )
 
 enum class FavoritesSortType(val label: String) {
-    TITLE_ASC("제목 오름차순"),
-    TITLE_DESC("제목 내림차순"),
+    TITLE_ASC("오름차순(제목)"),
+    TITLE_DESC("내림차순(제목)"),
     ;
 
     fun toggle(): FavoritesSortType {

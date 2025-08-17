@@ -93,6 +93,7 @@ internal fun FavoritesScreen(
         )
         FavoritesContent(
             favoriteBooks = favoriteBooks,
+            isPriceFilterEnabled = uiState.isPriceFilterEnabled,
             onAction = onAction,
         )
     }
@@ -135,31 +136,6 @@ internal fun FavoritesHeader(
             )
             Row {
                 OutlinedButton(
-                    onClick = { onAction(FavoritesUiAction.OnSortClick) },
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        containerColor = White,
-                        contentColor = Black,
-                    ),
-                    border = BorderStroke(width = 1.dp, color = Neutral200),
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(designR.drawable.ic_sort),
-                            contentDescription = "Sort Icon",
-                            tint = Color.Unspecified,
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = stringResource(designR.string.sort_label),
-                            color = Black,
-                            style = body1SemiBold,
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.width(4.dp))
-                OutlinedButton(
                     onClick = { onAction(FavoritesUiAction.OnFilterClick) },
                     colors = ButtonDefaults.outlinedButtonColors(
                         containerColor = White,
@@ -183,6 +159,31 @@ internal fun FavoritesHeader(
                         )
                     }
                 }
+                Spacer(modifier = Modifier.width(4.dp))
+                OutlinedButton(
+                    onClick = { onAction(FavoritesUiAction.OnSortClick) },
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        containerColor = White,
+                        contentColor = Black,
+                    ),
+                    border = BorderStroke(width = 1.dp, color = Neutral200),
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(designR.drawable.ic_sort),
+                            contentDescription = "Sort Icon",
+                            tint = Color.Unspecified,
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = stringResource(designR.string.sort_label),
+                            color = Black,
+                            style = body1SemiBold,
+                        )
+                    }
+                }
             }
         }
     }
@@ -191,6 +192,7 @@ internal fun FavoritesHeader(
 @Composable
 internal fun FavoritesContent(
     favoriteBooks: ImmutableList<BookUiModel>,
+    isPriceFilterEnabled: Boolean,
     onAction: (FavoritesUiAction) -> Unit,
 ) {
     LazyColumn(
@@ -208,6 +210,7 @@ internal fun FavoritesContent(
                 onBookClick = { book ->
                     onAction(FavoritesUiAction.OnBookClick(book))
                 },
+                isPriceFilterEnabled = isPriceFilterEnabled,
             )
         }
     }
