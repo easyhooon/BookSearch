@@ -9,7 +9,7 @@ sealed interface SearchState {
     data object Idle : SearchState
     data object Loading : SearchState
     data object Success : SearchState
-    data class Error(val exception: Throwable) : SearchState
+    data class Error(val message: String) : SearchState
 }
 
 data class SearchUiState(

@@ -118,7 +118,7 @@ class SearchViewModel @Inject constructor(
                 if (isFirstPage) {
                     _uiState.update { state ->
                         state.copy(
-                            searchState = SearchState.Error(exception),
+                            searchState = SearchState.Error(handleException(exception)),
                             footerState = FooterState.Idle,
                         )
                     }
