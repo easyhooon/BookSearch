@@ -1,10 +1,10 @@
 package com.easyhooon.booksearch.core.domain.usecase
 
-import com.easyhooon.booksearch.core.domain.repository.BookRepository
 import com.easyhooon.booksearch.core.domain.model.Book
+import com.easyhooon.booksearch.core.domain.repository.BookRepository
+import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import javax.inject.Inject
 
 class CombineBooksWithFavoritesUseCase @Inject constructor(
     private val repository: BookRepository,

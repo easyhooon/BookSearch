@@ -45,7 +45,7 @@ class FavoritesViewModel @Inject constructor(
         .flatMapLatest { state ->
             getFavoriteBooksUseCase(
                 query = state.searchQuery,
-                sortType = state.sortType
+                sortType = state.sortType,
             ).map { books ->
                 books.map { it.toUiModel().copy(isFavorites = true) }.toImmutableList()
             }

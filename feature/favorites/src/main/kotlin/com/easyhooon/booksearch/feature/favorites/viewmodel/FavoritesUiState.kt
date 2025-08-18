@@ -9,4 +9,3 @@ data class FavoritesUiState(
     val sortType: FavoritesSortType = FavoritesSortType.TITLE_ASC,
     val isPriceFilterEnabled: Boolean = false,
 )
-

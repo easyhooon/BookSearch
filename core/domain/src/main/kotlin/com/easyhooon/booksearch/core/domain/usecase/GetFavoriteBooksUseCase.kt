@@ -1,10 +1,10 @@
 package com.easyhooon.booksearch.core.domain.usecase
 
-import com.easyhooon.booksearch.core.domain.repository.BookRepository
 import com.easyhooon.booksearch.core.domain.model.Book
+import com.easyhooon.booksearch.core.domain.repository.BookRepository
+import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import javax.inject.Inject
 
 class GetFavoriteBooksUseCase @Inject constructor(
     private val repository: BookRepository,
@@ -27,7 +27,8 @@ class GetFavoriteBooksUseCase @Inject constructor(
 
 enum class FavoritesSortType(val label: String) {
     TITLE_ASC("오름차순(제목)"),
-    TITLE_DESC("내림차순(제목)");
+    TITLE_DESC("내림차순(제목)"),
+    ;
 
     fun toggle(): FavoritesSortType {
         return when (this) {
