@@ -214,8 +214,6 @@ internal fun FavoritesScreen(
 :core:common 모듈 내 클래스
 ```kotlin
 import androidx.compose.runtime.Stable
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.serialization.Serializable
 
 @Stable
@@ -226,9 +224,9 @@ data class BookUiModel(
     val url: String = "",
     val isbn: String = "",
     val datetime: String = "",
-    val authors: ImmutableList<String> = persistentListOf(),
+    val authors: List<String> = listOf(),
     val publisher: String = "",
-    val translators: ImmutableList<String> = persistentListOf(),
+    val translators: List<String> = listOf(),
     val price: String = "",
     val salePrice: String = "",
     val thumbnail: String = "",
