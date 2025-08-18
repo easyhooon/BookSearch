@@ -2,6 +2,7 @@ package com.easyhooon.booksearch.core.common.mapper
 
 import com.easyhooon.booksearch.core.common.model.BookUiModel
 import com.easyhooon.booksearch.core.domain.model.Book
+import kotlinx.collections.immutable.toImmutableList
 
 fun Book.toUiModel(): BookUiModel {
     return BookUiModel(
@@ -10,9 +11,9 @@ fun Book.toUiModel(): BookUiModel {
         url = url,
         isbn = isbn,
         datetime = datetime,
-        authors = authors,
+        authors = authors.toImmutableList(),
         publisher = publisher,
-        translators = translators,
+        translators = translators.toImmutableList(),
         price = price,
         salePrice = salePrice,
         thumbnail = thumbnail,
