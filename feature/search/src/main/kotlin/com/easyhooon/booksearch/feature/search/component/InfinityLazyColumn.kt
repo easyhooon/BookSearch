@@ -41,7 +41,7 @@ import com.easyhooon.booksearch.core.designsystem.theme.body1SemiBold
 import com.easyhooon.booksearch.core.designsystem.theme.label1Medium
 
 // 기기에서 평균적으로 한 화면에 보이는 아이템 개수
-private const val LIMIT_COUNT = 6
+private const val LIMIT_COUNT = 4
 
 @Composable
 fun InfinityLazyColumn(
@@ -76,7 +76,7 @@ fun InfinityLazyColumn(
 @SuppressLint("ComposableNaming")
 @Composable
 private fun LazyListState.onLoadMore(
-    limitCount: Int = 4,
+    limitCount: Int = LIMIT_COUNT,
     loadOnBottom: Boolean = true,
     action: () -> Unit,
 ) {
