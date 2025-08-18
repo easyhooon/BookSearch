@@ -75,9 +75,14 @@ inline fun <T> cancellableRunCatching(block: () -> T): Result<T> {
 <summary> UseCase 도입 </summary>  
     
 ### 1. Clean Architecture 에서 Domain 모듈 
-- [클라이언트 아키텍처에 대한 단상 - '서버'가 진짜 '도메인' 아닐까?](https://thdev.tech/architecture/2025/08/17/Clean-Android/) 해당 글과 같은 주장에 공감하는 입장이지만, 클린 아키텍처 에선 구글 권장 아키텍처와 다르게 Domain 이 필수이기 때문에, Domain 모듈과 UseCase를 도입함.
+- [클라이언트 아키텍처에 대한 단상 - '서버'가 진짜 '도메인' 아닐까?](https://thdev.tech/architecture/2025/08/17/Clean-Android/) 해당 글과 같은 주장에 공감하는 입장이지만, 클린 아키텍처에선 구글 권장 아키텍처와 다르게 Domain 이 필수이기 때문에, Domain 모듈과 UseCase를 도입함.
 - 단, Repository 의 함수를 포워딩하는 UseCase의 경우 불필요한 뎁스를 늘리기만 하고, UseCase 도입의 가치가 없다고 생각하여 비즈니스 로직을 포함하여 UseCase를 도입
   -> UseCase를 통해 비즈니스 로직을 추상화하고, 여러 뷰모델에서 공통으로 사용하는 비즈니스 로직을 공통화하여, 뷰모델의 복잡도를 감소 및 갓 뷰모델이 되지 않도록 막음
+
+### 2. UseCase 적용 케이스
+#### 2-1. 즐겨찾기에 추가된 도서, 검색 화면에 반영
+- Flow combine 연산자를 사용하여, API 를 통해 호출한 booksFlow 와, 즐겨찾기로 추가한 favoriteBooks 의 변화를 구독
+- combine 된 Flow 들 중 어느 하나라도 새로운 값을 emit 하면, transform 람다 함수가 호출됨 -> 즐겨찾기 추가, 삭제를 검색화면에 실시간으로 반영
 ```kotlin
 class CombineBooksWithFavoritesUseCase @Inject constructor(
     private val repository: BookRepository,
@@ -94,7 +99,12 @@ class CombineBooksWithFavoritesUseCase @Inject constructor(
         }
     }
 }
+```
 
+#### 2-2. 즐겨찾기 화면 검색어 존재여부에 따른 데이터 조회, 정렬 분기 처리
+- 검색어가 존재하는/하지 않는 경우, 제목 기준 오름차순, 내림차순 정렬 기준에 따라 데이터를 조회 및 정렬 후 Flow<List<*>으로 반환
+- 뷰모델에선 UseCase에서 반환되는 Flow 를 구독하여 UI 상태로 변환하기만 하면 됨 
+```kotlin
 class GetFavoriteBooksUseCase @Inject constructor(
     private val repository: BookRepository,
 ) {
@@ -126,7 +136,12 @@ enum class FavoritesSortType(val label: String) {
         }
     }
 }
+```
 
+#### 2-3. 검색 화면 페이지네이션 및 데이터 증분 로직 처리 
+- API 호출 결과를 첫 페이지(새 검색)/추가 페이지(더보기) 여부에 따라 데이터 교체/추가 분기 처리하여 Result로 반환
+- 뷰모델에선 UseCase에서 반환되는 Result를 구독하여 성공/실패에 따른 UI 상태 업데이트만 하면 됨
+```kotlin
 class SearchBooksUseCase @Inject constructor(
     private val repository: BookRepository,
 ) {
@@ -155,7 +170,12 @@ class SearchBooksUseCase @Inject constructor(
         }
     }
 }
+```
+#### 2-4. 즐겨찾기 토글 비즈니스 로직 처리 
+- 현재 즐겨찾기 상태를 확인하여 추가/삭제 분기 처리 후 변경된 상태를 Boolean 타입으로 반환
+- 뷰모델에선 UseCase 호출 결과에 따른 토스트 메시지 표시 등의 UI 이벤트 처리만 하면 됨
 
+```kotlin
 class ToggleFavoriteUseCase @Inject constructor(
     private val repository: BookRepository,
 ) {
@@ -174,40 +194,6 @@ class ToggleFavoriteUseCase @Inject constructor(
 }
 ``` 
 
-</details>
-    
-<details>
-<summary> 즐겨찾기에 추가된 도서, 검색 화면에 반영 </summary> 
-    
-- Flow combine 연산자를 사용하여, API 를 통해 호출한 booksFlow 와, 즐겨찾기로 추가한 favoriteBooks 의 변화를 구독
-- combine 된 Flow 들 중 어느 하나라도 새로운 값을 emit 하면, transform 람다 함수가 호출됨 -> 즐겨찾기 추가, 삭제를 실시간으로 반영 
-
-```kotlin
-// CombineBooksWithFavoritesUseCase
-    
-class CombineBooksWithFavoritesUseCase @Inject constructor(
-    private val repository: BookRepository,
-) {
-    operator fun invoke(booksFlow: Flow<List<Book>>): Flow<List<Book>> {
-        return combine(
-            booksFlow,
-            repository.favoriteBooks,
-        ) { books, favoriteBooks ->
-            books.map { book ->
-                val isFavorite = favoriteBooks.any { it.isbn == book.isbn }
-                book.copy(isFavorite = isFavorite)
-            }
-        }
-    }
-}
-
-data class SearchResult(
-    val books: List<Book>,
-    val isEnd: Boolean,
-    val totalCount: Int,
-    val nextPage: Int,
-)
-```
 </details>
 
 <details>
@@ -329,9 +315,9 @@ data class BookUiModel(
     val url: String = "",
     val isbn: String = "",
     val datetime: String = "",
-    val authors: List<String> = listOf(),
+    val authors: List<String> = emptyList(),
     val publisher: String = "",
-    val translators: List<String> = listOf(),
+    val translators: List<String> = emptyList(),
     val price: String = "",
     val salePrice: String = "",
     val thumbnail: String = "",
