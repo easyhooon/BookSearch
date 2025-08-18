@@ -70,6 +70,111 @@ inline fun <T> cancellableRunCatching(block: () -> T): Result<T> {
 }
 ```
 </details>
+
+<details>
+<summary> UseCase 도입 </summary>  
+    
+### 1. Clean Architecture 에서 Domain 모듈 
+- [클라이언트 아키텍처에 대한 단상 - '서버'가 진짜 '도메인' 아닐까?](https://thdev.tech/architecture/2025/08/17/Clean-Android/) 해당 글과 같은 주장에 공감하는 입장이지만, 클린 아키텍처 에선 구글 권장 아키텍처와 다르게 Domain 이 필수이기 때문에, Domain 모듈과 UseCase를 도입함.
+- 단, Repository 의 함수를 포워딩하는 UseCase의 경우 불필요한 뎁스를 늘리기만 하고, UseCase 도입의 가치가 없다고 생각하여 비즈니스 로직을 포함하여 UseCase를 도입
+  -> UseCase를 통해 비즈니스 로직을 추상화하고, 여러 뷰모델에서 공통으로 사용하는 비즈니스 로직을 공통화하여, 뷰모델의 복잡도를 감소 및 갓 뷰모델이 되지 않도록 막음
+```kotlin
+class CombineBooksWithFavoritesUseCase @Inject constructor(
+    private val repository: BookRepository,
+) {
+    operator fun invoke(booksFlow: Flow<List<Book>>): Flow<List<Book>> {
+        return combine(
+            booksFlow,
+            repository.favoriteBooks,
+        ) { books, favoriteBooks ->
+            books.map { book ->
+                val isFavorite = favoriteBooks.any { it.isbn == book.isbn }
+                book.copy(isFavorite = isFavorite)
+            }
+        }
+    }
+}
+
+class GetFavoriteBooksUseCase @Inject constructor(
+    private val repository: BookRepository,
+) {
+    operator fun invoke(query: String, sortType: FavoritesSortType): Flow<List<Book>> {
+        val booksFlow = if (query.isBlank()) {
+            repository.favoriteBooks
+        } else {
+            repository.searchFavoritesByTitle(query)
+        }
+
+        return booksFlow.map { books ->
+            when (sortType) {
+                FavoritesSortType.TITLE_ASC -> books.sortedBy { it.title }
+                FavoritesSortType.TITLE_DESC -> books.sortedByDescending { it.title }
+            }
+        }
+    }
+}
+
+enum class FavoritesSortType(val label: String) {
+    TITLE_ASC("오름차순(제목)"),
+    TITLE_DESC("내림차순(제목)"),
+    ;
+
+    fun toggle(): FavoritesSortType {
+        return when (this) {
+            TITLE_ASC -> TITLE_DESC
+            TITLE_DESC -> TITLE_ASC
+        }
+    }
+}
+
+class SearchBooksUseCase @Inject constructor(
+    private val repository: BookRepository,
+) {
+    suspend operator fun invoke(
+        query: String,
+        sort: String,
+        page: Int,
+        size: Int,
+        currentBooks: List<Book> = emptyList(),
+    ): Result<SearchResult> {
+        return cancellableRunCatching {
+            val searchResult = repository.searchBook(query, sort, page, size)
+
+            val newBooks = if (page == 1) {
+                searchResult.documents
+            } else {
+                currentBooks + searchResult.documents
+            }
+
+            SearchResult(
+                books = newBooks,
+                isEnd = searchResult.meta.isEnd,
+                totalCount = searchResult.meta.totalCount,
+                nextPage = page + 1,
+            )
+        }
+    }
+}
+
+class ToggleFavoriteUseCase @Inject constructor(
+    private val repository: BookRepository,
+) {
+    suspend operator fun invoke(book: Book): Boolean {
+        val favoriteBooks = repository.favoriteBooks.first()
+        val isCurrentlyFavorite = favoriteBooks.any { it.isbn == book.isbn }
+
+        return if (isCurrentlyFavorite) {
+            repository.deleteBook(book.isbn)
+            false
+        } else {
+            repository.insertBook(book)
+            true
+        }
+    }
+}
+``` 
+
+</details>
     
 <details>
 <summary> 즐겨찾기에 추가된 도서, 검색 화면에 반영 </summary> 
