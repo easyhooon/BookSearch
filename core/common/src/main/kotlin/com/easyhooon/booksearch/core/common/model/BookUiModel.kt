@@ -1,8 +1,6 @@
 package com.easyhooon.booksearch.core.common.model
 
 import androidx.compose.runtime.Stable
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.serialization.Serializable
 
 @Stable
@@ -13,9 +11,9 @@ data class BookUiModel(
     val url: String = "",
     val isbn: String = "",
     val datetime: String = "",
-    val authors: ImmutableList<String> = persistentListOf(),
+    val authors: List<String> = emptyList(),
     val publisher: String = "",
-    val translators: ImmutableList<String> = persistentListOf(),
+    val translators: List<String> = emptyList(),
     val price: String = "",
     val salePrice: String = "",
     val thumbnail: String = "",

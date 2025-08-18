@@ -15,7 +15,5 @@ dependencies {
     implementation(projects.core.domain)
     implementation(projects.core.network)
 
-    implementation(libs.kotlinx.collections.immutable)
-
     implementation(libs.logger)
 }
