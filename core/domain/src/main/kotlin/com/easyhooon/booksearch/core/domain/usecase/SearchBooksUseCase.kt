@@ -14,12 +14,11 @@ class SearchBooksUseCase @Inject constructor(
         page: Int,
         size: Int,
         currentBooks: List<Book> = emptyList(),
-        isFirstPage: Boolean = true,
     ): Result<SearchResult> {
         return cancellableRunCatching {
             val searchResult = repository.searchBook(query, sort, page, size)
 
-            val newBooks = if (isFirstPage) {
+            val newBooks = if (page == 1) {
                 searchResult.documents
             } else {
                 currentBooks + searchResult.documents

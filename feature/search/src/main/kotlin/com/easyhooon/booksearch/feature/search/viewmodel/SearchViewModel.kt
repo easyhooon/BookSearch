@@ -103,7 +103,6 @@ class SearchViewModel @Inject constructor(
                 page = page,
                 size = PAGE_SIZE,
                 currentBooks = _searchResults.value,
-                isFirstPage = isFirstPage,
             ).onSuccess { result ->
                 _searchResults.update { result.books }
                 _uiState.update { state ->
@@ -149,7 +148,7 @@ class SearchViewModel @Inject constructor(
 
     private fun retry() {
         val query = _uiState.value.currentQuery
-        if (query.isNotEmpty()) {
+        if (query.isNotBlank()) {
             searchBook(query)
         }
     }
