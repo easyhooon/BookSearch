@@ -15,6 +15,7 @@ dependencies {
     implementation(libs.kotlinx.collections.immutable)
 
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.splash)
 
     implementation(libs.compose.keyboard.state)
     implementation(libs.logger)
