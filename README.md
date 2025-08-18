@@ -433,8 +433,8 @@ private fun LazyListState.reachedBottom(
   - Room
 
 - Kotlin
-  - Coroutine,
-  - [Serialization](https://github.com/Kotlin/kotlinx.serialization),
+  - Coroutine
+  - [Serialization](https://github.com/Kotlin/kotlinx.serialization)
   - [Immutable Collections](https://github.com/Kotlin/kotlinx.collections.immutable)
 - Compose
   - Material3
