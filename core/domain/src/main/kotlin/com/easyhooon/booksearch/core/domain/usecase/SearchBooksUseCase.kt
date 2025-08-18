@@ -1,6 +1,6 @@
 package com.easyhooon.booksearch.core.domain.usecase
 
-import com.easyhooon.booksearch.core.domain.BookRepository
+import com.easyhooon.booksearch.core.domain.repository.BookRepository
 import com.easyhooon.booksearch.core.domain.model.Book
 import com.easyhooon.booksearch.core.domain.util.cancellableRunCatching
 import javax.inject.Inject

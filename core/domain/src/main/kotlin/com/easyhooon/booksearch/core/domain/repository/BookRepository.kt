@@ -1,4 +1,4 @@
-package com.easyhooon.booksearch.core.domain
+package com.easyhooon.booksearch.core.domain.repository
 
 import com.easyhooon.booksearch.core.domain.model.Book
 import com.easyhooon.booksearch.core.domain.model.SearchBook

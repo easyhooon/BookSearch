@@ -1,10 +1,10 @@
-package com.easyhooon.booksearch.core.data
+package com.easyhooon.booksearch.core.data.repository
 
 import com.easyhooon.booksearch.core.data.mapper.toEntity
 import com.easyhooon.booksearch.core.data.mapper.toModel
 import com.easyhooon.booksearch.core.database.FavoritesDao
-import com.easyhooon.booksearch.core.domain.BookRepository
 import com.easyhooon.booksearch.core.domain.model.Book
+import com.easyhooon.booksearch.core.domain.repository.BookRepository
 import com.easyhooon.booksearch.core.network.service.BookSearchService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map

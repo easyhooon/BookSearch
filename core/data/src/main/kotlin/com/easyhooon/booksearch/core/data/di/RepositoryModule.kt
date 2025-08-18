@@ -1,7 +1,7 @@
 package com.easyhooon.booksearch.core.data.di
 
-import com.easyhooon.booksearch.core.data.DefaultBookRepository
-import com.easyhooon.booksearch.core.domain.BookRepository
+import com.easyhooon.booksearch.core.data.repository.DefaultBookRepository
+import com.easyhooon.booksearch.core.domain.repository.BookRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
