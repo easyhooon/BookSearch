@@ -346,7 +346,7 @@ private fun LazyListState.reachedBottom(
 - Kotlin
   - Coroutine,
   - [Serialization](https://github.com/Kotlin/kotlinx.serialization),
-  - [Immutable Collection](https://github.com/Kotlin/kotlinx.collections.immutable)
+  - [Immutable Collections](https://github.com/Kotlin/kotlinx.collections.immutable)
 - Compose
   - Material3
   - Navigation
