@@ -508,7 +508,7 @@ private fun LazyListState.reachedBottom(
 ## Module
 ### 앱 모듈 구조
 
-<img width="800" alt="image" src="https://github.com/user-attachments/assets/f52d0b47-adb0-443d-8af8-ee71502bb269">
+<img width="800" alt="image" src="https://github.com/user-attachments/assets/71854cca-8276-41af-bdf2-4fd1da41d0b9">
 
 ## Package Structure
 ```
