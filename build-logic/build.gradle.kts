@@ -3,10 +3,10 @@ plugins {
 }
 
 dependencies {
-    compileOnly(libs.gradle.android)
-    compileOnly(libs.gradle.kotlin)
-    compileOnly(libs.gradle.androidx.room)
-    compileOnly(libs.gradle.compose.compiler)
+    compileOnly(libs.android.gradle.plugin)
+    compileOnly(libs.kotlin.gradle.plugin)
+    compileOnly(libs.room.gradle.plugin)
+    compileOnly(libs.compose.compiler.gradle.plugin)
 
     implementation(files(libs.javaClass.superclass.protectionDomain.codeSource.location))
 }
@@ -30,15 +30,6 @@ gradlePlugin {
             pluginRegister(pluginClass)
         }
     }
-}
-
-dependencies {
-    compileOnly(libs.gradle.android)
-    compileOnly(libs.gradle.kotlin)
-    compileOnly(libs.gradle.androidx.room)
-    compileOnly(libs.gradle.compose.compiler)
-
-    compileOnly(files(libs.javaClass.superclass.protectionDomain.codeSource.location))
 }
 
 // Pair<PluginName, ClassName>
