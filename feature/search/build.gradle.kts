@@ -8,6 +8,8 @@ android {
 }
 
 dependencies {
+    implementation(projects.core.data)
+    
     implementation(libs.kotlinx.collections.immutable)
 
     implementation(libs.logger)
