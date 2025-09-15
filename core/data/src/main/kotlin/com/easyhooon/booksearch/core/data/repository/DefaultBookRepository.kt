@@ -5,13 +5,13 @@ import com.easyhooon.booksearch.core.data.mapper.toModel
 import com.easyhooon.booksearch.core.database.FavoritesDao
 import com.easyhooon.booksearch.core.domain.model.Book
 import com.easyhooon.booksearch.core.domain.repository.BookRepository
-import com.easyhooon.booksearch.core.network.service.BookSearchService
+import com.easyhooon.booksearch.core.network.client.BookSearchKtorClient
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 internal class DefaultBookRepository @Inject constructor(
-    private val service: BookSearchService,
+    private val ktorClient: BookSearchKtorClient,
     private val favoritesDao: FavoritesDao,
 ) : BookRepository {
 
@@ -20,7 +20,7 @@ internal class DefaultBookRepository @Inject constructor(
         sort: String,
         page: Int,
         size: Int,
-    ) = service.searchBook(
+    ) = ktorClient.searchBook(
         query = query,
         sort = sort,
         page = page,

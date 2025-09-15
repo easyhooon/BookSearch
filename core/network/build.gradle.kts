@@ -28,6 +28,7 @@ dependencies {
 
     implementation(libs.ktor.client.okhttp)
     implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.client.logging)
     implementation(libs.ktor.kotlinx.serialization.json)
 
     implementation(libs.kotlinx.serialization.json)

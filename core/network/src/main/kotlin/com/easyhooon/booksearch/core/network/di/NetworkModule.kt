@@ -3,6 +3,7 @@ package com.easyhooon.booksearch.core.network.di
 import android.util.Log
 import com.easyhooon.booksearch.core.network.BuildConfig
 import com.easyhooon.booksearch.core.network.TokenInterceptor
+import com.easyhooon.booksearch.core.network.client.BookSearchKtorClient
 import com.easyhooon.booksearch.core.network.service.BookSearchService
 import com.orhanobut.logger.AndroidLogAdapter
 import com.orhanobut.logger.PrettyFormatStrategy
@@ -10,6 +11,15 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.defaultRequest
+import io.ktor.client.plugins.logging.LogLevel
+import io.ktor.client.plugins.logging.Logger
+import io.ktor.client.plugins.logging.Logging
+import io.ktor.client.request.header
+import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -124,5 +134,56 @@ internal object NetworkModule {
         retrofit: Retrofit,
     ): BookSearchService {
         return retrofit.create()
+    }
+
+    @Singleton
+    @Provides
+    internal fun provideKtorHttpClient(
+        networkLogAdapter: AndroidLogAdapter,
+    ): HttpClient {
+        return HttpClient(OkHttp) {
+            engine {
+                config {
+                    connectTimeout(MaxTimeoutMillis, TimeUnit.MILLISECONDS)
+                    readTimeout(MaxTimeoutMillis, TimeUnit.MILLISECONDS)
+                    writeTimeout(MaxTimeoutMillis, TimeUnit.MILLISECONDS)
+                }
+            }
+
+            install(ContentNegotiation) {
+                json(jsonRule)
+            }
+
+            install(Logging) {
+                logger = object : Logger {
+                    override fun log(message: String) {
+                        val shouldFilter = FILTERED_HEADERS.any { header ->
+                            message.lowercase().contains("$header:")
+                        }
+
+                        val isDuplicateContentType = message.lowercase().contains("content-type: application/json") &&
+                            !message.contains("charset")
+
+                        if (!shouldFilter && !isDuplicateContentType) {
+                            networkLogAdapter.log(Log.DEBUG, null, message)
+                        }
+                    }
+                }
+                level = if (BuildConfig.DEBUG) LogLevel.BODY else LogLevel.NONE
+            }
+
+            defaultRequest {
+                url(BuildConfig.KAKAO_API_BASE_URL)
+                header("Authorization", "KakaoAK ${BuildConfig.KAKAO_REST_API_KEY}")
+            }
+        }
+    }
+
+    @Singleton
+    @Provides
+    internal fun provideBookSearchKtorClient(
+        httpClient: HttpClient,
+    ): BookSearchKtorClient {
+        return BookSearchKtorClient(httpClient)
     }
 }
