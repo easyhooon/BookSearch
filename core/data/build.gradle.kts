@@ -15,4 +15,7 @@ dependencies {
     implementation(projects.core.network)
 
     implementation(libs.logger)
+    
+    implementation(libs.soil.query.core)
+    implementation(libs.soil.reacty)
 }
