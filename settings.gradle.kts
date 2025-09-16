@@ -33,7 +33,6 @@ include(
     ":core:data",
     ":core:common",
     ":core:designsystem",
-    ":core:domain",
     ":core:navigation",
     ":core:ui",
 

@@ -10,7 +10,6 @@ android {
 
 dependencies {
     implementation(projects.core.common)
-    implementation(projects.core.domain)
 
     implementation(libs.androidx.navigation.compose)
 }

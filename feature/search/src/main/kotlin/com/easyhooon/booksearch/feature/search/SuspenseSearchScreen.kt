@@ -12,7 +12,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.clearText
 import androidx.compose.material3.ButtonDefaults
@@ -46,12 +48,13 @@ import com.easyhooon.booksearch.core.designsystem.theme.body1Medium
 import com.easyhooon.booksearch.core.designsystem.theme.body1SemiBold
 import com.easyhooon.booksearch.core.ui.component.BookCard
 import com.easyhooon.booksearch.core.ui.component.BookSearchTopAppBar
-import com.easyhooon.booksearch.feature.search.component.InfinityLazyColumn
 import io.github.takahirom.rin.rememberRetained
 import kotlinx.collections.immutable.toImmutableList
+import soil.plant.compose.lazy.LazyLoad
 import soil.plant.compose.reacty.ErrorBoundary
 import soil.plant.compose.reacty.Suspense
-import soil.query.compose.rememberQuery
+import soil.query.compose.rememberInfiniteQuery
+import soil.plant.compose.reacty.Await
 import com.easyhooon.booksearch.core.designsystem.R as designR
 
 enum class SortType(val value: String, val displayName: String) {
@@ -65,7 +68,7 @@ enum class SortType(val value: String, val displayName: String) {
 }
 
 @Composable
-internal fun SuspenseSearchRoute(
+internal fun SearchRoute(
     innerPadding: PaddingValues,
     navigateToDetail: (BookUiModel) -> Unit,
 ) {
@@ -86,7 +89,6 @@ internal fun SuspenseSearchScreen(
 ) {
     var currentQuery by rememberRetained { mutableStateOf("") }
     var sortType by rememberRetained { mutableStateOf(SortType.ACCURACY) }
-    var currentPage by rememberRetained { mutableStateOf(1) }
 
     Column(
         modifier = Modifier
@@ -101,16 +103,13 @@ internal fun SuspenseSearchScreen(
             sortLabel = sortType.displayName,
             onSearchClick = { query ->
                 currentQuery = query
-                currentPage = 1
             },
             onClearClick = {
                 queryState.clearText()
                 currentQuery = ""
-                currentPage = 1
             },
             onSortClick = {
                 sortType = sortType.toggle()
-                currentPage = 1
             },
         )
 
@@ -128,9 +127,7 @@ internal fun SuspenseSearchScreen(
                     SuspenseSearchContent(
                         query = currentQuery,
                         sortType = sortType,
-                        page = currentPage,
                         onNavigateToDetail = onNavigateToDetail,
-                        onLoadMore = { currentPage += 1 }
                     )
                 }
             }
@@ -205,39 +202,64 @@ internal fun SuspenseSearchHeader(
 internal fun SuspenseSearchContent(
     query: String,
     sortType: SortType,
-    page: Int,
     onNavigateToDetail: (BookUiModel) -> Unit,
-    onLoadMore: () -> Unit,
 ) {
-    val searchQuery = rememberQuery<List<BookUiModel>>(
+    val infiniteQuery = rememberInfiniteQuery(
         key = SearchBooksQueryKey(
             query = query,
             sort = sortType.value,
-            page = page,
             size = 20,
         )
     )
 
-    val books = searchQuery.data?.toImmutableList() ?: kotlinx.collections.immutable.persistentListOf()
-
-    if (books.isEmpty()) {
-        SuspenseSearchEmptyContent()
-    } else {
-        InfinityLazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            loadMore = onLoadMore,
-        ) {
-            items(
-                items = books,
-                key = { it.isbn },
-            ) { book ->
-                BookCard(
-                    book = book,
-                    onBookClick = { onNavigateToDetail(book) },
-                )
+    Await(infiniteQuery) { allBooksPages ->
+        val allBooks = allBooksPages.flatMap { it.data }
+        
+        if (allBooks.isEmpty()) {
+            SuspenseSearchEmptyContent()
+        } else {
+            val lazyListState = rememberLazyListState()
+            
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                state = lazyListState,
+                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                items(
+                    items = allBooks,
+                    key = { it.isbn },
+                ) { book ->
+                    BookCard(
+                        book = book,
+                        onBookClick = { onNavigateToDetail(book) },
+                    )
+                }
+                
+                // Loading indicator for next page
+                val loadMoreParam = infiniteQuery.loadMoreParam
+                if (allBooks.isNotEmpty() && loadMoreParam != null) {
+                    item(contentType = "loading") {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(
+                                color = Neutral500,
+                                modifier = Modifier.padding(16.dp)
+                            )
+                        }
+                    }
+                }
             }
+            
+            LazyLoad(
+                state = lazyListState,
+                loadMore = infiniteQuery.loadMore,
+                loadMoreParam = infiniteQuery.loadMoreParam
+            )
         }
     }
 }

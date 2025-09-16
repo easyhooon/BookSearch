@@ -43,6 +43,19 @@ import com.easyhooon.booksearch.core.designsystem.theme.heading1Bold
 import com.easyhooon.booksearch.core.ui.component.BookSearchTopAppBar
 
 @Composable
+internal fun DetailRoute(
+    book: BookUiModel,
+    innerPadding: PaddingValues,
+    popBackStack: () -> Unit,
+) {
+    SuspenseDetailScreen(
+        book = book,
+        innerPadding = innerPadding,
+        onBack = popBackStack,
+    )
+}
+
+@Composable
 internal fun SuspenseDetailScreen(
     book: BookUiModel,
     innerPadding: PaddingValues,

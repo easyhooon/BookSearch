@@ -137,6 +137,8 @@ soil-query-core = { group = "com.soil-kt.soil", name = "query-core", version.ref
 soil-query-compose = { group = "com.soil-kt.soil", name = "query-compose", version.ref = "soil" }
 soil-reacty = { group = "com.soil-kt.soil", name = "reacty", version.ref = "soil" }
 soil-form = { group = "com.soil-kt.soil", name = "form", version.ref = "soil" }
+soil-lazyload = { group = "com.soil-kt.soil", name = "lazyload", version.ref = "soil" }
+soil-optimistic-update = { group = "com.soil-kt.soil", name = "optimistic-update", version.ref = "soil" }
 
 rin = { group = "io.github.takahirom.rin", name = "rin", version.ref = "rin" }
 

@@ -69,7 +69,7 @@ enum class FavoritesSortType(val value: String, val label: String) {
 }
 
 @Composable
-internal fun SuspenseFavoritesRoute(
+internal fun FavoritesRoute(
     innerPadding: PaddingValues,
     navigateToDetail: (BookUiModel) -> Unit,
 ) {

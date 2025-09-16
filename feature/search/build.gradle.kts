@@ -17,6 +17,7 @@ dependencies {
     implementation(libs.soil.query.core)
     implementation(libs.soil.query.compose)
     implementation(libs.soil.reacty)
+    implementation(libs.soil.lazyload)
 
     implementation(libs.rin)
 }
