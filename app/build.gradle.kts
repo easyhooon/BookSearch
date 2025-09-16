@@ -59,6 +59,9 @@ dependencies {
     implementation(libs.androidx.startup)
     implementation(libs.coil.compose)
     implementation(libs.logger)
+    
+    implementation(libs.soil.query.core)
+    implementation(libs.soil.query.compose)
 }
 
 fun getApiKey(propertyKey: String): String {

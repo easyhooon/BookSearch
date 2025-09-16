@@ -55,28 +55,28 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import com.easyhooon.booksearch.core.designsystem.R as designR
 
-@Composable
-internal fun SearchRoute(
-    innerPadding: PaddingValues,
-    navigateToDetail: (BookUiModel) -> Unit,
-    viewModel: SearchViewModel = hiltViewModel(),
-) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val searchBooks by viewModel.searchBooks.collectAsStateWithLifecycle()
-
-    ObserveAsEvents(flow = viewModel.uiEvent) { event ->
-        when (event) {
-            is SearchUiEvent.NavigateToDetail -> navigateToDetail(event.book)
-        }
-    }
-
-    SearchScreen(
-        innerPadding = innerPadding,
-        uiState = uiState,
-        searchBooks = searchBooks,
-        onAction = viewModel::onAction,
-    )
-}
+//@Composable
+//internal fun SearchRoute(
+//    innerPadding: PaddingValues,
+//    navigateToDetail: (BookUiModel) -> Unit,
+//    viewModel: SearchViewModel = hiltViewModel(),
+//) {
+//    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+//    val searchBooks by viewModel.searchBooks.collectAsStateWithLifecycle()
+//
+//    ObserveAsEvents(flow = viewModel.uiEvent) { event ->
+//        when (event) {
+//            is SearchUiEvent.NavigateToDetail -> navigateToDetail(event.book)
+//        }
+//    }
+//
+//    SearchScreen(
+//        innerPadding = innerPadding,
+//        uiState = uiState,
+//        searchBooks = searchBooks,
+//        onAction = viewModel::onAction,
+//    )
+//}
 
 @Composable
 internal fun SearchScreen(

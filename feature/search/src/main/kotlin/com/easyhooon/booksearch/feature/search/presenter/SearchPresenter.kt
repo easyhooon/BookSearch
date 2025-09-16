@@ -11,7 +11,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.easyhooon.booksearch.core.common.model.BookUiModel
 import com.easyhooon.booksearch.core.data.query.SearchBooksQueryKey
-import com.easyhooon.booksearch.core.domain.model.Book
 import io.github.takahirom.rin.rememberRetained
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -88,9 +87,9 @@ fun SearchPresenter(
     }
 
     var currentPage by rememberRetained { mutableStateOf(1) }
-    var allBooks by rememberRetained { mutableStateOf<List<Book>>(emptyList()) }
+    var allBooks by rememberRetained { mutableStateOf<List<BookUiModel>>(emptyList()) }
 
-    val query: QueryObject<List<Book>> = rememberQuery(
+    val query: QueryObject<List<BookUiModel>> = rememberQuery(
         key = SearchBooksQueryKey(
             query = currentQuery,
             sort = sortType.value,
@@ -112,23 +111,7 @@ fun SearchPresenter(
 
     val books by remember {
         derivedStateOf {
-            allBooks.map { book ->
-                BookUiModel(
-                    isbn = book.isbn,
-                    title = book.title,
-                    contents = book.contents,
-                    url = book.url,
-                    datetime = book.datetime,
-                    authors = book.authors,
-                    publisher = book.publisher,
-                    translators = book.translators,
-                    price = book.price,
-                    salePrice = book.salePrice,
-                    thumbnail = book.thumbnail,
-                    status = book.status,
-                    isFavorites = false,
-                )
-            }.toImmutableList()
+            allBooks.toImmutableList()
         }
     }
 

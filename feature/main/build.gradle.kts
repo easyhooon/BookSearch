@@ -19,4 +19,6 @@ dependencies {
 
     implementation(libs.compose.keyboard.state)
     implementation(libs.logger)
+    
+    implementation(libs.soil.query.compose)
 }

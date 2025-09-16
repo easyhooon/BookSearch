@@ -48,7 +48,7 @@ import com.easyhooon.booksearch.feature.search.presenter.SearchUiAction
 import io.github.takahirom.rin.rememberRetained
 
 @Composable
-internal fun NewSearchRoute(
+internal fun SearchRoute(
     innerPadding: PaddingValues,
     navigateToDetail: (BookUiModel) -> Unit,
 ) {
