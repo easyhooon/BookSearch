@@ -12,11 +12,14 @@ import com.easyhooon.booksearch.core.common.compose.EventEffect
 import com.easyhooon.booksearch.core.common.compose.rememberEventFlow
 import com.easyhooon.booksearch.core.common.model.BookUiModel
 import com.easyhooon.booksearch.core.data.query.GetFavoriteBooksQueryKey
+import com.easyhooon.booksearch.core.data.query.ToggleFavoriteQueryKey
 import com.easyhooon.booksearch.feature.favorites.FavoritesSortType
 import io.github.takahirom.rin.rememberRetained
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.launch
+import soil.query.compose.rememberMutation
 import soil.query.compose.rememberQuery
 
 data class FavoritesUiState(
@@ -64,8 +67,14 @@ fun FavoritesPresenter(
             isPriceFilterEnabled = isPriceFilterEnabled,
         )
     )
-
+    
     val favoriteBooks = favoritesQuery.data?.toImmutableList() ?: persistentListOf()
+    
+    // DroidKaigi 패턴: Mutation을 Presenter에서 생성 (더미 값으로 초기화)
+    var toggleMutationKey by remember { mutableStateOf<ToggleFavoriteQueryKey?>(null) }
+    val toggleFavoriteMutation = toggleMutationKey?.let { key ->
+        rememberMutation<Boolean, Unit>(key = key)
+    }
 
     EventEffect(eventFlow) { event ->
         when (event) {
@@ -95,9 +104,11 @@ fun FavoritesPresenter(
                     eventFlow.tryEmit(FavoritesUiEvent.NavigateToDetail(action.book))
                 }
                 is FavoritesUiAction.OnFavoriteToggle -> {
-                    // 즐겨찾기에서 제거 (Room 데이터베이스)
-                    // TODO: Mutation 사용해서 즐겨찾기 삭제
-                    // 현재는 단순히 UI 상태 변경만
+                    // DroidKaigi 패턴: Mutation 사용해서 즐겨찾기 토글
+                    coroutineScope.launch {
+                        toggleMutationKey = ToggleFavoriteQueryKey(action.book)
+                        toggleFavoriteMutation?.mutateAsync(Unit)
+                    }
                 }
             }
         }

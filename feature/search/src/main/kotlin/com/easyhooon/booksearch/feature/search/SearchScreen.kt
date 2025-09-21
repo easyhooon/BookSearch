@@ -65,13 +65,16 @@ enum class SortType(val value: String, val displayName: String) {
 @Composable
 internal fun SearchRoute(
     innerPadding: PaddingValues,
+    searchScreenContext: SearchScreenContext,
     navigateToDetail: (BookUiModel) -> Unit,
 ) {
     val queryState = rememberRetained { TextFieldState() }
-    val presenterState = SearchPresenter(
-        queryState = queryState,
-        onNavigateToDetail = navigateToDetail,
-    )
+    val presenterState = with(searchScreenContext) {
+        SearchPresenter(
+            queryState = queryState,
+            onNavigateToDetail = navigateToDetail,
+        )
+    }
 
     SearchScreen(
         innerPadding = innerPadding,

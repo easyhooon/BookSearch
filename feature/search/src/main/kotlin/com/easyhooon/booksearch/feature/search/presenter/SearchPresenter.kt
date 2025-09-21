@@ -8,10 +8,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import android.util.Log
 import com.easyhooon.booksearch.core.common.compose.EventEffect
 import com.easyhooon.booksearch.core.common.compose.rememberEventFlow
 import com.easyhooon.booksearch.core.common.model.BookUiModel
-import com.easyhooon.booksearch.core.data.query.SearchBooksQueryKey
+import com.easyhooon.booksearch.core.data.query.DefaultSearchBooksQueryKey
+import com.easyhooon.booksearch.feature.search.SearchScreenContext
 import com.easyhooon.booksearch.feature.search.SortType
 import io.github.takahirom.rin.rememberRetained
 import kotlinx.collections.immutable.ImmutableList
@@ -44,27 +46,32 @@ data class SearchPresenterState(
     val onAction: (SearchUiAction) -> Unit,
 )
 
+context(searchScreenContext: SearchScreenContext)
 @Composable
 fun SearchPresenter(
     queryState: TextFieldState = rememberRetained { TextFieldState() },
     onNavigateToDetail: (BookUiModel) -> Unit,
-): SearchPresenterState {
+): SearchPresenterState = providePresenterDefaults {
     var currentQuery by rememberRetained { mutableStateOf("") }
     var sortType by rememberRetained { mutableStateOf(SortType.ACCURACY) }
     val coroutineScope = rememberCoroutineScope()
 
     val eventFlow = rememberEventFlow<SearchUiEvent>()
 
-    // API 호출 - InfiniteQuery로 검색 결과 가져오기
+    // API 호출 - InfiniteQuery로 검색 결과 가져오기 (쿼리가 있을 때만)
     val infiniteQuery = if (currentQuery.isNotEmpty()) {
+        Log.d("SearchPresenter", "Creating InfiniteQuery for query: $currentQuery")
         rememberInfiniteQuery(
-            key = SearchBooksQueryKey(
+            key = searchScreenContext.searchBooksQueryKey.create(
                 query = currentQuery,
                 sort = sortType.value,
                 size = 20,
             )
         )
-    } else null
+    } else {
+        Log.d("SearchPresenter", "currentQuery is empty, not creating InfiniteQuery")
+        null
+    }
 
     // 검색 결과 처리
     val searchResults = infiniteQuery?.data?.flatMap { it.data }?.toImmutableList() ?: persistentListOf()
@@ -78,11 +85,17 @@ fun SearchPresenter(
         }
     }
 
-    val onAction: (SearchUiAction) -> Unit = remember(infiniteQuery) {
+    val onAction: (SearchUiAction) -> Unit = remember(currentQuery, sortType, infiniteQuery) {
         { action ->
             when (action) {
                 is SearchUiAction.OnSearchClick -> {
-                    currentQuery = action.query
+                    Log.d("SearchPresenter", "OnSearchClick called with query: '${action.query}'")
+                    if (action.query.isNotBlank()) {
+                        Log.d("SearchPresenter", "Query is not blank, updating currentQuery from '$currentQuery' to '${action.query}'")
+                        currentQuery = action.query
+                    } else {
+                        Log.d("SearchPresenter", "Query is blank, ignoring")
+                    }
                 }
                 is SearchUiAction.OnClearClick -> {
                     queryState.clearText()
@@ -117,3 +130,8 @@ fun SearchPresenter(
         onAction = onAction,
     )
 }
+
+@Composable
+private inline fun providePresenterDefaults(
+    content: @Composable () -> SearchPresenterState
+): SearchPresenterState = content()
