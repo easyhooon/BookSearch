@@ -10,21 +10,14 @@ android {
     namespace = "com.easyhooon.booksearch"
 
     buildTypes {
-        getByName("debug") {
+        debug {
             isDebuggable = true
-            applicationIdSuffix = ".dev"
-            manifestPlaceholders += mapOf(
-                "appName" to "@string/app_name_dev",
-            )
         }
 
-        getByName("release") {
+        release {
             isDebuggable = false
             isMinifyEnabled = true
             isShrinkResources = true
-            manifestPlaceholders += mapOf(
-                "appName" to "@string/app_name",
-            )
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",

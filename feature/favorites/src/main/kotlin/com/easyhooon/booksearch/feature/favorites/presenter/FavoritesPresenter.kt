@@ -12,15 +12,11 @@ import com.easyhooon.booksearch.core.common.compose.EventEffect
 import com.easyhooon.booksearch.core.common.compose.rememberEventFlow
 import com.easyhooon.booksearch.core.common.model.BookUiModel
 import com.easyhooon.booksearch.core.data.query.GetFavoriteBooksQueryKey
-import com.easyhooon.booksearch.core.data.query.ToggleFavoriteQueryKey
 import com.easyhooon.booksearch.feature.favorites.FavoritesSortType
 import io.github.takahirom.rin.rememberRetained
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.launch
-import soil.query.QueryRef
-import soil.query.compose.rememberMutation
 import soil.query.compose.rememberQuery
 
 data class FavoritesUiState(
@@ -46,7 +42,6 @@ sealed interface FavoritesUiEvent {
 data class FavoritesPresenterState(
     val uiState: FavoritesUiState,
     val onAction: (FavoritesUiAction) -> Unit,
-    val favoritesQueryRef: QueryRef<List<BookUiModel>>?,
 )
 
 @Composable
@@ -101,11 +96,8 @@ fun FavoritesPresenter(
                 }
                 is FavoritesUiAction.OnFavoriteToggle -> {
                     // 즐겨찾기에서 제거 (Room 데이터베이스)
-                    coroutineScope.launch {
-                        // TODO: Mutation 사용해서 즐겨찾기 삭제
-                        // 즉시 데이터 새로고침
-                        favoritesQuery.invalidate()
-                    }
+                    // TODO: Mutation 사용해서 즐겨찾기 삭제
+                    // 현재는 단순히 UI 상태 변경만
                 }
             }
         }
@@ -121,6 +113,5 @@ fun FavoritesPresenter(
     return FavoritesPresenterState(
         uiState = uiState,
         onAction = onAction,
-        favoritesQueryRef = favoritesQuery,
     )
 }
