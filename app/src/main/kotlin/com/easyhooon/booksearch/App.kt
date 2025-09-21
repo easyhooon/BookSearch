@@ -22,12 +22,12 @@ class App : Application(), SwrClientFactory {
             policy = SwrCachePlusPolicy(
                 coroutineScope = SwrCacheScope(),
                 queryOptions = QueryOptions(
-                    logger = { println(it) }
+                    logger = { println(it) },
                 ),
                 memoryPressure = AndroidMemoryPressure(this),
                 networkConnectivity = AndroidNetworkConnectivity(this),
-                windowVisibility = AndroidWindowVisibility()
-            )
+                windowVisibility = AndroidWindowVisibility(),
+            ),
         )
     }
 }

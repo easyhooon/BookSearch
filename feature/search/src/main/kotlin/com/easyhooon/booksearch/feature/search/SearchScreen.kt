@@ -16,17 +16,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.input.TextFieldState
-import androidx.compose.foundation.text.input.clearText
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -35,7 +30,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.easyhooon.booksearch.core.common.model.BookUiModel
-import com.easyhooon.booksearch.core.data.query.SearchBooksQueryKey
 import com.easyhooon.booksearch.core.designsystem.DevicePreview
 import com.easyhooon.booksearch.core.designsystem.component.BookSearchTextField
 import com.easyhooon.booksearch.core.designsystem.theme.Black
@@ -48,13 +42,14 @@ import com.easyhooon.booksearch.core.designsystem.theme.body1Medium
 import com.easyhooon.booksearch.core.designsystem.theme.body1SemiBold
 import com.easyhooon.booksearch.core.ui.component.BookCard
 import com.easyhooon.booksearch.core.ui.component.BookSearchTopAppBar
+import com.easyhooon.booksearch.feature.search.presenter.SearchPresenter
+import com.easyhooon.booksearch.feature.search.presenter.SearchUiAction
+import com.easyhooon.booksearch.feature.search.presenter.SearchUiState
 import io.github.takahirom.rin.rememberRetained
-import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.ImmutableList
 import soil.plant.compose.lazy.LazyLoad
 import soil.plant.compose.reacty.ErrorBoundary
 import soil.plant.compose.reacty.Suspense
-import soil.query.compose.rememberInfiniteQuery
-import soil.plant.compose.reacty.Await
 import com.easyhooon.booksearch.core.designsystem.R as designR
 
 enum class SortType(val value: String, val displayName: String) {
@@ -73,11 +68,16 @@ internal fun SearchRoute(
     navigateToDetail: (BookUiModel) -> Unit,
 ) {
     val queryState = rememberRetained { TextFieldState() }
+    val presenterState = SearchPresenter(
+        queryState = queryState,
+        onNavigateToDetail = navigateToDetail,
+    )
 
     SearchScreen(
         innerPadding = innerPadding,
         queryState = queryState,
-        onNavigateToDetail = navigateToDetail,
+        uiState = presenterState.uiState,
+        onAction = presenterState.onAction,
     )
 }
 
@@ -85,11 +85,9 @@ internal fun SearchRoute(
 internal fun SearchScreen(
     innerPadding: PaddingValues,
     queryState: TextFieldState,
-    onNavigateToDetail: (BookUiModel) -> Unit,
+    uiState: SearchUiState,
+    onAction: (SearchUiAction) -> Unit,
 ) {
-    var currentQuery by rememberRetained { mutableStateOf("") }
-    var sortType by rememberRetained { mutableStateOf(SortType.ACCURACY) }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -100,20 +98,19 @@ internal fun SearchScreen(
 
         SearchHeader(
             queryState = queryState,
-            sortLabel = sortType.displayName,
+            sortLabel = uiState.sortType.displayName,
             onSearchClick = { query ->
-                currentQuery = query
+                onAction(SearchUiAction.OnSearchClick(query))
             },
             onClearClick = {
-                queryState.clearText()
-                currentQuery = ""
+                onAction(SearchUiAction.OnClearClick)
             },
             onSortClick = {
-                sortType = sortType.toggle()
+                onAction(SearchUiAction.OnSortClick)
             },
         )
 
-        if (currentQuery.isNotEmpty()) {
+        if (uiState.currentQuery.isNotEmpty()) {
             ErrorBoundary(
                 fallback = { context ->
                     SearchErrorContent(onRetry = { context.reset?.invoke() })
@@ -125,9 +122,14 @@ internal fun SearchScreen(
                     }
                 ) {
                     SearchContent(
-                        query = currentQuery,
-                        sortType = sortType,
-                        onNavigateToDetail = onNavigateToDetail,
+                        books = uiState.searchResults,
+                        hasNextPage = uiState.hasNextPage,
+                        onBookClick = { book ->
+                            onAction(SearchUiAction.OnBookClick(book))
+                        },
+                        onLoadMore = {
+                            onAction(SearchUiAction.OnLoadMore)
+                        },
                     )
                 }
             }
@@ -200,67 +202,55 @@ internal fun SearchHeader(
 
 @Composable
 internal fun SearchContent(
-    query: String,
-    sortType: SortType,
-    onNavigateToDetail: (BookUiModel) -> Unit,
+    books: ImmutableList<BookUiModel>,
+    hasNextPage: Boolean,
+    onBookClick: (BookUiModel) -> Unit,
+    onLoadMore: () -> Unit,
 ) {
-    val infiniteQuery = rememberInfiniteQuery(
-        key = SearchBooksQueryKey(
-            query = query,
-            sort = sortType.value,
-            size = 20,
-        )
-    )
+    if (books.isEmpty()) {
+        SearchEmptyContent()
+    } else {
+        val lazyListState = rememberLazyListState()
 
-    Await(infiniteQuery) { allBooksPages ->
-        val allBooks = allBooksPages.flatMap { it.data }
-        
-        if (allBooks.isEmpty()) {
-            SearchEmptyContent()
-        } else {
-            val lazyListState = rememberLazyListState()
-            
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                state = lazyListState,
-                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                items(
-                    items = allBooks,
-                    key = { it.isbn },
-                ) { book ->
-                    BookCard(
-                        book = book,
-                        onBookClick = { onNavigateToDetail(book) },
-                    )
-                }
-                
-                // Loading indicator for next page
-                val loadMoreParam = infiniteQuery.loadMoreParam
-                if (allBooks.isNotEmpty() && loadMoreParam != null) {
-                    item(contentType = "loading") {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator(
-                                color = Neutral500,
-                                modifier = Modifier.padding(16.dp)
-                            )
-                        }
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            state = lazyListState,
+            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            items(
+                items = books,
+                key = { it.isbn },
+            ) { book ->
+                BookCard(
+                    book = book,
+                    onBookClick = { onBookClick(book) },
+                )
+            }
+
+            // Loading indicator for next page
+            if (books.isNotEmpty() && hasNextPage) {
+                item(contentType = "loading") {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(
+                            color = Neutral500,
+                            modifier = Modifier.padding(16.dp)
+                        )
                     }
                 }
             }
-            
-            LazyLoad(
-                state = lazyListState,
-                loadMore = infiniteQuery.loadMore,
-                loadMoreParam = infiniteQuery.loadMoreParam
-            )
         }
+
+        LazyLoad(
+            state = lazyListState,
+            loadMore = { onLoadMore() },
+            loadMoreParam = if (hasNextPage) Unit else null
+        )
     }
 }
 

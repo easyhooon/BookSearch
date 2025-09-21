@@ -20,6 +20,10 @@ android {
             buildConfigField("String", "KAKAO_API_BASE_URL", getLocalProperty("KAKAO_API_BASE_URL"))
             buildConfigField("String", "KAKAO_REST_API_KEY", getLocalProperty("KAKAO_REST_API_KEY"))
         }
+        release {
+            buildConfigField("String", "KAKAO_API_BASE_URL", getLocalProperty("KAKAO_API_BASE_URL"))
+            buildConfigField("String", "KAKAO_REST_API_KEY", getLocalProperty("KAKAO_REST_API_KEY"))
+        }
     }
 }
 

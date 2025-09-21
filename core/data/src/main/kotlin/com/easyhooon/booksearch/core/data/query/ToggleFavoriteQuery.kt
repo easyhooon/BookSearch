@@ -15,9 +15,9 @@ data class ToggleFavoriteQueryKey(
 
     override val id: MutationId<Boolean, Unit> = MutationId(
         namespace = "toggle_favorite",
-        tags = arrayOf("${book.isbn}")
+        tags = arrayOf(book.isbn)
     )
-    
+
     override val mutate: suspend MutationReceiver.(variable: Unit) -> Boolean
         get() = { ToggleFavoriteQuery.instance.fetch(this@ToggleFavoriteQueryKey) }
 }
@@ -41,7 +41,7 @@ class ToggleFavoriteQuery @Inject constructor(
             thumbnail = key.book.thumbnail,
             status = key.book.status,
         )
-        
+
         // Simple toggle - if it's favorite, remove it; if not, add it
         return if (key.book.isFavorites) {
             favoritesDao.deleteFavorite(key.book.isbn)

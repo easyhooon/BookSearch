@@ -14,17 +14,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.input.TextFieldState
-import androidx.compose.foundation.text.input.clearText
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -33,7 +28,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.easyhooon.booksearch.core.common.model.BookUiModel
-import com.easyhooon.booksearch.core.data.query.GetFavoriteBooksQueryKey
 import com.easyhooon.booksearch.core.designsystem.DevicePreview
 import com.easyhooon.booksearch.core.designsystem.component.BookSearchTextField
 import com.easyhooon.booksearch.core.designsystem.theme.Black
@@ -46,12 +40,13 @@ import com.easyhooon.booksearch.core.designsystem.theme.body1Medium
 import com.easyhooon.booksearch.core.designsystem.theme.body1SemiBold
 import com.easyhooon.booksearch.core.ui.component.BookCard
 import com.easyhooon.booksearch.core.ui.component.BookSearchTopAppBar
+import com.easyhooon.booksearch.feature.favorites.presenter.FavoritesPresenter
+import com.easyhooon.booksearch.feature.favorites.presenter.FavoritesUiAction
+import com.easyhooon.booksearch.feature.favorites.presenter.FavoritesUiState
 import io.github.takahirom.rin.rememberRetained
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.ImmutableList
 import soil.plant.compose.reacty.ErrorBoundary
 import soil.plant.compose.reacty.Suspense
-import soil.query.compose.rememberQuery
 import com.easyhooon.booksearch.core.designsystem.R as designR
 
 enum class FavoritesSortType(val value: String, val label: String) {
@@ -59,10 +54,10 @@ enum class FavoritesSortType(val value: String, val label: String) {
     OLDEST("OLDEST", "오래된순"),
     PRICE_LOW_TO_HIGH("PRICE_LOW_TO_HIGH", "가격 낮은순"),
     PRICE_HIGH_TO_LOW("PRICE_HIGH_TO_LOW", "가격 높은순");
-    
+
     fun next(): FavoritesSortType = when (this) {
         LATEST -> OLDEST
-        OLDEST -> PRICE_LOW_TO_HIGH  
+        OLDEST -> PRICE_LOW_TO_HIGH
         PRICE_LOW_TO_HIGH -> PRICE_HIGH_TO_LOW
         PRICE_HIGH_TO_LOW -> LATEST
     }
@@ -74,11 +69,16 @@ internal fun FavoritesRoute(
     navigateToDetail: (BookUiModel) -> Unit,
 ) {
     val queryState = rememberRetained { TextFieldState() }
-    
+    val presenterState = FavoritesPresenter(
+        queryState = queryState,
+        onNavigateToDetail = navigateToDetail,
+    )
+
     FavoritesScreen(
         innerPadding = innerPadding,
         queryState = queryState,
-        onNavigateToDetail = navigateToDetail,
+        uiState = presenterState.uiState,
+        onAction = presenterState.onAction,
     )
 }
 
@@ -86,12 +86,9 @@ internal fun FavoritesRoute(
 internal fun FavoritesScreen(
     innerPadding: PaddingValues,
     queryState: TextFieldState,
-    onNavigateToDetail: (BookUiModel) -> Unit,
+    uiState: FavoritesUiState,
+    onAction: (FavoritesUiAction) -> Unit,
 ) {
-    var searchQuery by rememberRetained { mutableStateOf("") }
-    var sortType by rememberRetained { mutableStateOf(FavoritesSortType.LATEST) }
-    var isPriceFilterEnabled by rememberRetained { mutableStateOf(false) }
-    
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -99,25 +96,24 @@ internal fun FavoritesScreen(
             .background(Neutral100),
     ) {
         BookSearchTopAppBar(title = stringResource(id = designR.string.favorites_label))
-        
+
         FavoritesHeader(
             queryState = queryState,
-            sortLabel = sortType.label,
+            sortLabel = uiState.sortType.label,
             onSearchClick = {
-                searchQuery = queryState.text.toString()
+                onAction(FavoritesUiAction.OnSearchClick)
             },
             onClearClick = {
-                queryState.clearText()
-                searchQuery = ""
+                onAction(FavoritesUiAction.OnClearClick)
             },
             onFilterClick = {
-                isPriceFilterEnabled = !isPriceFilterEnabled
+                onAction(FavoritesUiAction.OnFilterClick)
             },
             onSortClick = {
-                sortType = sortType.next()
+                onAction(FavoritesUiAction.OnSortClick)
             },
         )
-        
+
         ErrorBoundary(
             fallback = { context ->
                 FavoritesErrorContent(onRetry = { context.reset?.invoke() })
@@ -129,10 +125,14 @@ internal fun FavoritesScreen(
                 }
             ) {
                 FavoritesContent(
-                    query = searchQuery,
-                    sortType = sortType,
-                    isPriceFilterEnabled = isPriceFilterEnabled,
-                    onNavigateToDetail = onNavigateToDetail,
+                    books = uiState.favoriteBooks,
+                    isPriceFilterEnabled = uiState.isPriceFilterEnabled,
+                    onBookClick = { book ->
+                        onAction(FavoritesUiAction.OnBookClick(book))
+                    },
+                    onFavoriteToggle = { book ->
+                        onAction(FavoritesUiAction.OnFavoriteToggle(book))
+                    },
                 )
             }
         }
@@ -230,23 +230,11 @@ internal fun FavoritesHeader(
 
 @Composable
 internal fun FavoritesContent(
-    query: String,
-    sortType: FavoritesSortType,
+    books: ImmutableList<BookUiModel>,
     isPriceFilterEnabled: Boolean,
-    onNavigateToDetail: (BookUiModel) -> Unit,
+    onBookClick: (BookUiModel) -> Unit,
+    onFavoriteToggle: (BookUiModel) -> Unit,
 ) {
-    val favoritesQuery = rememberQuery<List<BookUiModel>>(
-        key = GetFavoriteBooksQueryKey(
-            query = query,
-            sortType = sortType.value,
-            isPriceFilterEnabled = isPriceFilterEnabled,
-        )
-    )
-    
-    // We'll handle toggle favorite in each BookCard individually
-    
-    val books = favoritesQuery.data?.toImmutableList() ?: persistentListOf()
-    
     if (books.isEmpty()) {
         FavoritesEmptyContent()
     } else {
@@ -262,11 +250,11 @@ internal fun FavoritesContent(
                 BookCard(
                     book = books[index],
                     onBookClick = { book ->
-                        onNavigateToDetail(book)
+                        onBookClick(book)
                     },
                     isPriceFilterEnabled = isPriceFilterEnabled,
                     onFavoritesClick = { book ->
-                        // TODO: Handle favorite toggle
+                        onFavoriteToggle(book)
                     },
                 )
             }
@@ -335,7 +323,8 @@ private fun FavoritesScreenPreview() {
         FavoritesScreen(
             innerPadding = PaddingValues(),
             queryState = TextFieldState(),
-            onNavigateToDetail = {},
+            uiState = FavoritesUiState(),
+            onAction = {},
         )
     }
 }

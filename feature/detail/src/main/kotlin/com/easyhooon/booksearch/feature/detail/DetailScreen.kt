@@ -15,10 +15,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
@@ -41,6 +37,9 @@ import com.easyhooon.booksearch.core.designsystem.theme.Neutral600
 import com.easyhooon.booksearch.core.designsystem.theme.body1Medium
 import com.easyhooon.booksearch.core.designsystem.theme.heading1Bold
 import com.easyhooon.booksearch.core.ui.component.BookSearchTopAppBar
+import com.easyhooon.booksearch.feature.detail.presenter.DetailPresenter
+import com.easyhooon.booksearch.feature.detail.presenter.DetailUiAction
+import com.easyhooon.booksearch.feature.detail.presenter.DetailUiState
 
 @Composable
 internal fun DetailRoute(
@@ -48,23 +47,28 @@ internal fun DetailRoute(
     innerPadding: PaddingValues,
     popBackStack: () -> Unit,
 ) {
+    val context = LocalContext.current
+    val presenterState = DetailPresenter(
+        initialBook = book,
+        onNavigateBack = popBackStack,
+        onShowToast = { message ->
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+        },
+    )
+
     DetailScreen(
-        book = book,
         innerPadding = innerPadding,
-        onBack = popBackStack,
+        uiState = presenterState.uiState,
+        onAction = presenterState.onAction,
     )
 }
 
 @Composable
 internal fun DetailScreen(
-    book: BookUiModel,
     innerPadding: PaddingValues,
-    onBack: () -> Unit,
+    uiState: DetailUiState,
+    onAction: (DetailUiAction) -> Unit,
 ) {
-    var currentBook by remember { mutableStateOf(book) }
-    val context = LocalContext.current
-
-    // Simple toggle without Soil mutation - just UI state change
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -72,22 +76,16 @@ internal fun DetailScreen(
     ) {
         BookSearchTopAppBar(
             startIconRes = designR.drawable.ic_chevron_left,
-            startIconOnClick = onBack,
-            endIconRes = if (currentBook.isFavorites) designR.drawable.ic_favorite_filled_red
+            startIconOnClick = {
+                onAction(DetailUiAction.OnBackClick)
+            },
+            endIconRes = if (uiState.book.isFavorites) designR.drawable.ic_favorite_filled_red
             else designR.drawable.ic_selected_favorites,
             endIconOnClick = {
-                val newFavoriteStatus = !currentBook.isFavorites
-                currentBook = currentBook.copy(isFavorites = newFavoriteStatus)
-
-                val message = if (newFavoriteStatus) {
-                    context.getString(R.string.insert_favorites)
-                } else {
-                    context.getString(R.string.delete_favorites)
-                }
-                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                onAction(DetailUiAction.OnFavoriteClick)
             },
         )
-        DetailContent(book = currentBook)
+        DetailContent(book = uiState.book)
     }
 }
 
@@ -233,9 +231,11 @@ internal fun DetailContent(
 private fun DetailScreenPreview() {
     BookSearchTheme {
         DetailScreen(
-            book = BookUiModel(),
             innerPadding = PaddingValues(),
-            onBack = {},
+            uiState = DetailUiState(
+                book = BookUiModel()
+            ),
+            onAction = {},
         )
     }
 }
