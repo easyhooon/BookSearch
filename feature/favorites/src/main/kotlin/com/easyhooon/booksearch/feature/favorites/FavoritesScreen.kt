@@ -75,7 +75,7 @@ internal fun FavoritesRoute(
 ) {
     val queryState = rememberRetained { TextFieldState() }
     
-    SuspenseFavoritesScreen(
+    FavoritesScreen(
         innerPadding = innerPadding,
         queryState = queryState,
         onNavigateToDetail = navigateToDetail,
@@ -83,7 +83,7 @@ internal fun FavoritesRoute(
 }
 
 @Composable
-internal fun SuspenseFavoritesScreen(
+internal fun FavoritesScreen(
     innerPadding: PaddingValues,
     queryState: TextFieldState,
     onNavigateToDetail: (BookUiModel) -> Unit,
@@ -100,7 +100,7 @@ internal fun SuspenseFavoritesScreen(
     ) {
         BookSearchTopAppBar(title = stringResource(id = designR.string.favorites_label))
         
-        SuspenseFavoritesHeader(
+        FavoritesHeader(
             queryState = queryState,
             sortLabel = sortType.label,
             onSearchClick = {
@@ -120,15 +120,15 @@ internal fun SuspenseFavoritesScreen(
         
         ErrorBoundary(
             fallback = { context ->
-                SuspenseFavoritesErrorContent(onRetry = { context.reset?.invoke() })
+                FavoritesErrorContent(onRetry = { context.reset?.invoke() })
             }
         ) {
             Suspense(
                 fallback = {
-                    SuspenseFavoritesLoadingContent()
+                    FavoritesLoadingContent()
                 }
             ) {
-                SuspenseFavoritesContent(
+                FavoritesContent(
                     query = searchQuery,
                     sortType = sortType,
                     isPriceFilterEnabled = isPriceFilterEnabled,
@@ -140,7 +140,7 @@ internal fun SuspenseFavoritesScreen(
 }
 
 @Composable
-internal fun SuspenseFavoritesHeader(
+internal fun FavoritesHeader(
     queryState: TextFieldState,
     sortLabel: String,
     onSearchClick: () -> Unit,
@@ -229,7 +229,7 @@ internal fun SuspenseFavoritesHeader(
 }
 
 @Composable
-internal fun SuspenseFavoritesContent(
+internal fun FavoritesContent(
     query: String,
     sortType: FavoritesSortType,
     isPriceFilterEnabled: Boolean,
@@ -248,7 +248,7 @@ internal fun SuspenseFavoritesContent(
     val books = favoritesQuery.data?.toImmutableList() ?: persistentListOf()
     
     if (books.isEmpty()) {
-        SuspenseFavoritesEmptyContent()
+        FavoritesEmptyContent()
     } else {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
@@ -275,7 +275,7 @@ internal fun SuspenseFavoritesContent(
 }
 
 @Composable
-private fun SuspenseFavoritesLoadingContent() {
+private fun FavoritesLoadingContent() {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
@@ -285,7 +285,7 @@ private fun SuspenseFavoritesLoadingContent() {
 }
 
 @Composable
-private fun SuspenseFavoritesErrorContent(onRetry: () -> Unit) {
+private fun FavoritesErrorContent(onRetry: () -> Unit) {
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
@@ -315,7 +315,7 @@ private fun SuspenseFavoritesErrorContent(onRetry: () -> Unit) {
 }
 
 @Composable
-private fun SuspenseFavoritesEmptyContent() {
+private fun FavoritesEmptyContent() {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
@@ -330,9 +330,9 @@ private fun SuspenseFavoritesEmptyContent() {
 
 @DevicePreview
 @Composable
-private fun SuspenseFavoritesScreenPreview() {
+private fun FavoritesScreenPreview() {
     BookSearchTheme {
-        SuspenseFavoritesScreen(
+        FavoritesScreen(
             innerPadding = PaddingValues(),
             queryState = TextFieldState(),
             onNavigateToDetail = {},

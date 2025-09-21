@@ -48,7 +48,7 @@ internal fun DetailRoute(
     innerPadding: PaddingValues,
     popBackStack: () -> Unit,
 ) {
-    SuspenseDetailScreen(
+    DetailScreen(
         book = book,
         innerPadding = innerPadding,
         onBack = popBackStack,
@@ -56,7 +56,7 @@ internal fun DetailRoute(
 }
 
 @Composable
-internal fun SuspenseDetailScreen(
+internal fun DetailScreen(
     book: BookUiModel,
     innerPadding: PaddingValues,
     onBack: () -> Unit,
@@ -87,12 +87,12 @@ internal fun SuspenseDetailScreen(
                 Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
             },
         )
-        SuspenseDetailContent(book = currentBook)
+        DetailContent(book = currentBook)
     }
 }
 
 @Composable
-internal fun SuspenseDetailContent(
+internal fun DetailContent(
     book: BookUiModel,
     modifier: Modifier = Modifier,
 ) {
@@ -230,9 +230,9 @@ internal fun SuspenseDetailContent(
 
 @DevicePreview
 @Composable
-private fun SuspenseDetailScreenPreview() {
+private fun DetailScreenPreview() {
     BookSearchTheme {
-        SuspenseDetailScreen(
+        DetailScreen(
             book = BookUiModel(),
             innerPadding = PaddingValues(),
             onBack = {},

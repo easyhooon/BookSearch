@@ -74,7 +74,7 @@ internal fun SearchRoute(
 ) {
     val queryState = rememberRetained { TextFieldState() }
 
-    SuspenseSearchScreen(
+    SearchScreen(
         innerPadding = innerPadding,
         queryState = queryState,
         onNavigateToDetail = navigateToDetail,
@@ -82,7 +82,7 @@ internal fun SearchRoute(
 }
 
 @Composable
-internal fun SuspenseSearchScreen(
+internal fun SearchScreen(
     innerPadding: PaddingValues,
     queryState: TextFieldState,
     onNavigateToDetail: (BookUiModel) -> Unit,
@@ -98,7 +98,7 @@ internal fun SuspenseSearchScreen(
     ) {
         BookSearchTopAppBar(title = stringResource(designR.string.search_label))
 
-        SuspenseSearchHeader(
+        SearchHeader(
             queryState = queryState,
             sortLabel = sortType.displayName,
             onSearchClick = { query ->
@@ -116,15 +116,15 @@ internal fun SuspenseSearchScreen(
         if (currentQuery.isNotEmpty()) {
             ErrorBoundary(
                 fallback = { context ->
-                    SuspenseSearchErrorContent(onRetry = { context.reset?.invoke() })
+                    SearchErrorContent(onRetry = { context.reset?.invoke() })
                 }
             ) {
                 Suspense(
                     fallback = {
-                        SuspenseSearchLoadingContent()
+                        SearchLoadingContent()
                     }
                 ) {
-                    SuspenseSearchContent(
+                    SearchContent(
                         query = currentQuery,
                         sortType = sortType,
                         onNavigateToDetail = onNavigateToDetail,
@@ -132,13 +132,13 @@ internal fun SuspenseSearchScreen(
                 }
             }
         } else {
-            SuspenseSearchIdleContent()
+            SearchIdleContent()
         }
     }
 }
 
 @Composable
-internal fun SuspenseSearchHeader(
+internal fun SearchHeader(
     queryState: TextFieldState,
     sortLabel: String,
     onSearchClick: (String) -> Unit,
@@ -199,7 +199,7 @@ internal fun SuspenseSearchHeader(
 }
 
 @Composable
-internal fun SuspenseSearchContent(
+internal fun SearchContent(
     query: String,
     sortType: SortType,
     onNavigateToDetail: (BookUiModel) -> Unit,
@@ -216,7 +216,7 @@ internal fun SuspenseSearchContent(
         val allBooks = allBooksPages.flatMap { it.data }
         
         if (allBooks.isEmpty()) {
-            SuspenseSearchEmptyContent()
+            SearchEmptyContent()
         } else {
             val lazyListState = rememberLazyListState()
             
@@ -265,7 +265,7 @@ internal fun SuspenseSearchContent(
 }
 
 @Composable
-private fun SuspenseSearchLoadingContent() {
+private fun SearchLoadingContent() {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
@@ -275,7 +275,7 @@ private fun SuspenseSearchLoadingContent() {
 }
 
 @Composable
-private fun SuspenseSearchErrorContent(onRetry: () -> Unit) {
+private fun SearchErrorContent(onRetry: () -> Unit) {
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
@@ -305,7 +305,7 @@ private fun SuspenseSearchErrorContent(onRetry: () -> Unit) {
 }
 
 @Composable
-private fun SuspenseSearchEmptyContent() {
+private fun SearchEmptyContent() {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
@@ -319,7 +319,7 @@ private fun SuspenseSearchEmptyContent() {
 }
 
 @Composable
-private fun SuspenseSearchIdleContent() {
+private fun SearchIdleContent() {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
@@ -334,7 +334,7 @@ private fun SuspenseSearchIdleContent() {
 
 @DevicePreview
 @Composable
-private fun SuspenseSearchScreenPreview() {
+private fun SearchScreenPreview() {
     BookSearchTheme {
         // Preview implementation would go here
     }
