@@ -29,7 +29,7 @@ fun NavGraphBuilder.detailGraph(
         val detailScreenContext = remember {
             EntryPointAccessors.fromApplication(
                 context,
-                DetailScreenContextEntryPoint::class.java
+                DetailScreenContextEntryPoint::class.java,
             ).detailScreenContext()
         }
 

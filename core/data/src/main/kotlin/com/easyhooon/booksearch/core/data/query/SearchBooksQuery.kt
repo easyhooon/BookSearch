@@ -3,17 +3,14 @@ package com.easyhooon.booksearch.core.data.query
 import android.util.Log
 import com.easyhooon.booksearch.core.common.model.BookUiModel
 import com.easyhooon.booksearch.core.network.client.BookSearchKtorClient
-import soil.query.InfiniteQueryId
-import soil.query.InfiniteQueryKey
-import soil.query.QueryChunks
-import soil.query.QueryReceiver
-import soil.query.QueryId
-import soil.query.QueryKey
-import soil.query.buildInfiniteQueryKey
 import javax.inject.Inject
 import javax.inject.Singleton
+import soil.query.InfiniteQueryId
+import soil.query.InfiniteQueryKey
+import soil.query.buildInfiniteQueryKey
+
 data class SearchBooksPageParam(
-    val page: Int
+    val page: Int,
 )
 
 @Singleton
@@ -27,12 +24,12 @@ class DefaultSearchBooksQueryKey @Inject constructor(
     ): InfiniteQueryKey<List<BookUiModel>, SearchBooksPageParam> = buildInfiniteQueryKey(
         id = InfiniteQueryId(
             namespace = "search_books",
-            tags = arrayOf("$query:$sort:$size")
+            tags = arrayOf("$query:$sort:$size"),
         ),
         initialParam = { SearchBooksPageParam(1) },
-        fetch = { pageParam -> 
+        fetch = { pageParam ->
             Log.d("SearchBooksQuery", "fetch called with query='$query', sort='$sort', page=${pageParam.page}, size=$size")
-            
+
             if (query.isBlank()) {
                 Log.d("SearchBooksQuery", "Query is blank, returning empty list")
                 emptyList()
@@ -42,11 +39,11 @@ class DefaultSearchBooksQueryKey @Inject constructor(
                     query = query,
                     sort = sort,
                     page = pageParam.page,
-                    size = size
+                    size = size,
                 )
-                
+
                 Log.d("SearchBooksQuery", "API response received: ${response.documents.size} documents")
-                
+
                 response.documents.map { bookResponse ->
                     BookUiModel(
                         isbn = bookResponse.isbn,
@@ -74,7 +71,6 @@ class DefaultSearchBooksQueryKey @Inject constructor(
             } else {
                 null
             }
-        }
+        },
     )
 }
-

@@ -18,13 +18,13 @@ class DefaultToggleFavoriteQueryKey @Inject constructor(
     fun create(book: BookUiModel): ToggleFavoriteQueryKey = object : MutationKey<Boolean, Unit> {
         override val id: MutationId<Boolean, Unit> = MutationId(
             namespace = "toggle_favorite",
-            tags = arrayOf(book.isbn)
+            tags = arrayOf(book.isbn),
         )
 
         override val mutate: suspend MutationReceiver.(variable: Unit) -> Boolean
             get() = { toggleFavorite(book) }
     }
-    
+
     private suspend fun toggleFavorite(book: BookUiModel): Boolean {
         val bookEntity = BookEntity(
             isbn = book.isbn,
@@ -50,5 +50,4 @@ class DefaultToggleFavoriteQueryKey @Inject constructor(
             true // Successfully added
         }
     }
-
 }

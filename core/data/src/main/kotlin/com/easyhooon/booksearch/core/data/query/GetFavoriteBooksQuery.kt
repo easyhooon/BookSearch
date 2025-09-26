@@ -22,57 +22,56 @@ class DefaultGetFavoriteBooksQueryKey @Inject constructor(
     ): GetFavoriteBooksQueryKey = object : QueryKey<List<BookUiModel>> {
         override val id: QueryId<List<BookUiModel>> = QueryId(
             namespace = "favorite_books",
-            tags = arrayOf("$query:$sortType:$isPriceFilterEnabled")
+            tags = arrayOf("$query:$sortType:$isPriceFilterEnabled"),
         )
-        
+
         override val fetch: suspend QueryReceiver.() -> List<BookUiModel>
             get() = { fetchFavorites(query, sortType, isPriceFilterEnabled) }
     }
-    
+
     private suspend fun fetchFavorites(
         query: String,
-        sortType: String, 
-        isPriceFilterEnabled: Boolean
+        sortType: String,
+        isPriceFilterEnabled: Boolean,
     ): List<BookUiModel> {
         return if (query.isNotEmpty()) {
             favoritesDao.searchFavoritesByTitle(query).first()
         } else {
             favoritesDao.getAllFavorites().first()
         }.let { books ->
-                var filteredBooks = books
-                
-                // Apply price filter (if enabled, filter out books with price = 0 or empty)
-                if (isPriceFilterEnabled) {
-                    filteredBooks = filteredBooks.filter { 
-                        it.price.isNotEmpty() && it.price != "0" 
-                    }
-                }
-                
-                // Apply sorting
-                when (sortType) {
-                    "LATEST" -> filteredBooks.sortedByDescending { it.datetime }
-                    "OLDEST" -> filteredBooks.sortedBy { it.datetime }
-                    "PRICE_LOW_TO_HIGH" -> filteredBooks.sortedBy { it.price.toIntOrNull() ?: 0 }
-                    "PRICE_HIGH_TO_LOW" -> filteredBooks.sortedByDescending { it.price.toIntOrNull() ?: 0 }
-                    else -> filteredBooks
-                }
-            }.map { bookEntity ->
-                BookUiModel(
-                    isbn = bookEntity.isbn,
-                    title = bookEntity.title,
-                    contents = bookEntity.contents,
-                    url = bookEntity.url,
-                    datetime = bookEntity.datetime,
-                    authors = bookEntity.authors,
-                    publisher = bookEntity.publisher,
-                    translators = bookEntity.translators,
-                    price = bookEntity.price,
-                    salePrice = bookEntity.salePrice,
-                    thumbnail = bookEntity.thumbnail,
-                    status = bookEntity.status,
-                    isFavorites = true, // All favorites are favorite by definition
-                )
-            }
-    }
+            var filteredBooks = books
 
+            // Apply price filter (if enabled, filter out books with price = 0 or empty)
+            if (isPriceFilterEnabled) {
+                filteredBooks = filteredBooks.filter {
+                    it.price.isNotEmpty() && it.price != "0"
+                }
+            }
+
+            // Apply sorting
+            when (sortType) {
+                "LATEST" -> filteredBooks.sortedByDescending { it.datetime }
+                "OLDEST" -> filteredBooks.sortedBy { it.datetime }
+                "PRICE_LOW_TO_HIGH" -> filteredBooks.sortedBy { it.price.toIntOrNull() ?: 0 }
+                "PRICE_HIGH_TO_LOW" -> filteredBooks.sortedByDescending { it.price.toIntOrNull() ?: 0 }
+                else -> filteredBooks
+            }
+        }.map { bookEntity ->
+            BookUiModel(
+                isbn = bookEntity.isbn,
+                title = bookEntity.title,
+                contents = bookEntity.contents,
+                url = bookEntity.url,
+                datetime = bookEntity.datetime,
+                authors = bookEntity.authors,
+                publisher = bookEntity.publisher,
+                translators = bookEntity.translators,
+                price = bookEntity.price,
+                salePrice = bookEntity.salePrice,
+                thumbnail = bookEntity.thumbnail,
+                status = bookEntity.status,
+                isFavorites = true, // All favorites are favorite by definition
+            )
+        }
+    }
 }

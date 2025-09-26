@@ -38,7 +38,6 @@ import com.easyhooon.booksearch.core.ui.component.BookSearchTopAppBar
 import com.easyhooon.booksearch.feature.detail.presenter.DetailUiAction
 import com.easyhooon.booksearch.feature.detail.presenter.DetailUiState
 
-
 @Composable
 internal fun DetailScreen(
     innerPadding: PaddingValues,
@@ -201,7 +200,6 @@ internal fun DetailContent(
     }
 }
 
-
 @DevicePreview
 @Composable
 private fun DetailScreenPreview() {
@@ -209,7 +207,7 @@ private fun DetailScreenPreview() {
         DetailScreen(
             innerPadding = PaddingValues(),
             uiState = DetailUiState(
-                book = BookUiModel()
+                book = BookUiModel(),
             ),
             onAction = {},
         )

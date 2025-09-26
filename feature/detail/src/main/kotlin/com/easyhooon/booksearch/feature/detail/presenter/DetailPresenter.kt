@@ -42,13 +42,11 @@ fun DetailPresenter(
     var currentBook by rememberRetained { mutableStateOf(initialBook) }
     val coroutineScope = rememberCoroutineScope()
 
-
     // 즐겨찾기 토글 Mutation
     var toggleMutationKey by remember { mutableStateOf<ToggleFavoriteQueryKey?>(null) }
     val toggleFavoriteMutation = toggleMutationKey?.let { key ->
         rememberMutation(key = key)
     }
-
 
     val onAction: (DetailUiAction) -> Unit = remember(currentBook) {
         { action ->
@@ -56,17 +54,18 @@ fun DetailPresenter(
                 is DetailUiAction.OnBackClick -> {
                     eventFlow.tryEmit(DetailUiEvent.NavigateBack)
                 }
+
                 is DetailUiAction.OnFavoriteClick -> {
                     // Optimistic update
                     val newFavoriteStatus = !currentBook.isFavorites
                     currentBook = currentBook.copy(isFavorites = newFavoriteStatus)
-                    
+
                     // Room 데이터베이스에 실제 변경사항 적용 (비동기)
                     coroutineScope.launch {
                         toggleMutationKey = context.createToggleFavoriteQueryKey(currentBook)
                         toggleFavoriteMutation?.mutateAsync(Unit)
                     }
-                    
+
                     val message = if (newFavoriteStatus) {
                         "즐겨찾기에 추가되었습니다"
                     } else {
@@ -90,5 +89,5 @@ fun DetailPresenter(
 
 @Composable
 private inline fun providePresenterDefaults(
-    content: @Composable () -> DetailPresenterState
+    content: @Composable () -> DetailPresenterState,
 ): DetailPresenterState = content()
