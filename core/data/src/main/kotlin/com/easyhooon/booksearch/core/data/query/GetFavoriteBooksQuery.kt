@@ -9,42 +9,47 @@ import soil.query.QueryReceiver
 import javax.inject.Inject
 import javax.inject.Singleton
 
-data class GetFavoriteBooksQueryKey(
-    val query: String = "",
-    val sortType: String = "LATEST",
-    val isPriceFilterEnabled: Boolean = false,
-) : QueryKey<List<BookUiModel>> {
-
-    override val id: QueryId<List<BookUiModel>> = QueryId(
-        namespace = "favorite_books",
-        tags = arrayOf("$query:$sortType:$isPriceFilterEnabled")
-    )
-    
-    override val fetch: suspend QueryReceiver.() -> List<BookUiModel>
-        get() = { GetFavoriteBooksQuery.instance.fetch(this@GetFavoriteBooksQueryKey) }
-}
+typealias GetFavoriteBooksQueryKey = QueryKey<List<BookUiModel>>
 
 @Singleton
-class GetFavoriteBooksQuery @Inject constructor(
+class DefaultGetFavoriteBooksQueryKey @Inject constructor(
     private val favoritesDao: FavoritesDao,
 ) {
-    suspend fun fetch(key: GetFavoriteBooksQueryKey): List<BookUiModel> {
-        return if (key.query.isNotEmpty()) {
-            favoritesDao.searchFavoritesByTitle(key.query).first()
+    fun create(
+        query: String = "",
+        sortType: String = "LATEST",
+        isPriceFilterEnabled: Boolean = false,
+    ): GetFavoriteBooksQueryKey = object : QueryKey<List<BookUiModel>> {
+        override val id: QueryId<List<BookUiModel>> = QueryId(
+            namespace = "favorite_books",
+            tags = arrayOf("$query:$sortType:$isPriceFilterEnabled")
+        )
+        
+        override val fetch: suspend QueryReceiver.() -> List<BookUiModel>
+            get() = { fetchFavorites(query, sortType, isPriceFilterEnabled) }
+    }
+    
+    private suspend fun fetchFavorites(
+        query: String,
+        sortType: String, 
+        isPriceFilterEnabled: Boolean
+    ): List<BookUiModel> {
+        return if (query.isNotEmpty()) {
+            favoritesDao.searchFavoritesByTitle(query).first()
         } else {
             favoritesDao.getAllFavorites().first()
         }.let { books ->
                 var filteredBooks = books
                 
                 // Apply price filter (if enabled, filter out books with price = 0 or empty)
-                if (key.isPriceFilterEnabled) {
+                if (isPriceFilterEnabled) {
                     filteredBooks = filteredBooks.filter { 
                         it.price.isNotEmpty() && it.price != "0" 
                     }
                 }
                 
                 // Apply sorting
-                when (key.sortType) {
+                when (sortType) {
                     "LATEST" -> filteredBooks.sortedByDescending { it.datetime }
                     "OLDEST" -> filteredBooks.sortedBy { it.datetime }
                     "PRICE_LOW_TO_HIGH" -> filteredBooks.sortedBy { it.price.toIntOrNull() ?: 0 }
@@ -70,7 +75,4 @@ class GetFavoriteBooksQuery @Inject constructor(
             }
     }
 
-    companion object {
-        lateinit var instance: GetFavoriteBooksQuery
-    }
 }

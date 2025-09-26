@@ -10,15 +10,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import android.util.Log
 import com.easyhooon.booksearch.core.common.compose.EventEffect
-import com.easyhooon.booksearch.core.common.compose.rememberEventFlow
 import com.easyhooon.booksearch.core.common.model.BookUiModel
-import com.easyhooon.booksearch.core.data.query.DefaultSearchBooksQueryKey
 import com.easyhooon.booksearch.feature.search.SearchScreenContext
 import com.easyhooon.booksearch.feature.search.SortType
 import io.github.takahirom.rin.rememberRetained
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import soil.query.compose.rememberInfiniteQuery
 
@@ -46,23 +45,22 @@ data class SearchPresenterState(
     val onAction: (SearchUiAction) -> Unit,
 )
 
-context(searchScreenContext: SearchScreenContext)
+context(context: SearchScreenContext)
 @Composable
 fun SearchPresenter(
-    queryState: TextFieldState = rememberRetained { TextFieldState() },
-    onNavigateToDetail: (BookUiModel) -> Unit,
+    queryState: TextFieldState,
+    eventFlow: MutableSharedFlow<SearchUiEvent>,
 ): SearchPresenterState = providePresenterDefaults {
     var currentQuery by rememberRetained { mutableStateOf("") }
     var sortType by rememberRetained { mutableStateOf(SortType.ACCURACY) }
     val coroutineScope = rememberCoroutineScope()
 
-    val eventFlow = rememberEventFlow<SearchUiEvent>()
 
     // API 호출 - InfiniteQuery로 검색 결과 가져오기 (쿼리가 있을 때만)
     val infiniteQuery = if (currentQuery.isNotEmpty()) {
         Log.d("SearchPresenter", "Creating InfiniteQuery for query: $currentQuery")
         rememberInfiniteQuery(
-            key = searchScreenContext.searchBooksQueryKey.create(
+            key = context.searchBooksQueryKey.create(
                 query = currentQuery,
                 sort = sortType.value,
                 size = 20,
@@ -77,13 +75,6 @@ fun SearchPresenter(
     val searchResults = infiniteQuery?.data?.flatMap { it.data }?.toImmutableList() ?: persistentListOf()
     val hasNextPage = infiniteQuery?.loadMoreParam != null
 
-    EventEffect(eventFlow) { event ->
-        when (event) {
-            is SearchUiEvent.NavigateToDetail -> {
-                onNavigateToDetail(event.book)
-            }
-        }
-    }
 
     val onAction: (SearchUiAction) -> Unit = remember(currentQuery, sortType, infiniteQuery) {
         { action ->

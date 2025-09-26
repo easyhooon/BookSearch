@@ -40,10 +40,8 @@ import com.easyhooon.booksearch.core.designsystem.theme.body1Medium
 import com.easyhooon.booksearch.core.designsystem.theme.body1SemiBold
 import com.easyhooon.booksearch.core.ui.component.BookCard
 import com.easyhooon.booksearch.core.ui.component.BookSearchTopAppBar
-import com.easyhooon.booksearch.feature.favorites.presenter.FavoritesPresenter
 import com.easyhooon.booksearch.feature.favorites.presenter.FavoritesUiAction
 import com.easyhooon.booksearch.feature.favorites.presenter.FavoritesUiState
-import io.github.takahirom.rin.rememberRetained
 import kotlinx.collections.immutable.ImmutableList
 import soil.plant.compose.reacty.ErrorBoundary
 import soil.plant.compose.reacty.Suspense
@@ -63,24 +61,6 @@ enum class FavoritesSortType(val value: String, val label: String) {
     }
 }
 
-@Composable
-internal fun FavoritesRoute(
-    innerPadding: PaddingValues,
-    navigateToDetail: (BookUiModel) -> Unit,
-) {
-    val queryState = rememberRetained { TextFieldState() }
-    val presenterState = FavoritesPresenter(
-        queryState = queryState,
-        onNavigateToDetail = navigateToDetail,
-    )
-
-    FavoritesScreen(
-        innerPadding = innerPadding,
-        queryState = queryState,
-        uiState = presenterState.uiState,
-        onAction = presenterState.onAction,
-    )
-}
 
 @Composable
 internal fun FavoritesScreen(

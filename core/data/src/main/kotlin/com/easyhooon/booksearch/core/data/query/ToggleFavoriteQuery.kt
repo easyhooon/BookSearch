@@ -9,42 +9,41 @@ import soil.query.MutationReceiver
 import javax.inject.Inject
 import javax.inject.Singleton
 
-data class ToggleFavoriteQueryKey(
-    val book: BookUiModel,
-) : MutationKey<Boolean, Unit> {
-
-    override val id: MutationId<Boolean, Unit> = MutationId(
-        namespace = "toggle_favorite",
-        tags = arrayOf(book.isbn)
-    )
-
-    override val mutate: suspend MutationReceiver.(variable: Unit) -> Boolean
-        get() = { ToggleFavoriteQuery.instance.fetch(this@ToggleFavoriteQueryKey) }
-}
+typealias ToggleFavoriteQueryKey = MutationKey<Boolean, Unit>
 
 @Singleton
-class ToggleFavoriteQuery @Inject constructor(
+class DefaultToggleFavoriteQueryKey @Inject constructor(
     private val favoritesDao: FavoritesDao,
 ) {
-    suspend fun fetch(key: ToggleFavoriteQueryKey): Boolean {
+    fun create(book: BookUiModel): ToggleFavoriteQueryKey = object : MutationKey<Boolean, Unit> {
+        override val id: MutationId<Boolean, Unit> = MutationId(
+            namespace = "toggle_favorite",
+            tags = arrayOf(book.isbn)
+        )
+
+        override val mutate: suspend MutationReceiver.(variable: Unit) -> Boolean
+            get() = { toggleFavorite(book) }
+    }
+    
+    private suspend fun toggleFavorite(book: BookUiModel): Boolean {
         val bookEntity = BookEntity(
-            isbn = key.book.isbn,
-            title = key.book.title,
-            contents = key.book.contents,
-            url = key.book.url,
-            datetime = key.book.datetime,
-            authors = key.book.authors,
-            publisher = key.book.publisher,
-            translators = key.book.translators,
-            price = key.book.price,
-            salePrice = key.book.salePrice,
-            thumbnail = key.book.thumbnail,
-            status = key.book.status,
+            isbn = book.isbn,
+            title = book.title,
+            contents = book.contents,
+            url = book.url,
+            datetime = book.datetime,
+            authors = book.authors,
+            publisher = book.publisher,
+            translators = book.translators,
+            price = book.price,
+            salePrice = book.salePrice,
+            thumbnail = book.thumbnail,
+            status = book.status,
         )
 
         // Simple toggle - if it's favorite, remove it; if not, add it
-        return if (key.book.isFavorites) {
-            favoritesDao.deleteFavorite(key.book.isbn)
+        return if (book.isFavorites) {
+            favoritesDao.deleteFavorite(book.isbn)
             false // Successfully removed
         } else {
             favoritesDao.insertFavorite(bookEntity)
@@ -52,7 +51,4 @@ class ToggleFavoriteQuery @Inject constructor(
         }
     }
 
-    companion object {
-        lateinit var instance: ToggleFavoriteQuery
-    }
 }

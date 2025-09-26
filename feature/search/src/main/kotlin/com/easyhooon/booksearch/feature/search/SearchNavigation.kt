@@ -28,10 +28,11 @@ fun NavGraphBuilder.searchGraph(
             ).searchScreenContext()
         }
         
-        SearchRoute(
-            innerPadding = innerPadding,
-            searchScreenContext = searchScreenContext,
-            navigateToDetail = navigateToDetail,
-        )
+        with(searchScreenContext) {
+            SearchScreenRoot(
+                innerPadding = innerPadding,
+                onBookClick = navigateToDetail,
+            )
+        }
     }
 }

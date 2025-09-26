@@ -6,11 +6,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import com.easyhooon.booksearch.core.common.compose.EventEffect
-import com.easyhooon.booksearch.core.common.compose.rememberEventFlow
 import com.easyhooon.booksearch.core.common.model.BookUiModel
 import com.easyhooon.booksearch.core.data.query.ToggleFavoriteQueryKey
+import com.easyhooon.booksearch.feature.detail.DetailScreenContext
 import io.github.takahirom.rin.rememberRetained
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import soil.query.compose.rememberMutation
 
@@ -33,32 +33,22 @@ data class DetailPresenterState(
     val onAction: (DetailUiAction) -> Unit,
 )
 
+context(context: DetailScreenContext)
 @Composable
 fun DetailPresenter(
     initialBook: BookUiModel,
-    onNavigateBack: () -> Unit,
-    onShowToast: (String) -> Unit,
-): DetailPresenterState {
+    eventFlow: MutableSharedFlow<DetailUiEvent>,
+): DetailPresenterState = providePresenterDefaults {
     var currentBook by rememberRetained { mutableStateOf(initialBook) }
     val coroutineScope = rememberCoroutineScope()
 
-    val eventFlow = rememberEventFlow<DetailUiEvent>()
 
-    // 즐겨찾기 토글 Mutation  
-    val toggleFavoriteMutation = rememberMutation<Boolean, Unit>(
-        key = ToggleFavoriteQueryKey(currentBook)
-    )
-
-    EventEffect(eventFlow) { event ->
-        when (event) {
-            is DetailUiEvent.NavigateBack -> {
-                onNavigateBack()
-            }
-            is DetailUiEvent.ShowToast -> {
-                onShowToast(event.message)
-            }
-        }
+    // 즐겨찾기 토글 Mutation
+    var toggleMutationKey by remember { mutableStateOf<ToggleFavoriteQueryKey?>(null) }
+    val toggleFavoriteMutation = toggleMutationKey?.let { key ->
+        rememberMutation(key = key)
     }
+
 
     val onAction: (DetailUiAction) -> Unit = remember(currentBook) {
         { action ->
@@ -73,7 +63,8 @@ fun DetailPresenter(
                     
                     // Room 데이터베이스에 실제 변경사항 적용 (비동기)
                     coroutineScope.launch {
-                        toggleFavoriteMutation.mutateAsync(Unit)
+                        toggleMutationKey = context.createToggleFavoriteQueryKey(currentBook)
+                        toggleFavoriteMutation?.mutateAsync(Unit)
                     }
                     
                     val message = if (newFavoriteStatus) {
@@ -96,3 +87,8 @@ fun DetailPresenter(
         onAction = onAction,
     )
 }
+
+@Composable
+private inline fun providePresenterDefaults(
+    content: @Composable () -> DetailPresenterState
+): DetailPresenterState = content()

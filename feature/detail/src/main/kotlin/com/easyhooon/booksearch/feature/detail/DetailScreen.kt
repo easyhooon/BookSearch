@@ -1,6 +1,5 @@
 package com.easyhooon.booksearch.feature.detail
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,7 +16,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -37,31 +35,9 @@ import com.easyhooon.booksearch.core.designsystem.theme.Neutral600
 import com.easyhooon.booksearch.core.designsystem.theme.body1Medium
 import com.easyhooon.booksearch.core.designsystem.theme.heading1Bold
 import com.easyhooon.booksearch.core.ui.component.BookSearchTopAppBar
-import com.easyhooon.booksearch.feature.detail.presenter.DetailPresenter
 import com.easyhooon.booksearch.feature.detail.presenter.DetailUiAction
 import com.easyhooon.booksearch.feature.detail.presenter.DetailUiState
 
-@Composable
-internal fun DetailRoute(
-    book: BookUiModel,
-    innerPadding: PaddingValues,
-    popBackStack: () -> Unit,
-) {
-    val context = LocalContext.current
-    val presenterState = DetailPresenter(
-        initialBook = book,
-        onNavigateBack = popBackStack,
-        onShowToast = { message ->
-            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-        },
-    )
-
-    DetailScreen(
-        innerPadding = innerPadding,
-        uiState = presenterState.uiState,
-        onAction = presenterState.onAction,
-    )
-}
 
 @Composable
 internal fun DetailScreen(

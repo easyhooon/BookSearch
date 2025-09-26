@@ -12,7 +12,6 @@ import soil.query.SwrCachePlusPolicy
 import soil.query.SwrCacheScope
 import soil.query.SwrClientPlus
 import soil.query.annotation.ExperimentalSoilQueryApi
-import javax.inject.Inject
 
 @HiltAndroidApp
 class App : Application(), SwrClientFactory {

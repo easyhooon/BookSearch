@@ -8,16 +8,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import com.easyhooon.booksearch.core.common.compose.EventEffect
-import com.easyhooon.booksearch.core.common.compose.rememberEventFlow
 import com.easyhooon.booksearch.core.common.model.BookUiModel
 import com.easyhooon.booksearch.core.data.query.GetFavoriteBooksQueryKey
 import com.easyhooon.booksearch.core.data.query.ToggleFavoriteQueryKey
+import com.easyhooon.booksearch.feature.favorites.FavoritesScreenContext
 import com.easyhooon.booksearch.feature.favorites.FavoritesSortType
 import io.github.takahirom.rin.rememberRetained
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import soil.query.compose.rememberMutation
 import soil.query.compose.rememberQuery
@@ -47,21 +47,21 @@ data class FavoritesPresenterState(
     val onAction: (FavoritesUiAction) -> Unit,
 )
 
+context(context: FavoritesScreenContext)
 @Composable
 fun FavoritesPresenter(
-    queryState: TextFieldState = rememberRetained { TextFieldState() },
-    onNavigateToDetail: (BookUiModel) -> Unit,
-): FavoritesPresenterState {
+    queryState: TextFieldState,
+    eventFlow: MutableSharedFlow<FavoritesUiEvent>,
+): FavoritesPresenterState = providePresenterDefaults {
     var searchQuery by rememberRetained { mutableStateOf("") }
     var sortType by rememberRetained { mutableStateOf(FavoritesSortType.LATEST) }
     var isPriceFilterEnabled by rememberRetained { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
-    val eventFlow = rememberEventFlow<FavoritesUiEvent>()
 
     // Room에서 즐겨찾기 데이터 가져오기
     val favoritesQuery = rememberQuery(
-        key = GetFavoriteBooksQueryKey(
+        key = context.createGetFavoriteBooksQueryKey(
             query = searchQuery,
             sortType = sortType.value,
             isPriceFilterEnabled = isPriceFilterEnabled,
@@ -76,13 +76,6 @@ fun FavoritesPresenter(
         rememberMutation<Boolean, Unit>(key = key)
     }
 
-    EventEffect(eventFlow) { event ->
-        when (event) {
-            is FavoritesUiEvent.NavigateToDetail -> {
-                onNavigateToDetail(event.book)
-            }
-        }
-    }
 
     val onAction: (FavoritesUiAction) -> Unit = remember(favoriteBooks) {
         { action ->
@@ -106,7 +99,7 @@ fun FavoritesPresenter(
                 is FavoritesUiAction.OnFavoriteToggle -> {
                     // DroidKaigi 패턴: Mutation 사용해서 즐겨찾기 토글
                     coroutineScope.launch {
-                        toggleMutationKey = ToggleFavoriteQueryKey(action.book)
+                        toggleMutationKey = context.createToggleFavoriteQueryKey(action.book)
                         toggleFavoriteMutation?.mutateAsync(Unit)
                     }
                 }
@@ -126,3 +119,8 @@ fun FavoritesPresenter(
         onAction = onAction,
     )
 }
+
+@Composable
+private inline fun providePresenterDefaults(
+    content: @Composable () -> FavoritesPresenterState
+): FavoritesPresenterState = content()

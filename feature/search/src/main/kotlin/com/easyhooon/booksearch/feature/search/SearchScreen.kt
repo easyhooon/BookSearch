@@ -42,10 +42,8 @@ import com.easyhooon.booksearch.core.designsystem.theme.body1Medium
 import com.easyhooon.booksearch.core.designsystem.theme.body1SemiBold
 import com.easyhooon.booksearch.core.ui.component.BookCard
 import com.easyhooon.booksearch.core.ui.component.BookSearchTopAppBar
-import com.easyhooon.booksearch.feature.search.presenter.SearchPresenter
 import com.easyhooon.booksearch.feature.search.presenter.SearchUiAction
 import com.easyhooon.booksearch.feature.search.presenter.SearchUiState
-import io.github.takahirom.rin.rememberRetained
 import kotlinx.collections.immutable.ImmutableList
 import soil.plant.compose.lazy.LazyLoad
 import soil.plant.compose.reacty.ErrorBoundary
@@ -62,27 +60,6 @@ enum class SortType(val value: String, val displayName: String) {
     }
 }
 
-@Composable
-internal fun SearchRoute(
-    innerPadding: PaddingValues,
-    searchScreenContext: SearchScreenContext,
-    navigateToDetail: (BookUiModel) -> Unit,
-) {
-    val queryState = rememberRetained { TextFieldState() }
-    val presenterState = with(searchScreenContext) {
-        SearchPresenter(
-            queryState = queryState,
-            onNavigateToDetail = navigateToDetail,
-        )
-    }
-
-    SearchScreen(
-        innerPadding = innerPadding,
-        queryState = queryState,
-        uiState = presenterState.uiState,
-        onAction = presenterState.onAction,
-    )
-}
 
 @Composable
 internal fun SearchScreen(
