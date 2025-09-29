@@ -2,13 +2,14 @@ package com.easyhooon.booksearch.core.data.subscription
 
 import com.easyhooon.booksearch.core.common.model.BookUiModel
 import com.easyhooon.booksearch.core.database.FavoritesDao
+import com.orhanobut.logger.Logger
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import soil.query.SubscriptionId
 import soil.query.SubscriptionKey
-import soil.query.SubscriptionReceiver
-import javax.inject.Inject
-import javax.inject.Singleton
+import soil.query.buildSubscriptionKey
 
 typealias FavoriteBooksSubscriptionKey = SubscriptionKey<List<BookUiModel>>
 
@@ -20,26 +21,24 @@ class DefaultFavoriteBooksSubscriptionKey @Inject constructor(
         query: String = "",
         sortType: String = "LATEST",
         isPriceFilterEnabled: Boolean = false,
-    ): FavoriteBooksSubscriptionKey = object : SubscriptionKey<List<BookUiModel>> {
-        override val id: SubscriptionId<List<BookUiModel>> = SubscriptionId(
-            namespace = "favorite_books_subscription",
-            tags = arrayOf("$query:$sortType:$isPriceFilterEnabled"),
-        )
-
-        override val subscribe: SubscriptionReceiver.() -> Flow<List<BookUiModel>>
-            get() = { subscribeFavorites(query, sortType, isPriceFilterEnabled) }
-    }
+    ): FavoriteBooksSubscriptionKey = buildSubscriptionKey(
+        id = SubscriptionId("favorite_books_subscription_${query}_${sortType}_$isPriceFilterEnabled"),
+        subscribe = { subscribeFavorites(query, sortType, isPriceFilterEnabled) }
+    )
 
     private fun subscribeFavorites(
         query: String,
         sortType: String,
         isPriceFilterEnabled: Boolean,
     ): Flow<List<BookUiModel>> {
+        Logger.d("subscribeFavorites() called - query: $query, sortType: $sortType, isPriceFilterEnabled: $isPriceFilterEnabled")
+
         return if (query.isNotEmpty()) {
             favoritesDao.searchFavoritesByTitle(query)
         } else {
             favoritesDao.getAllFavorites()
         }.map { books ->
+            Logger.d("FavoriteBooks Raw data from DB: ${books.size} books")
             var filteredBooks = books
 
             if (isPriceFilterEnabled) {
@@ -56,7 +55,7 @@ class DefaultFavoriteBooksSubscriptionKey @Inject constructor(
                 else -> filteredBooks
             }
         }.map { bookEntities ->
-            bookEntities.map { bookEntity ->
+            val result = bookEntities.map { bookEntity ->
                 BookUiModel(
                     isbn = bookEntity.isbn,
                     title = bookEntity.title,
@@ -73,6 +72,8 @@ class DefaultFavoriteBooksSubscriptionKey @Inject constructor(
                     isFavorites = true,
                 )
             }
+            Logger.d("FavoriteBooks Flow mapping result: ${result.size} books")
+            result
         }
     }
 }

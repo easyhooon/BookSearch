@@ -17,13 +17,13 @@ class DefaultFavoriteBookIdsSubscriptionKey @Inject constructor(
 ) {
     fun create(): FavoriteBookIdsSubscriptionKey = buildSubscriptionKey(
         id = SubscriptionId("favorite_book_ids_subscription"),
-        subscribe = { 
+        subscribe = {
             Logger.d("subscribeFavoriteBookIds() called")
             favoritesDao.getAllFavorites().map { books ->
                 val result = books.map { it.isbn }.toSet()
                 Logger.d("FavoriteBookIds Flow emitted: $result")
                 result
             }
-        }
+        },
     )
 }

@@ -5,7 +5,7 @@ import com.easyhooon.booksearch.core.database.FavoritesDao
 import kotlinx.coroutines.flow.first
 import soil.query.QueryId
 import soil.query.QueryKey
-import soil.query.QueryReceiver
+import soil.query.buildQueryKey
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -19,15 +19,10 @@ class DefaultGetFavoriteBooksQueryKey @Inject constructor(
         query: String = "",
         sortType: String = "LATEST",
         isPriceFilterEnabled: Boolean = false,
-    ): GetFavoriteBooksQueryKey = object : QueryKey<List<BookUiModel>> {
-        override val id: QueryId<List<BookUiModel>> = QueryId(
-            namespace = "favorite_books",
-            tags = arrayOf("$query:$sortType:$isPriceFilterEnabled"),
-        )
-
-        override val fetch: suspend QueryReceiver.() -> List<BookUiModel>
-            get() = { fetchFavorites(query, sortType, isPriceFilterEnabled) }
-    }
+    ): GetFavoriteBooksQueryKey = buildQueryKey(
+        id = QueryId("favorite_books_${query}_${sortType}_$isPriceFilterEnabled"),
+        fetch = { fetchFavorites(query, sortType, isPriceFilterEnabled) }
+    )
 
     private suspend fun fetchFavorites(
         query: String,

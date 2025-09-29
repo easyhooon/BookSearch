@@ -22,10 +22,7 @@ class DefaultSearchBooksQueryKey @Inject constructor(
         sort: String = "accuracy",
         size: Int = 20,
     ): InfiniteQueryKey<List<BookUiModel>, SearchBooksPageParam> = buildInfiniteQueryKey(
-        id = InfiniteQueryId(
-            namespace = "search_books",
-            tags = arrayOf("$query:$sort:$size"),
-        ),
+        id = InfiniteQueryId("search_books_${query}_${sort}_$size"),
         initialParam = { SearchBooksPageParam(1) },
         fetch = { pageParam ->
             Log.d("SearchBooksQuery", "fetch called with query='$query', sort='$sort', page=${pageParam.page}, size=$size")
