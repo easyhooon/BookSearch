@@ -36,14 +36,10 @@ sealed interface SearchUiAction {
     data class OnSearchClick(val query: String) : SearchUiAction
     data object OnClearClick : SearchUiAction
     data object OnSortClick : SearchUiAction
-    data class OnBookClick(val book: BookUiModel) : SearchUiAction
     data class OnFavoriteToggle(val book: BookUiModel) : SearchUiAction
     data object OnLoadMore : SearchUiAction
 }
 
-sealed interface SearchUiEvent {
-    data class NavigateToDetail(val book: BookUiModel) : SearchUiEvent
-}
 
 data class SearchPresenterState(
     val uiState: SearchUiState,
@@ -55,7 +51,6 @@ context(context: SearchScreenContext)
 @Composable
 fun SearchPresenter(
     queryState: TextFieldState,
-    eventFlow: MutableSharedFlow<SearchUiEvent>,
 ): SearchPresenterState = providePresenterDefaults {
     var currentQuery by rememberRetained { mutableStateOf("") }
     var sortType by rememberRetained { mutableStateOf(SortType.ACCURACY) }
@@ -86,9 +81,13 @@ fun SearchPresenter(
 
     // 검색 결과에 즐겨찾기 상태 반영
     val rawSearchResults = infiniteQuery?.data?.flatMap { it.data } ?: emptyList()
-    val searchResults = rawSearchResults.map { book ->
-        book.copy(isFavorites = favoriteBookIds.contains(book.isbn))
-    }.toImmutableList()
+    val searchResults = remember(rawSearchResults, favoriteBookIds) {
+        rawSearchResults.map { book ->
+            val isFavorite = favoriteBookIds.contains(book.isbn)
+            Log.d("SearchPresenter", "Book: ${book.title}, ISBN: ${book.isbn}, isFavorite: $isFavorite, favoriteIds: $favoriteBookIds")
+            book.copy(isFavorites = isFavorite)
+        }.toImmutableList()
+    }
 
     val hasNextPage = infiniteQuery?.loadMoreParam != null
 
@@ -98,7 +97,7 @@ fun SearchPresenter(
         rememberMutation(key = key)
     }
 
-    val onAction: (SearchUiAction) -> Unit = remember(currentQuery, sortType, infiniteQuery) {
+    val onAction: (SearchUiAction) -> Unit = remember(currentQuery, sortType, infiniteQuery, favoriteBookIds) {
         { action ->
             when (action) {
                 is SearchUiAction.OnSearchClick -> {
@@ -116,9 +115,6 @@ fun SearchPresenter(
                 }
                 is SearchUiAction.OnSortClick -> {
                     sortType = sortType.toggle()
-                }
-                is SearchUiAction.OnBookClick -> {
-                    eventFlow.tryEmit(SearchUiEvent.NavigateToDetail(action.book))
                 }
                 is SearchUiAction.OnFavoriteToggle -> {
                     coroutineScope.launch {

@@ -34,13 +34,9 @@ sealed interface FavoritesUiAction {
     data object OnClearClick : FavoritesUiAction
     data object OnFilterClick : FavoritesUiAction
     data object OnSortClick : FavoritesUiAction
-    data class OnBookClick(val book: BookUiModel) : FavoritesUiAction
     data class OnFavoriteToggle(val book: BookUiModel) : FavoritesUiAction
 }
 
-sealed interface FavoritesUiEvent {
-    data class NavigateToDetail(val book: BookUiModel) : FavoritesUiEvent
-}
 
 data class FavoritesPresenterState(
     val uiState: FavoritesUiState,
@@ -52,7 +48,6 @@ context(context: FavoritesScreenContext)
 @Composable
 fun FavoritesPresenter(
     queryState: TextFieldState,
-    eventFlow: MutableSharedFlow<FavoritesUiEvent>,
 ): FavoritesPresenterState = providePresenterDefaults {
     var searchQuery by rememberRetained { mutableStateOf("") }
     var sortType by rememberRetained { mutableStateOf(FavoritesSortType.LATEST) }
@@ -93,9 +88,6 @@ fun FavoritesPresenter(
                 }
                 is FavoritesUiAction.OnSortClick -> {
                     sortType = sortType.next()
-                }
-                is FavoritesUiAction.OnBookClick -> {
-                    eventFlow.tryEmit(FavoritesUiEvent.NavigateToDetail(action.book))
                 }
                 is FavoritesUiAction.OnFavoriteToggle -> {
                     // DroidKaigi 패턴: Mutation 사용해서 즐겨찾기 토글

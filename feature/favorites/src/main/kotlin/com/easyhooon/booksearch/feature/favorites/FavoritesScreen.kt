@@ -68,6 +68,7 @@ internal fun FavoritesScreen(
     queryState: TextFieldState,
     uiState: FavoritesUiState,
     onAction: (FavoritesUiAction) -> Unit,
+    onBookClick: (BookUiModel) -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -107,9 +108,7 @@ internal fun FavoritesScreen(
                 FavoritesContent(
                     books = uiState.favoriteBooks,
                     isPriceFilterEnabled = uiState.isPriceFilterEnabled,
-                    onBookClick = { book ->
-                        onAction(FavoritesUiAction.OnBookClick(book))
-                    },
+                    onBookClick = onBookClick,
                     onFavoriteToggle = { book ->
                         onAction(FavoritesUiAction.OnFavoriteToggle(book))
                     },
@@ -305,6 +304,7 @@ private fun FavoritesScreenPreview() {
             queryState = TextFieldState(),
             uiState = FavoritesUiState(),
             onAction = {},
+            onBookClick = {},
         )
     }
 }

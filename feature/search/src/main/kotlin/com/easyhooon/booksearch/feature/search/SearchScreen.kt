@@ -67,6 +67,7 @@ internal fun SearchScreen(
     queryState: TextFieldState,
     uiState: SearchUiState,
     onAction: (SearchUiAction) -> Unit,
+    onBookClick: (BookUiModel) -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -104,9 +105,7 @@ internal fun SearchScreen(
                     SearchContent(
                         books = uiState.searchResults,
                         hasNextPage = uiState.hasNextPage,
-                        onBookClick = { book ->
-                            onAction(SearchUiAction.OnBookClick(book))
-                        },
+                        onBookClick = onBookClick,
                         onLoadMore = {
                             onAction(SearchUiAction.OnLoadMore)
                         },
