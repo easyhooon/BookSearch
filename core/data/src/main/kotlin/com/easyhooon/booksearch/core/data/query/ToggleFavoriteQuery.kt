@@ -17,10 +17,10 @@ typealias ToggleFavoriteQueryKey = MutationKey<Boolean, Unit>
 class DefaultToggleFavoriteQueryKey @Inject constructor(
     private val favoritesDao: FavoritesDao,
 ) {
-    fun create(book: BookUiModel): ToggleFavoriteQueryKey = object : ToggleFavoriteQueryKey by buildMutationKey(
+    fun create(book: BookUiModel): ToggleFavoriteQueryKey = buildMutationKey(
         id = MutationId("toggle_favorite_${book.isbn}"),
         mutate = { toggleFavorite(book) }
-    ) {}
+    )
 
     private suspend fun toggleFavorite(book: BookUiModel): Boolean {
         Logger.d("toggleFavorite called for book: ${book.title} (${book.isbn}), current isFavorites: ${book.isFavorites}")
