@@ -6,7 +6,7 @@ import com.easyhooon.booksearch.core.common.compose.rememberEventFlow
 import com.easyhooon.booksearch.core.common.model.BookUiModel
 import com.easyhooon.booksearch.core.common.toast.ToastMessageEffect
 import com.easyhooon.booksearch.feature.detail.presenter.DetailPresenter
-import com.easyhooon.booksearch.feature.detail.presenter.DetailUiEvent
+import com.easyhooon.booksearch.feature.detail.presenter.DetailScreenEvent
 
 context(context: DetailScreenContext)
 @Composable
@@ -15,21 +15,21 @@ fun DetailScreenRoot(
     innerPadding: PaddingValues,
     onNavigateBack: () -> Unit,
 ) {
-    val eventFlow = rememberEventFlow<DetailUiEvent>()
+    val eventFlow = rememberEventFlow<DetailScreenEvent>()
 
-    val presenterState = DetailPresenter(
+    val uiState = DetailPresenter(
         initialBook = initialBook,
         eventFlow = eventFlow,
     )
 
     ToastMessageEffect(
-        userMessageStateHolder = presenterState.uiState.userMessageStateHolder,
+        userMessageStateHolder = uiState.userMessageStateHolder,
     )
 
     DetailScreen(
         innerPadding = innerPadding,
-        uiState = presenterState.uiState,
-        onAction = presenterState.onAction,
+        uiState = uiState,
+        onFavoriteClick = { eventFlow.tryEmit(DetailScreenEvent.ToggleFavorite) },
         onBackClick = onNavigateBack,
     )
 }

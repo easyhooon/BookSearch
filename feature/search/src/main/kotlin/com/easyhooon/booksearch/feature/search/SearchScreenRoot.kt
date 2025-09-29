@@ -4,8 +4,10 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.runtime.Composable
 import com.easyhooon.booksearch.core.common.compose.SafeLaunchedEffect
+import com.easyhooon.booksearch.core.common.compose.rememberEventFlow
 import com.easyhooon.booksearch.core.common.model.BookUiModel
 import com.easyhooon.booksearch.feature.search.presenter.SearchPresenter
+import com.easyhooon.booksearch.feature.search.presenter.SearchScreenEvent
 import com.orhanobut.logger.Logger
 import io.github.takahirom.rin.rememberRetained
 import soil.query.annotation.ExperimentalSoilQueryApi
@@ -31,7 +33,10 @@ fun SearchScreenRoot(
         Logger.d("SearchScreenRoot favoriteBookIds changed: $favoriteBookIds")
     }
 
-    val presenterState = SearchPresenter(
+    val eventFlow = rememberEventFlow<SearchScreenEvent>()
+
+    val uiState = SearchPresenter(
+        eventFlow = eventFlow,
         queryState = queryState,
         favoriteBookIds = favoriteBookIds,
     )
@@ -39,8 +44,11 @@ fun SearchScreenRoot(
     SearchScreen(
         innerPadding = innerPadding,
         queryState = queryState,
-        uiState = presenterState.uiState,
-        onAction = presenterState.onAction,
+        uiState = uiState,
+        onSearchClick = { query -> eventFlow.tryEmit(SearchScreenEvent.Search(query)) },
+        onClearClick = { eventFlow.tryEmit(SearchScreenEvent.ClearSearch) },
+        onSortClick = { eventFlow.tryEmit(SearchScreenEvent.ToggleSort) },
+        onLoadMore = { eventFlow.tryEmit(SearchScreenEvent.LoadMore) },
         onBookClick = onBookClick,
     )
 }

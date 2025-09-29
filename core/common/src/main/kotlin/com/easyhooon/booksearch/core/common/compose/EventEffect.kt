@@ -1,7 +1,6 @@
 package com.easyhooon.booksearch.core.common.compose
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -22,7 +21,7 @@ fun <EVENT> EventEffect(
     eventFlow: EventFlow<EVENT>,
     block: suspend CoroutineScope.(event: EVENT) -> Unit,
 ) {
-    LaunchedEffect(eventFlow) {
+    SafeLaunchedEffect(eventFlow) {
         supervisorScope {
             eventFlow.collect { event ->
                 launch {

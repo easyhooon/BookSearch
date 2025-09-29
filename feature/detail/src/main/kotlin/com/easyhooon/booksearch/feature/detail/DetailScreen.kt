@@ -36,14 +36,13 @@ import com.easyhooon.booksearch.core.designsystem.theme.body1Medium
 import com.easyhooon.booksearch.core.designsystem.theme.heading1Bold
 import com.easyhooon.booksearch.core.ui.component.BookSearchTopAppBar
 import com.easyhooon.booksearch.core.common.toast.UserMessageStateHolderImpl
-import com.easyhooon.booksearch.feature.detail.presenter.DetailUiAction
 import com.easyhooon.booksearch.feature.detail.presenter.DetailUiState
 
 @Composable
 internal fun DetailScreen(
     innerPadding: PaddingValues,
     uiState: DetailUiState,
-    onAction: (DetailUiAction) -> Unit,
+    onFavoriteClick: () -> Unit,
     onBackClick: () -> Unit,
 ) {
     Column(
@@ -56,9 +55,7 @@ internal fun DetailScreen(
             startIconOnClick = onBackClick,
             endIconRes = if (uiState.book.isFavorites) designR.drawable.ic_favorite_filled_red
             else designR.drawable.ic_selected_favorites,
-            endIconOnClick = {
-                onAction(DetailUiAction.OnFavoriteClick)
-            },
+            endIconOnClick = onFavoriteClick,
         )
         DetailContent(book = uiState.book)
     }
@@ -210,7 +207,7 @@ private fun DetailScreenPreview() {
                 book = BookUiModel(),
                 userMessageStateHolder = UserMessageStateHolderImpl(),
             ),
-            onAction = {},
+            onFavoriteClick = {},
             onBackClick = {},
         )
     }

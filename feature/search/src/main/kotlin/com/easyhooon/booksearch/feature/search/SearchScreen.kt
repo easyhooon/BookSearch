@@ -42,7 +42,6 @@ import com.easyhooon.booksearch.core.designsystem.theme.body1Medium
 import com.easyhooon.booksearch.core.designsystem.theme.body1SemiBold
 import com.easyhooon.booksearch.core.ui.component.BookCard
 import com.easyhooon.booksearch.core.ui.component.BookSearchTopAppBar
-import com.easyhooon.booksearch.feature.search.presenter.SearchUiAction
 import com.easyhooon.booksearch.feature.search.presenter.SearchUiState
 import kotlinx.collections.immutable.ImmutableList
 import soil.plant.compose.lazy.LazyLoad
@@ -66,7 +65,10 @@ internal fun SearchScreen(
     innerPadding: PaddingValues,
     queryState: TextFieldState,
     uiState: SearchUiState,
-    onAction: (SearchUiAction) -> Unit,
+    onSearchClick: (String) -> Unit,
+    onClearClick: () -> Unit,
+    onSortClick: () -> Unit,
+    onLoadMore: () -> Unit,
     onBookClick: (BookUiModel) -> Unit,
 ) {
     Column(
@@ -80,15 +82,9 @@ internal fun SearchScreen(
         SearchHeader(
             queryState = queryState,
             sortLabel = uiState.sortType.displayName,
-            onSearchClick = { query ->
-                onAction(SearchUiAction.OnSearchClick(query))
-            },
-            onClearClick = {
-                onAction(SearchUiAction.OnClearClick)
-            },
-            onSortClick = {
-                onAction(SearchUiAction.OnSortClick)
-            },
+            onSearchClick = onSearchClick,
+            onClearClick = onClearClick,
+            onSortClick = onSortClick,
         )
 
         if (uiState.currentQuery.isNotEmpty()) {
@@ -106,9 +102,7 @@ internal fun SearchScreen(
                         books = uiState.searchResults,
                         hasNextPage = uiState.hasNextPage,
                         onBookClick = onBookClick,
-                        onLoadMore = {
-                            onAction(SearchUiAction.OnLoadMore)
-                        },
+                        onLoadMore = onLoadMore,
                     )
                 }
             }
@@ -305,6 +299,15 @@ private fun SearchIdleContent() {
 @Composable
 private fun SearchScreenPreview() {
     BookSearchTheme {
-        // Preview implementation would go here
+        SearchScreen(
+            innerPadding = PaddingValues(),
+            queryState = TextFieldState(),
+            uiState = SearchUiState(),
+            onSearchClick = {},
+            onClearClick = {},
+            onSortClick = {},
+            onLoadMore = {},
+            onBookClick = {},
+        )
     }
 }

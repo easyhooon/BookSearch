@@ -7,8 +7,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import com.easyhooon.booksearch.core.common.compose.EventEffect
+import com.easyhooon.booksearch.core.common.compose.EventFlow
+import com.easyhooon.booksearch.core.common.compose.providePresenterDefaults
 import com.easyhooon.booksearch.core.common.model.BookUiModel
 import com.easyhooon.booksearch.core.data.query.ToggleFavoriteQueryKey
 import com.easyhooon.booksearch.feature.search.SearchScreenContext
@@ -17,7 +19,6 @@ import io.github.takahirom.rin.rememberRetained
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.launch
 import soil.query.annotation.ExperimentalSoilQueryApi
 import soil.query.compose.rememberInfiniteQuery
 import soil.query.compose.rememberMutation
@@ -29,31 +30,24 @@ data class SearchUiState(
     val hasNextPage: Boolean = false,
 )
 
-sealed interface SearchUiAction {
-    data class OnSearchClick(val query: String) : SearchUiAction
-    data object OnClearClick : SearchUiAction
-    data object OnSortClick : SearchUiAction
-    data class OnFavoriteToggle(val book: BookUiModel) : SearchUiAction
-    data object OnLoadMore : SearchUiAction
+sealed interface SearchScreenEvent {
+    data class Search(val query: String) : SearchScreenEvent
+    data object ClearSearch : SearchScreenEvent
+    data object ToggleSort : SearchScreenEvent
+    data class ToggleFavorite(val book: BookUiModel) : SearchScreenEvent
+    data object LoadMore : SearchScreenEvent
 }
-
-
-data class SearchPresenterState(
-    val uiState: SearchUiState,
-    val onAction: (SearchUiAction) -> Unit,
-)
 
 @OptIn(ExperimentalSoilQueryApi::class)
 context(context: SearchScreenContext)
 @Composable
 fun SearchPresenter(
+    eventFlow: EventFlow<SearchScreenEvent>,
     queryState: TextFieldState,
     favoriteBookIds: Set<String> = emptySet(),
-): SearchPresenterState = providePresenterDefaults {
+): SearchUiState = providePresenterDefaults {
     var currentQuery by rememberRetained { mutableStateOf("") }
     var sortType by rememberRetained { mutableStateOf(SortType.ACCURACY) }
-    val coroutineScope = rememberCoroutineScope()
-
 
     // API 호출 - InfiniteQuery로 검색 결과 가져오기 (쿼리가 있을 때만)
     val infiniteQuery = if (currentQuery.isNotEmpty()) {
@@ -88,56 +82,40 @@ fun SearchPresenter(
         rememberMutation(key = key)
     }
 
-    val onAction: (SearchUiAction) -> Unit = remember(currentQuery, sortType, infiniteQuery, favoriteBookIds) {
-        { action ->
-            when (action) {
-                is SearchUiAction.OnSearchClick -> {
-                    Log.d("SearchPresenter", "OnSearchClick called with query: '${action.query}'")
-                    if (action.query.isNotBlank()) {
-                        Log.d("SearchPresenter", "Query is not blank, updating currentQuery from '$currentQuery' to '${action.query}'")
-                        currentQuery = action.query
-                    } else {
-                        Log.d("SearchPresenter", "Query is blank, ignoring")
-                    }
+    EventEffect(eventFlow) { event ->
+        when (event) {
+            is SearchScreenEvent.Search -> {
+                Log.d("SearchPresenter", "Search event called with query: '${event.query}'")
+                if (event.query.isNotBlank()) {
+                    Log.d("SearchPresenter", "Query is not blank, updating currentQuery from '$currentQuery' to '${event.query}'")
+                    currentQuery = event.query
+                } else {
+                    Log.d("SearchPresenter", "Query is blank, ignoring")
                 }
-                is SearchUiAction.OnClearClick -> {
-                    queryState.clearText()
-                    currentQuery = ""
-                }
-                is SearchUiAction.OnSortClick -> {
-                    sortType = sortType.toggle()
-                }
-                is SearchUiAction.OnFavoriteToggle -> {
-                    coroutineScope.launch {
-                        toggleMutationKey = context.createToggleFavoriteQueryKey(action.book)
-                        toggleFavoriteMutation?.mutateAsync(Unit)
-                    }
-                }
-                is SearchUiAction.OnLoadMore -> {
-                    infiniteQuery?.let { query ->
-                        coroutineScope.launch {
-                            query.loadMore(query.loadMoreParam!!)
-                        }
-                    }
+            }
+            is SearchScreenEvent.ClearSearch -> {
+                queryState.clearText()
+                currentQuery = ""
+            }
+            is SearchScreenEvent.ToggleSort -> {
+                sortType = sortType.toggle()
+            }
+            is SearchScreenEvent.ToggleFavorite -> {
+                toggleMutationKey = context.createToggleFavoriteQueryKey(event.book)
+                toggleFavoriteMutation?.mutate(Unit)
+            }
+            is SearchScreenEvent.LoadMore -> {
+                infiniteQuery?.let { query ->
+                    query.loadMore(query.loadMoreParam!!)
                 }
             }
         }
     }
 
-    val uiState = SearchUiState(
+    SearchUiState(
         currentQuery = currentQuery,
         sortType = sortType,
         searchResults = searchResults,
         hasNextPage = hasNextPage,
     )
-
-    return SearchPresenterState(
-        uiState = uiState,
-        onAction = onAction,
-    )
 }
-
-@Composable
-private inline fun providePresenterDefaults(
-    content: @Composable () -> SearchPresenterState
-): SearchPresenterState = content()

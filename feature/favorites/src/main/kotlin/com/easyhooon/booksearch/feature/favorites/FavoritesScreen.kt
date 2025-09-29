@@ -40,7 +40,6 @@ import com.easyhooon.booksearch.core.designsystem.theme.body1Medium
 import com.easyhooon.booksearch.core.designsystem.theme.body1SemiBold
 import com.easyhooon.booksearch.core.ui.component.BookCard
 import com.easyhooon.booksearch.core.ui.component.BookSearchTopAppBar
-import com.easyhooon.booksearch.feature.favorites.presenter.FavoritesUiAction
 import com.easyhooon.booksearch.feature.favorites.presenter.FavoritesUiState
 import kotlinx.collections.immutable.ImmutableList
 import soil.plant.compose.reacty.ErrorBoundary
@@ -67,7 +66,11 @@ internal fun FavoritesScreen(
     innerPadding: PaddingValues,
     queryState: TextFieldState,
     uiState: FavoritesUiState,
-    onAction: (FavoritesUiAction) -> Unit,
+    onSearchClick: () -> Unit,
+    onClearClick: () -> Unit,
+    onFilterClick: () -> Unit,
+    onSortClick: () -> Unit,
+    onFavoriteToggle: (BookUiModel) -> Unit,
     onBookClick: (BookUiModel) -> Unit,
 ) {
     Column(
@@ -81,18 +84,10 @@ internal fun FavoritesScreen(
         FavoritesHeader(
             queryState = queryState,
             sortLabel = uiState.sortType.label,
-            onSearchClick = {
-                onAction(FavoritesUiAction.OnSearchClick)
-            },
-            onClearClick = {
-                onAction(FavoritesUiAction.OnClearClick)
-            },
-            onFilterClick = {
-                onAction(FavoritesUiAction.OnFilterClick)
-            },
-            onSortClick = {
-                onAction(FavoritesUiAction.OnSortClick)
-            },
+            onSearchClick = onSearchClick,
+            onClearClick = onClearClick,
+            onFilterClick = onFilterClick,
+            onSortClick = onSortClick,
         )
 
         ErrorBoundary(
@@ -109,9 +104,7 @@ internal fun FavoritesScreen(
                     books = uiState.favoriteBooks,
                     isPriceFilterEnabled = uiState.isPriceFilterEnabled,
                     onBookClick = onBookClick,
-                    onFavoriteToggle = { book ->
-                        onAction(FavoritesUiAction.OnFavoriteToggle(book))
-                    },
+                    onFavoriteToggle = onFavoriteToggle,
                 )
             }
         }
@@ -303,7 +296,11 @@ private fun FavoritesScreenPreview() {
             innerPadding = PaddingValues(),
             queryState = TextFieldState(),
             uiState = FavoritesUiState(),
-            onAction = {},
+            onSearchClick = {},
+            onClearClick = {},
+            onFilterClick = {},
+            onSortClick = {},
+            onFavoriteToggle = {},
             onBookClick = {},
         )
     }
