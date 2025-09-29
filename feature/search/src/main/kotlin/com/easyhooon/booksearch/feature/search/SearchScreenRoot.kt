@@ -3,12 +3,11 @@ package com.easyhooon.booksearch.feature.search
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.runtime.Composable
-import com.easyhooon.booksearch.core.common.compose.SafeLaunchedEffect
+import com.easyhooon.booksearch.core.common.SoilDataBoundary
 import com.easyhooon.booksearch.core.common.compose.rememberEventFlow
 import com.easyhooon.booksearch.core.common.model.BookUiModel
 import com.easyhooon.booksearch.feature.search.presenter.SearchPresenter
 import com.easyhooon.booksearch.feature.search.presenter.SearchScreenEvent
-import com.orhanobut.logger.Logger
 import io.github.takahirom.rin.rememberRetained
 import soil.query.annotation.ExperimentalSoilQueryApi
 import soil.query.compose.rememberSubscription
@@ -21,34 +20,68 @@ fun SearchScreenRoot(
     onBookClick: (BookUiModel) -> Unit,
 ) {
     val queryState = rememberRetained { TextFieldState() }
-
-    // DroidKaigi 방식: subscription으로 즐겨찾기 ID들을 구독
-    val favoriteIdsSubscription = rememberSubscription(
-        key = context.createFavoriteBookIdsSubscriptionKey()
-    )
-
-    val favoriteBookIds = favoriteIdsSubscription.data ?: emptySet()
-    
-    SafeLaunchedEffect(favoriteBookIds) {
-        Logger.d("SearchScreenRoot favoriteBookIds changed: $favoriteBookIds")
-    }
-
     val eventFlow = rememberEventFlow<SearchScreenEvent>()
 
-    val uiState = SearchPresenter(
-        eventFlow = eventFlow,
-        queryState = queryState,
-        favoriteBookIds = favoriteBookIds,
-    )
+    SoilDataBoundary(
+        state = rememberSubscription(
+            key = context.createFavoriteBookIdsSubscriptionKey()
+        ),
+        fallback = com.easyhooon.booksearch.core.common.SoilFallback(
+            errorFallback = {
+                // 에러 시 빈 즐겨찾기로 표시
+                val uiState = SearchPresenter(
+                    eventFlow = eventFlow,
+                    queryState = queryState,
+                    favoriteBookIds = emptySet(),
+                )
 
-    SearchScreen(
-        innerPadding = innerPadding,
-        queryState = queryState,
-        uiState = uiState,
-        onSearchClick = { query -> eventFlow.tryEmit(SearchScreenEvent.Search(query)) },
-        onClearClick = { eventFlow.tryEmit(SearchScreenEvent.ClearSearch) },
-        onSortClick = { eventFlow.tryEmit(SearchScreenEvent.ToggleSort) },
-        onLoadMore = { eventFlow.tryEmit(SearchScreenEvent.LoadMore) },
-        onBookClick = onBookClick,
-    )
+                SearchScreen(
+                    innerPadding = innerPadding,
+                    queryState = queryState,
+                    uiState = uiState,
+                    onSearchClick = { query -> eventFlow.tryEmit(SearchScreenEvent.Search(query)) },
+                    onClearClick = { eventFlow.tryEmit(SearchScreenEvent.ClearSearch) },
+                    onSortClick = { eventFlow.tryEmit(SearchScreenEvent.ToggleSort) },
+                    onLoadMore = { eventFlow.tryEmit(SearchScreenEvent.LoadMore) },
+                    onBookClick = onBookClick,
+                )
+            },
+            suspenseFallback = {
+                // 로딩 중에도 화면 표시
+                val uiState = SearchPresenter(
+                    eventFlow = eventFlow,
+                    queryState = queryState,
+                    favoriteBookIds = emptySet(),
+                )
+
+                SearchScreen(
+                    innerPadding = innerPadding,
+                    queryState = queryState,
+                    uiState = uiState,
+                    onSearchClick = { query -> eventFlow.tryEmit(SearchScreenEvent.Search(query)) },
+                    onClearClick = { eventFlow.tryEmit(SearchScreenEvent.ClearSearch) },
+                    onSortClick = { eventFlow.tryEmit(SearchScreenEvent.ToggleSort) },
+                    onLoadMore = { eventFlow.tryEmit(SearchScreenEvent.LoadMore) },
+                    onBookClick = onBookClick,
+                )
+            }
+        )
+    ) { favoriteBookIds ->
+        val uiState = SearchPresenter(
+            eventFlow = eventFlow,
+            queryState = queryState,
+            favoriteBookIds = favoriteBookIds,
+        )
+
+        SearchScreen(
+            innerPadding = innerPadding,
+            queryState = queryState,
+            uiState = uiState,
+            onSearchClick = { query -> eventFlow.tryEmit(SearchScreenEvent.Search(query)) },
+            onClearClick = { eventFlow.tryEmit(SearchScreenEvent.ClearSearch) },
+            onSortClick = { eventFlow.tryEmit(SearchScreenEvent.ToggleSort) },
+            onLoadMore = { eventFlow.tryEmit(SearchScreenEvent.LoadMore) },
+            onBookClick = onBookClick,
+        )
+    }
 }

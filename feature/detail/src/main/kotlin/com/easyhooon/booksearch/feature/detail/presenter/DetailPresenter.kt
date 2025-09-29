@@ -39,7 +39,6 @@ fun DetailPresenter(
         key = context.createToggleFavoriteQueryKey(currentBook),
     )
 
-    // DroidKaigi 패턴: EventEffect로 mutation 처리
     EventEffect(eventFlow) { event ->
         when (event) {
             is DetailScreenEvent.ToggleFavorite -> {

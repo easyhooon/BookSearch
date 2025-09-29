@@ -1,48 +1,188 @@
 package com.easyhooon.booksearch.core.common
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import kotlinx.coroutines.launch
+import soil.plant.compose.reacty.Await
+import soil.plant.compose.reacty.ErrorBoundary
+import soil.plant.compose.reacty.ErrorBoundaryContext
+import soil.plant.compose.reacty.Suspense
+import soil.query.compose.QueryObject
+import soil.query.compose.SubscriptionObject
 import soil.query.core.DataModel
-import soil.query.core.Reply
-import soil.query.core.combine
 
-fun <T> soilDataBoundary(
+@Composable
+fun <T> SoilDataBoundary(
     state: DataModel<T>,
-): T? {
-    return when (val reply = state.reply) {
-        is Reply.Some<T> -> reply.value
-        is Reply.None -> null
+    modifier: Modifier = Modifier,
+    fallback: SoilFallback = SoilFallbackDefaults.default(),
+    content: @Composable (T) -> Unit,
+) {
+    val coroutineScope = rememberCoroutineScope()
+
+    ErrorBoundary(
+        fallback = fallback.errorFallback,
+        onReset = {
+            coroutineScope.launch {
+                state.performResetIfNeeded()
+            }
+        },
+        modifier = modifier,
+    ) {
+        Suspense(fallback = fallback.suspenseFallback) {
+            Await(state = state, content = content)
+        }
     }
 }
 
-fun <T1, T2, RESULT> soilDataBoundary(
+@Composable
+fun <T1, T2> SoilDataBoundary(
     state1: DataModel<T1>,
     state2: DataModel<T2>,
-    transform: (T1, T2) -> RESULT,
-): RESULT? {
-    val combinedReply = Reply.combine(
-        state1.reply,
-        state2.reply,
-    ) { reply1, reply2 -> transform(reply1, reply2) }
+    modifier: Modifier = Modifier,
+    fallback: SoilFallback = SoilFallbackDefaults.default(),
+    content: @Composable (T1, T2) -> Unit,
+) {
+    val coroutineScope = rememberCoroutineScope()
 
-    return when (combinedReply) {
-        is Reply.None -> null
-        is Reply.Some<RESULT> -> combinedReply.value
+    ErrorBoundary(
+        fallback = fallback.errorFallback,
+        onReset = {
+            coroutineScope.launch {
+                state1.performResetIfNeeded()
+                state2.performResetIfNeeded()
+            }
+        },
+        modifier = modifier,
+    ) {
+        Suspense(fallback = fallback.suspenseFallback) {
+            Await(
+                state1 = state1,
+                state2 = state2,
+                content = content,
+            )
+        }
     }
 }
 
-fun <T1, T2, T3, RESULT> soilDataBoundary(
+@Composable
+fun <T1, T2, T3> SoilDataBoundary(
     state1: DataModel<T1>,
     state2: DataModel<T2>,
     state3: DataModel<T3>,
-    transform: (T1, T2, T3) -> RESULT,
-): RESULT? {
-    val combinedReply = Reply.combine(
-        state1.reply,
-        state2.reply,
-        state3.reply,
-    ) { reply1, reply2, reply3 -> transform(reply1, reply2, reply3) }
+    modifier: Modifier = Modifier,
+    fallback: SoilFallback = SoilFallbackDefaults.default(),
+    content: @Composable (T1, T2, T3) -> Unit,
+) {
+    val coroutineScope = rememberCoroutineScope()
 
-    return when (combinedReply) {
-        is Reply.None -> null
-        is Reply.Some<RESULT> -> combinedReply.value
+    ErrorBoundary(
+        fallback = fallback.errorFallback,
+        onReset = {
+            coroutineScope.launch {
+                state1.performResetIfNeeded()
+                state2.performResetIfNeeded()
+                state3.performResetIfNeeded()
+            }
+        },
+        modifier = modifier,
+    ) {
+        Suspense(fallback = fallback.suspenseFallback) {
+            Await(
+                state1 = state1,
+                state2 = state2,
+                state3 = state3,
+                content = content,
+            )
+        }
+    }
+}
+
+// Context interfaces
+interface SoilFallbackContext
+
+interface SoilSuspenseContext : SoilFallbackContext
+
+interface SoilErrorContext : SoilFallbackContext {
+    val errorBoundaryContext: ErrorBoundaryContext
+}
+
+internal class DefaultSoilSuspenseContext : SoilSuspenseContext
+
+internal class DefaultSoilErrorContext(
+    override val errorBoundaryContext: ErrorBoundaryContext,
+) : SoilErrorContext
+
+// Fallback configurations
+data class SoilFallback(
+    val errorFallback: @Composable context(SoilErrorContext) BoxScope.() -> Unit,
+    val suspenseFallback: @Composable context(SoilSuspenseContext) BoxScope.() -> Unit,
+)
+
+object SoilFallbackDefaults {
+    fun default(): SoilFallback = SoilFallback(
+        errorFallback = {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center,
+            ) {
+                // Simple error fallback - you can customize this
+            }
+        },
+        suspenseFallback = {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator()
+            }
+        }
+    )
+}
+
+@Composable
+private fun ErrorBoundary(
+    modifier: Modifier = Modifier,
+    fallback: @Composable context(SoilErrorContext) BoxScope.() -> Unit,
+    onReset: (() -> Unit)? = null,
+    content: @Composable () -> Unit,
+) {
+    ErrorBoundary(
+        fallback = {
+            with(DefaultSoilErrorContext(it)) {
+                fallback()
+            }
+        },
+        onReset = onReset,
+        modifier = modifier,
+        content = content,
+    )
+}
+
+@Composable
+private fun Suspense(
+    fallback: @Composable context(SoilSuspenseContext) BoxScope.() -> Unit,
+    content: @Composable () -> Unit,
+) {
+    Suspense(
+        fallback = {
+            with(DefaultSoilSuspenseContext()) {
+                fallback()
+            }
+        },
+        content = content,
+    )
+}
+
+private suspend fun <T> DataModel<T>.performResetIfNeeded() {
+    when (this) {
+        is QueryObject<T> -> this.error?.let { this.refresh() }
+        is SubscriptionObject<T> -> this.error?.let { this.reset() }
     }
 }

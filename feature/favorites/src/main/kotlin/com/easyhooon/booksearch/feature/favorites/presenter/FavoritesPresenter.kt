@@ -18,9 +18,7 @@ import io.github.takahirom.rin.rememberRetained
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
-import soil.query.annotation.ExperimentalSoilQueryApi
 import soil.query.compose.rememberMutation
-import soil.query.compose.rememberSubscription
 
 data class FavoritesUiState(
     val searchQuery: String = "",
@@ -37,49 +35,38 @@ sealed interface FavoritesScreenEvent {
     data class ToggleFavorite(val book: BookUiModel) : FavoritesScreenEvent
 }
 
-@OptIn(ExperimentalSoilQueryApi::class)
 context(context: FavoritesScreenContext)
 @Composable
 fun FavoritesPresenter(
     eventFlow: EventFlow<FavoritesScreenEvent>,
     queryState: TextFieldState,
+    searchQuery: String,
+    sortType: FavoritesSortType,
+    isPriceFilterEnabled: Boolean,
+    favoriteBooks: ImmutableList<BookUiModel>,
+    onSearchQuery: (String) -> Unit,
+    onSortType: (FavoritesSortType) -> Unit,
+    onPriceFilter: (Boolean) -> Unit,
 ): FavoritesUiState = providePresenterDefaults {
-    var searchQuery by rememberRetained { mutableStateOf("") }
-    var sortType by rememberRetained { mutableStateOf(FavoritesSortType.LATEST) }
-    var isPriceFilterEnabled by rememberRetained { mutableStateOf(false) }
-
-    // Room에서 즐겨찾기 데이터 구독
-    val favoritesSubscription = rememberSubscription(
-        key = context.createFavoriteBooksSubscriptionKey(
-            query = searchQuery,
-            sortType = sortType.value,
-            isPriceFilterEnabled = isPriceFilterEnabled,
-        )
-    )
-
-    val favoriteBooks = favoritesSubscription.data?.toImmutableList() ?: persistentListOf()
-
-    // DroidKaigi 패턴: Mutation을 Presenter에서 생성 (더미 값으로 초기화)
     var toggleMutationKey by remember { mutableStateOf<ToggleFavoriteQueryKey?>(null) }
     val toggleFavoriteMutation = toggleMutationKey?.let { key ->
         rememberMutation(key = key)
     }
 
-
     EventEffect(eventFlow) { event ->
         when (event) {
             is FavoritesScreenEvent.Search -> {
-                searchQuery = queryState.text.toString()
+                onSearchQuery(queryState.text.toString())
             }
             is FavoritesScreenEvent.ClearSearch -> {
                 queryState.clearText()
-                searchQuery = ""
+                onSearchQuery("")
             }
             is FavoritesScreenEvent.ToggleFilter -> {
-                isPriceFilterEnabled = !isPriceFilterEnabled
+                onPriceFilter(!isPriceFilterEnabled)
             }
             is FavoritesScreenEvent.ToggleSort -> {
-                sortType = sortType.next()
+                onSortType(sortType.next())
             }
             is FavoritesScreenEvent.ToggleFavorite -> {
                 toggleMutationKey = context.createToggleFavoriteQueryKey(event.book)
