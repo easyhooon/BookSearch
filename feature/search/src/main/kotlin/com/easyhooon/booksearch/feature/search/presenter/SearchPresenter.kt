@@ -20,6 +20,10 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import soil.query.compose.rememberInfiniteQuery
+import soil.query.compose.rememberMutation
+import soil.query.compose.rememberSubscription
+import com.easyhooon.booksearch.core.data.query.ToggleFavoriteQueryKey
+import soil.query.annotation.ExperimentalSoilQueryApi
 
 data class SearchUiState(
     val currentQuery: String = "",
@@ -33,6 +37,7 @@ sealed interface SearchUiAction {
     data object OnClearClick : SearchUiAction
     data object OnSortClick : SearchUiAction
     data class OnBookClick(val book: BookUiModel) : SearchUiAction
+    data class OnFavoriteToggle(val book: BookUiModel) : SearchUiAction
     data object OnLoadMore : SearchUiAction
 }
 
@@ -45,6 +50,7 @@ data class SearchPresenterState(
     val onAction: (SearchUiAction) -> Unit,
 )
 
+@OptIn(ExperimentalSoilQueryApi::class)
 context(context: SearchScreenContext)
 @Composable
 fun SearchPresenter(
@@ -71,10 +77,26 @@ fun SearchPresenter(
         null
     }
 
-    // 검색 결과 처리
-    val searchResults = infiniteQuery?.data?.flatMap { it.data }?.toImmutableList() ?: persistentListOf()
+    // 즐겨찾기 ID 구독
+    val favoriteIdsSubscription = rememberSubscription(
+        key = context.createFavoriteBookIdsSubscriptionKey()
+    )
+
+    val favoriteBookIds = favoriteIdsSubscription.data ?: emptySet()
+
+    // 검색 결과에 즐겨찾기 상태 반영
+    val rawSearchResults = infiniteQuery?.data?.flatMap { it.data } ?: emptyList()
+    val searchResults = rawSearchResults.map { book ->
+        book.copy(isFavorites = favoriteBookIds.contains(book.isbn))
+    }.toImmutableList()
+
     val hasNextPage = infiniteQuery?.loadMoreParam != null
 
+    // 즐겨찾기 토글 mutation
+    var toggleMutationKey by remember { mutableStateOf<ToggleFavoriteQueryKey?>(null) }
+    val toggleFavoriteMutation = toggleMutationKey?.let { key ->
+        rememberMutation(key = key)
+    }
 
     val onAction: (SearchUiAction) -> Unit = remember(currentQuery, sortType, infiniteQuery) {
         { action ->
@@ -97,6 +119,12 @@ fun SearchPresenter(
                 }
                 is SearchUiAction.OnBookClick -> {
                     eventFlow.tryEmit(SearchUiEvent.NavigateToDetail(action.book))
+                }
+                is SearchUiAction.OnFavoriteToggle -> {
+                    coroutineScope.launch {
+                        toggleMutationKey = context.createToggleFavoriteQueryKey(action.book)
+                        toggleFavoriteMutation?.mutateAsync(Unit)
+                    }
                 }
                 is SearchUiAction.OnLoadMore -> {
                     infiniteQuery?.let { query ->

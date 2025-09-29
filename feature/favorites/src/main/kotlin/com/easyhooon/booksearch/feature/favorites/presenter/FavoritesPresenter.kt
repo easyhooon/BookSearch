@@ -9,7 +9,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import com.easyhooon.booksearch.core.common.model.BookUiModel
-import com.easyhooon.booksearch.core.data.query.GetFavoriteBooksQueryKey
 import com.easyhooon.booksearch.core.data.query.ToggleFavoriteQueryKey
 import com.easyhooon.booksearch.feature.favorites.FavoritesScreenContext
 import com.easyhooon.booksearch.feature.favorites.FavoritesSortType
@@ -19,8 +18,9 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
+import soil.query.annotation.ExperimentalSoilQueryApi
 import soil.query.compose.rememberMutation
-import soil.query.compose.rememberQuery
+import soil.query.compose.rememberSubscription
 
 data class FavoritesUiState(
     val searchQuery: String = "",
@@ -47,6 +47,7 @@ data class FavoritesPresenterState(
     val onAction: (FavoritesUiAction) -> Unit,
 )
 
+@OptIn(ExperimentalSoilQueryApi::class)
 context(context: FavoritesScreenContext)
 @Composable
 fun FavoritesPresenter(
@@ -59,17 +60,17 @@ fun FavoritesPresenter(
     val coroutineScope = rememberCoroutineScope()
 
 
-    // Room에서 즐겨찾기 데이터 가져오기
-    val favoritesQuery = rememberQuery(
-        key = context.createGetFavoriteBooksQueryKey(
+    // Room에서 즐겨찾기 데이터 구독
+    val favoritesSubscription = rememberSubscription(
+        key = context.createFavoriteBooksSubscriptionKey(
             query = searchQuery,
             sortType = sortType.value,
             isPriceFilterEnabled = isPriceFilterEnabled,
         )
     )
-    
-    val favoriteBooks = favoritesQuery.data?.toImmutableList() ?: persistentListOf()
-    
+
+    val favoriteBooks = favoritesSubscription.data?.toImmutableList() ?: persistentListOf()
+
     // DroidKaigi 패턴: Mutation을 Presenter에서 생성 (더미 값으로 초기화)
     var toggleMutationKey by remember { mutableStateOf<ToggleFavoriteQueryKey?>(null) }
     val toggleFavoriteMutation = toggleMutationKey?.let { key ->
