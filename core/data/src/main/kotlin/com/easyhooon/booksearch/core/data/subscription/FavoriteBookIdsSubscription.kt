@@ -1,13 +1,13 @@
 package com.easyhooon.booksearch.core.data.subscription
 
 import com.easyhooon.booksearch.core.database.FavoritesDao
-import kotlinx.coroutines.flow.Flow
+import com.orhanobut.logger.Logger
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.flow.map
 import soil.query.SubscriptionId
 import soil.query.SubscriptionKey
-import soil.query.SubscriptionReceiver
-import javax.inject.Inject
-import javax.inject.Singleton
+import soil.query.buildSubscriptionKey
 
 typealias FavoriteBookIdsSubscriptionKey = SubscriptionKey<Set<String>>
 
@@ -15,19 +15,15 @@ typealias FavoriteBookIdsSubscriptionKey = SubscriptionKey<Set<String>>
 class DefaultFavoriteBookIdsSubscriptionKey @Inject constructor(
     private val favoritesDao: FavoritesDao,
 ) {
-    fun create(): FavoriteBookIdsSubscriptionKey = object : SubscriptionKey<Set<String>> {
-        override val id: SubscriptionId<Set<String>> = SubscriptionId(
-            namespace = "favorite_book_ids_subscription",
-            tags = emptyArray(),
-        )
-
-        override val subscribe: SubscriptionReceiver.() -> Flow<Set<String>>
-            get() = { subscribeFavoriteBookIds() }
-    }
-
-    private fun subscribeFavoriteBookIds(): Flow<Set<String>> {
-        return favoritesDao.getAllFavorites().map { books ->
-            books.map { it.isbn }.toSet()
+    fun create(): FavoriteBookIdsSubscriptionKey = buildSubscriptionKey(
+        id = SubscriptionId("favorite_book_ids_subscription"),
+        subscribe = { 
+            Logger.d("subscribeFavoriteBookIds() called")
+            favoritesDao.getAllFavorites().map { books ->
+                val result = books.map { it.isbn }.toSet()
+                Logger.d("FavoriteBookIds Flow emitted: $result")
+                result
+            }
         }
-    }
+    )
 }

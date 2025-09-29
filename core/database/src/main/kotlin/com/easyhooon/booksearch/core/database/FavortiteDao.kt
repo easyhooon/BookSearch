@@ -19,5 +19,5 @@ interface FavoritesDao {
     suspend fun insertFavorite(book: BookEntity)
 
     @Query("DELETE FROM favorites WHERE isbn = :isbn")
-    suspend fun deleteFavorite(isbn: String)
+    suspend fun deleteFavorite(isbn: String): Int
 }

@@ -1,5 +1,6 @@
 package com.easyhooon.booksearch.feature.search.presenter
 
+import android.util.Log
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.clearText
 import androidx.compose.runtime.Composable
@@ -8,22 +9,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import android.util.Log
-import com.easyhooon.booksearch.core.common.compose.EventEffect
 import com.easyhooon.booksearch.core.common.model.BookUiModel
+import com.easyhooon.booksearch.core.data.query.ToggleFavoriteQueryKey
 import com.easyhooon.booksearch.feature.search.SearchScreenContext
 import com.easyhooon.booksearch.feature.search.SortType
 import io.github.takahirom.rin.rememberRetained
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
+import soil.query.annotation.ExperimentalSoilQueryApi
 import soil.query.compose.rememberInfiniteQuery
 import soil.query.compose.rememberMutation
-import soil.query.compose.rememberSubscription
-import com.easyhooon.booksearch.core.data.query.ToggleFavoriteQueryKey
-import soil.query.annotation.ExperimentalSoilQueryApi
 
 data class SearchUiState(
     val currentQuery: String = "",
@@ -51,6 +48,7 @@ context(context: SearchScreenContext)
 @Composable
 fun SearchPresenter(
     queryState: TextFieldState,
+    favoriteBookIds: Set<String> = emptySet(),
 ): SearchPresenterState = providePresenterDefaults {
     var currentQuery by rememberRetained { mutableStateOf("") }
     var sortType by rememberRetained { mutableStateOf(SortType.ACCURACY) }
@@ -72,14 +70,7 @@ fun SearchPresenter(
         null
     }
 
-    // 즐겨찾기 ID 구독
-    val favoriteIdsSubscription = rememberSubscription(
-        key = context.createFavoriteBookIdsSubscriptionKey()
-    )
-
-    val favoriteBookIds = favoriteIdsSubscription.data ?: emptySet()
-
-    // 검색 결과에 즐겨찾기 상태 반영
+    // 검색 결과에 즐겨찾기 상태 반영 (favoriteBookIds는 파라미터로 받음)
     val rawSearchResults = infiniteQuery?.data?.flatMap { it.data } ?: emptyList()
     val searchResults = remember(rawSearchResults, favoriteBookIds) {
         rawSearchResults.map { book ->
