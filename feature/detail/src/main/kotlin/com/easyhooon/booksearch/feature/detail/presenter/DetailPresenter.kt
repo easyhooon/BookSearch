@@ -36,7 +36,7 @@ fun DetailPresenter(
 
     // 즐겨찾기 토글 Mutation - 현재 책으로 미리 생성
     val toggleFavoriteMutation = rememberMutation(
-        key = context.createToggleFavoriteQueryKey(currentBook)
+        key = context.createToggleFavoriteQueryKey(currentBook),
     )
 
     // DroidKaigi 패턴: EventEffect로 mutation 처리
@@ -58,6 +58,7 @@ fun DetailPresenter(
                 }
                 userMessageStateHolder.showMessage(message)
             }
+
             is DetailScreenEvent.ShowToast -> {
                 // UserMessageStateHolder로 토스트 처리
                 userMessageStateHolder.showMessage(event.message)

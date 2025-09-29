@@ -23,7 +23,7 @@ class DefaultFavoriteBooksSubscriptionKey @Inject constructor(
         isPriceFilterEnabled: Boolean = false,
     ): FavoriteBooksSubscriptionKey = buildSubscriptionKey(
         id = SubscriptionId("favorite_books_subscription_${query}_${sortType}_$isPriceFilterEnabled"),
-        subscribe = { subscribeFavorites(query, sortType, isPriceFilterEnabled) }
+        subscribe = { subscribeFavorites(query, sortType, isPriceFilterEnabled) },
     )
 
     private fun subscribeFavorites(

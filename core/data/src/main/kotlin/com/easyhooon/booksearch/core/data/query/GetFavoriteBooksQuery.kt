@@ -21,7 +21,7 @@ class DefaultGetFavoriteBooksQueryKey @Inject constructor(
         isPriceFilterEnabled: Boolean = false,
     ): GetFavoriteBooksQueryKey = buildQueryKey(
         id = QueryId("favorite_books_${query}_${sortType}_$isPriceFilterEnabled"),
-        fetch = { fetchFavorites(query, sortType, isPriceFilterEnabled) }
+        fetch = { fetchFavorites(query, sortType, isPriceFilterEnabled) },
     )
 
     private suspend fun fetchFavorites(

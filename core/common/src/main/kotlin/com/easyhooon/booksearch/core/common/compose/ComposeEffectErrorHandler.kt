@@ -19,6 +19,7 @@ val LocalComposeEffectErrorHandler = staticCompositionLocalOf<ComposeEffectError
     }
 }
 
+@Suppress("TooGenericExceptionCaught")
 @Composable
 fun SafeLaunchedEffect(key: Any?, block: suspend CoroutineScope.() -> Unit) {
     val composeEffectErrorHandler = LocalComposeEffectErrorHandler.current

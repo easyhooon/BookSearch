@@ -4,22 +4,21 @@ import com.easyhooon.booksearch.core.common.model.BookUiModel
 import com.easyhooon.booksearch.core.database.FavoritesDao
 import com.easyhooon.booksearch.core.database.entity.BookEntity
 import com.orhanobut.logger.Logger
-import soil.query.MutationId
-import soil.query.MutationKey
-import soil.query.MutationReceiver
-import soil.query.buildMutationKey
 import javax.inject.Inject
 import javax.inject.Singleton
+import soil.query.MutationId
+import soil.query.MutationKey
+import soil.query.buildMutationKey
 
 typealias ToggleFavoriteQueryKey = MutationKey<Boolean, Unit>
 
-@Singleton  
+@Singleton
 class DefaultToggleFavoriteQueryKey @Inject constructor(
     private val favoritesDao: FavoritesDao,
 ) {
     fun create(book: BookUiModel): ToggleFavoriteQueryKey = buildMutationKey(
         id = MutationId("toggle_favorite_${book.isbn}"),
-        mutate = { toggleFavorite(book) }
+        mutate = { toggleFavorite(book) },
     )
 
     private suspend fun toggleFavorite(book: BookUiModel): Boolean {

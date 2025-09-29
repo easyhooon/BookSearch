@@ -62,7 +62,7 @@ fun FavoritesPresenter(
     // DroidKaigi 패턴: Mutation을 Presenter에서 생성 (더미 값으로 초기화)
     var toggleMutationKey by remember { mutableStateOf<ToggleFavoriteQueryKey?>(null) }
     val toggleFavoriteMutation = toggleMutationKey?.let { key ->
-        rememberMutation<Boolean, Unit>(key = key)
+        rememberMutation(key = key)
     }
 
 
