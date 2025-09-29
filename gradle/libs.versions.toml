@@ -59,7 +59,7 @@ androidx-test-core = "1.7.0"
 ktor = "3.2.3"
 ktorfit = "2.6.4"
 
-soil = "1.0.0-alpha13"
+soil = "1.0.0-alpha14"
 rin = "0.4.0"
 metro = "0.6.4"
 
