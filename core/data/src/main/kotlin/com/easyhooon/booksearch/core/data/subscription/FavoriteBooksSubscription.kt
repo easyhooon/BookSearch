@@ -19,7 +19,7 @@ class DefaultFavoriteBooksSubscriptionKey @Inject constructor(
 ) {
     fun create(
         query: String = "",
-        sortType: String = "LATEST",
+        sortType: String = "TITLE_ASC",
         isPriceFilterEnabled: Boolean = false,
     ): FavoriteBooksSubscriptionKey = buildSubscriptionKey(
         id = SubscriptionId("favorite_books_subscription_${query}_${sortType}_$isPriceFilterEnabled"),
@@ -48,11 +48,9 @@ class DefaultFavoriteBooksSubscriptionKey @Inject constructor(
             }
 
             when (sortType) {
-                "LATEST" -> filteredBooks.sortedByDescending { it.datetime }
-                "OLDEST" -> filteredBooks.sortedBy { it.datetime }
-                "PRICE_LOW_TO_HIGH" -> filteredBooks.sortedBy { it.price.toIntOrNull() ?: 0 }
-                "PRICE_HIGH_TO_LOW" -> filteredBooks.sortedByDescending { it.price.toIntOrNull() ?: 0 }
-                else -> filteredBooks
+                "TITLE_ASC" -> filteredBooks.sortedBy { it.title }
+                "TITLE_DESC" -> filteredBooks.sortedByDescending { it.title }
+                else -> filteredBooks.sortedBy { it.title } // 기본값: 제목 오름차순
             }
         }.map { bookEntities ->
             val result = bookEntities.map { bookEntity ->
