@@ -27,6 +27,6 @@ class DefaultFavoriteBookIdsSubscriptionKey @Inject constructor(
                 result
             }
         }
-        override val contentEquals: SubscriptionContentEquals<Set<String>> = { old: Set<String>, new: Set<String> -> false }
+        // override val contentEquals: SubscriptionContentEquals<Set<String>> = { old: Set<String>, new: Set<String> -> false }
     }
 }
