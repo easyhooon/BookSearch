@@ -40,7 +40,7 @@ class DefaultToggleFavoriteQueryKey @Inject constructor(
         )
 
         // Simple toggle - if it's favorite, remove it; if not, add it
-        return if (book.isFavorites) {
+        return if (book.isFavorites == true) {
             Logger.d("Removing from favorites: ${book.isbn}")
             val deletedRows = favoritesDao.deleteFavorite(book.isbn)
             Logger.d("Delete operation completed for: ${book.isbn}, deleted rows: $deletedRows")

@@ -53,7 +53,7 @@ internal fun DetailScreen(
         BookSearchTopAppBar(
             startIconRes = designR.drawable.ic_chevron_left,
             startIconOnClick = onBackClick,
-            endIconRes = if (uiState.book.isFavorites) designR.drawable.ic_favorite_filled_red
+            endIconRes = if (uiState.book.isFavorites == true) designR.drawable.ic_favorite_filled_red
             else designR.drawable.ic_selected_favorites,
             endIconOnClick = onFavoriteClick,
         )

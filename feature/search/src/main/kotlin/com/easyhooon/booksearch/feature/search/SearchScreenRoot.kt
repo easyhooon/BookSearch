@@ -11,6 +11,7 @@ import com.easyhooon.booksearch.core.common.SoilFallback
 import com.easyhooon.booksearch.core.common.compose.rememberEventFlow
 import com.easyhooon.booksearch.core.common.model.BookUiModel
 import com.easyhooon.booksearch.core.data.query.SearchBooksPageParam
+import com.orhanobut.logger.Logger
 import com.easyhooon.booksearch.feature.search.presenter.SearchPresenter
 import com.easyhooon.booksearch.feature.search.presenter.SearchScreenEvent
 import io.github.takahirom.rin.rememberRetained
@@ -102,6 +103,7 @@ fun SearchScreenRoot(
                 }
             )
         ) { favoriteBookIds, searchData ->
+            Logger.d("Combine emitted - favoriteBookIds: $favoriteBookIds, searchData size: ${searchData.size}")
             // Soil infinite query의 searchData에서 실제 데이터 추출
             val allSearchResults: List<BookUiModel> = searchData.flatMap { chunk -> chunk.data }
 
@@ -109,6 +111,7 @@ fun SearchScreenRoot(
             val searchResultsWithFavorites = allSearchResults.map { book: BookUiModel ->
                 book.copy(isFavorites = favoriteBookIds.contains(book.isbn))
             }.toImmutableList()
+            Logger.d("SearchResults updated with favorites - total: ${searchResultsWithFavorites.size}, favorites: ${searchResultsWithFavorites.count { it.isFavorites == true }}")
 
             val uiState = SearchPresenter(
                 eventFlow = eventFlow,

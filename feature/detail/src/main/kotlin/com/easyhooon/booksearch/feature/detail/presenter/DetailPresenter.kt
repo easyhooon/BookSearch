@@ -43,7 +43,7 @@ fun DetailPresenter(
         when (event) {
             is DetailScreenEvent.ToggleFavorite -> {
                 // Optimistic update
-                val newFavoriteStatus = !currentBook.isFavorites
+                val newFavoriteStatus = !(currentBook.isFavorites ?: false)
                 currentBook = currentBook.copy(isFavorites = newFavoriteStatus)
 
                 // EventEffect에서 mutation 실행 (suspend 함수 지원)

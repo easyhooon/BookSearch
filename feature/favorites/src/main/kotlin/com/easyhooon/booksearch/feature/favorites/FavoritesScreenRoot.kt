@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.easyhooon.booksearch.core.common.SoilDataBoundary
+import com.easyhooon.booksearch.core.common.SoilFallback
 import com.easyhooon.booksearch.core.common.compose.rememberEventFlow
 import com.easyhooon.booksearch.core.common.model.BookUiModel
 import com.easyhooon.booksearch.feature.favorites.presenter.FavoritesPresenter
@@ -43,7 +44,7 @@ fun FavoritesScreenRoot(
                 isPriceFilterEnabled = isPriceFilterEnabled,
             )
         ),
-        fallback = com.easyhooon.booksearch.core.common.SoilFallback(
+        fallback = SoilFallback(
             errorFallback = {
                 // 에러 시 빈 즐겨찾기로 표시
                 val uiState = FavoritesPresenter(

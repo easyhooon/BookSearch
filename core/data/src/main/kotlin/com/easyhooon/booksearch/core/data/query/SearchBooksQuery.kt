@@ -55,7 +55,7 @@ class DefaultSearchBooksQueryKey @Inject constructor(
                         salePrice = bookResponse.salePrice,
                         thumbnail = bookResponse.thumbnail,
                         status = bookResponse.status,
-                        isFavorites = false,
+                        isFavorites = null,
                     )
                 }
             }
