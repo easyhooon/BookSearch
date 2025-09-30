@@ -31,7 +31,6 @@ sealed interface SearchScreenEvent {
     data object ClearSearch : SearchScreenEvent
     data object ToggleSort : SearchScreenEvent
     data class ToggleFavorite(val book: BookUiModel) : SearchScreenEvent
-    data object LoadMore : SearchScreenEvent
 }
 
 context(context: SearchScreenContext)
@@ -73,10 +72,6 @@ fun SearchPresenter(
             is SearchScreenEvent.ToggleFavorite -> {
                 toggleMutationKey = context.createToggleFavoriteQueryKey(event.book)
                 toggleFavoriteMutation?.mutate(Unit)
-            }
-            is SearchScreenEvent.LoadMore -> {
-                // LoadMore는 Root에서 직접 처리됨
-                Log.d("SearchPresenter", "LoadMore event - handled in Root")
             }
         }
     }

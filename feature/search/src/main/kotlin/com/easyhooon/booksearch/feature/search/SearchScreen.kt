@@ -68,8 +68,9 @@ internal fun SearchScreen(
     onSearchClick: (String) -> Unit,
     onClearClick: () -> Unit,
     onSortClick: () -> Unit,
-    onLoadMore: () -> Unit,
     onBookClick: (BookUiModel) -> Unit,
+    loadMore: suspend (Any) -> Unit = {},
+    loadMoreParam: Any? = null,
 ) {
     Column(
         modifier = Modifier
@@ -102,7 +103,8 @@ internal fun SearchScreen(
                         books = uiState.searchResults,
                         hasNextPage = uiState.hasNextPage,
                         onBookClick = onBookClick,
-                        onLoadMore = onLoadMore,
+                        loadMore = loadMore,
+                        loadMoreParam = loadMoreParam,
                     )
                 }
             }
@@ -178,7 +180,8 @@ internal fun SearchContent(
     books: ImmutableList<BookUiModel>,
     hasNextPage: Boolean,
     onBookClick: (BookUiModel) -> Unit,
-    onLoadMore: () -> Unit,
+    loadMore: suspend (Any) -> Unit = {},
+    loadMoreParam: Any? = null,
 ) {
     if (books.isEmpty()) {
         SearchEmptyContent()
@@ -221,8 +224,8 @@ internal fun SearchContent(
 
         LazyLoad(
             state = lazyListState,
-            loadMore = { onLoadMore() },
-            loadMoreParam = if (hasNextPage) Unit else null
+            loadMore = { param -> loadMore(param) },
+            loadMoreParam = loadMoreParam
         )
     }
 }
@@ -306,7 +309,6 @@ private fun SearchScreenPreview() {
             onSearchClick = {},
             onClearClick = {},
             onSortClick = {},
-            onLoadMore = {},
             onBookClick = {},
         )
     }
