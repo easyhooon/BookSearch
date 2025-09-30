@@ -47,19 +47,14 @@ import soil.plant.compose.reacty.Suspense
 import com.easyhooon.booksearch.core.designsystem.R as designR
 
 enum class FavoritesSortType(val value: String, val label: String) {
-    LATEST("LATEST", "최신순"),
-    OLDEST("OLDEST", "오래된순"),
-    PRICE_LOW_TO_HIGH("PRICE_LOW_TO_HIGH", "가격 낮은순"),
-    PRICE_HIGH_TO_LOW("PRICE_HIGH_TO_LOW", "가격 높은순");
+    TITLE_ASC("TITLE_ASC", "제목 오름차순"),
+    TITLE_DESC("TITLE_DESC", "제목 내림차순");
 
     fun next(): FavoritesSortType = when (this) {
-        LATEST -> OLDEST
-        OLDEST -> PRICE_LOW_TO_HIGH
-        PRICE_LOW_TO_HIGH -> PRICE_HIGH_TO_LOW
-        PRICE_HIGH_TO_LOW -> LATEST
+        TITLE_ASC -> TITLE_DESC
+        TITLE_DESC -> TITLE_ASC
     }
 }
-
 
 @Composable
 internal fun FavoritesScreen(

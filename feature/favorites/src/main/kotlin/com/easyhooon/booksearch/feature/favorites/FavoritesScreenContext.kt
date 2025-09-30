@@ -19,7 +19,7 @@ class FavoritesScreenContext @Inject constructor(
 
     fun createFavoriteBooksSubscriptionKey(
         query: String = "",
-        sortType: String = "LATEST",
+        sortType: String = "TITLE_ASC",
         isPriceFilterEnabled: Boolean = false,
     ): FavoriteBooksSubscriptionKey = favoriteBooksSubscriptionKey.create(query, sortType, isPriceFilterEnabled)
 }

@@ -28,11 +28,9 @@ fun FavoritesScreenRoot(
     onBookClick: (BookUiModel) -> Unit,
 ) {
     val queryState = rememberRetained { TextFieldState() }
-
-    // UI 상태 추적을 위해 Root에서 관리
-    var searchQuery by remember { mutableStateOf("") }
-    var sortType by remember { mutableStateOf(FavoritesSortType.LATEST) }
-    var isPriceFilterEnabled by remember { mutableStateOf(false) }
+    var searchQuery by rememberRetained { mutableStateOf("") }
+    var sortType by rememberRetained { mutableStateOf(FavoritesSortType.TITLE_ASC) }
+    var isPriceFilterEnabled by rememberRetained { mutableStateOf(false) }
 
     val eventFlow = rememberEventFlow<FavoritesScreenEvent>()
 
