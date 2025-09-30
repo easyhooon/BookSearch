@@ -1,6 +1,5 @@
 package com.easyhooon.booksearch.feature.search.presenter
 
-import android.util.Log
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.clearText
 import androidx.compose.runtime.Composable
@@ -13,6 +12,7 @@ import com.easyhooon.booksearch.core.common.compose.EventFlow
 import com.easyhooon.booksearch.core.common.compose.providePresenterDefaults
 import com.easyhooon.booksearch.core.common.model.BookUiModel
 import com.easyhooon.booksearch.core.data.query.ToggleFavoriteQueryKey
+import com.orhanobut.logger.Logger
 import com.easyhooon.booksearch.feature.search.SearchScreenContext
 import com.easyhooon.booksearch.feature.search.SortType
 import kotlinx.collections.immutable.ImmutableList
@@ -54,12 +54,12 @@ fun SearchPresenter(
     EventEffect(eventFlow) { event ->
         when (event) {
             is SearchScreenEvent.Search -> {
-                Log.d("SearchPresenter", "Search event called with query: '${event.query}'")
+                Logger.d("SearchPresenter: Search event called with query: '${event.query}'")
                 if (event.query.isNotBlank()) {
-                    Log.d("SearchPresenter", "Query is not blank, updating currentQuery to '${event.query}'")
+                    Logger.d("SearchPresenter: Query is not blank, updating currentQuery to '${event.query}'")
                     onQueryChange(event.query)
                 } else {
-                    Log.d("SearchPresenter", "Query is blank, ignoring")
+                    Logger.d("SearchPresenter: Query is blank, ignoring")
                 }
             }
             is SearchScreenEvent.ClearSearch -> {

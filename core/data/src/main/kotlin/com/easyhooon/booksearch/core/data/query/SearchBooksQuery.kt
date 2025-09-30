@@ -1,8 +1,8 @@
 package com.easyhooon.booksearch.core.data.query
 
-import android.util.Log
 import com.easyhooon.booksearch.core.common.model.BookUiModel
 import com.easyhooon.booksearch.core.network.client.BookSearchKtorClient
+import com.orhanobut.logger.Logger
 import javax.inject.Inject
 import javax.inject.Singleton
 import soil.query.InfiniteQueryId
@@ -30,13 +30,13 @@ class DefaultSearchBooksQueryKey @Inject constructor(
         override val id = InfiniteQueryId<List<BookUiModel>, SearchBooksPageParam>("search_books_${query}_${sort}_$size")
         override val initialParam = { SearchBooksPageParam(1) }
         override val fetch: suspend QueryReceiver.(param: SearchBooksPageParam) -> List<BookUiModel> = { pageParam ->
-            Log.d("SearchBooksQuery", "fetch called with query='$query', sort='$sort', page=${pageParam.page}, size=$size")
+            Logger.d("SearchBooksQuery: fetch called with query='$query', sort='$sort', page=${pageParam.page}, size=$size")
 
             if (query.isBlank()) {
-                Log.d("SearchBooksQuery", "Query is blank, returning empty list")
+                Logger.d("SearchBooksQuery: Query is blank, returning empty list")
                 emptyList()
             } else {
-                Log.d("SearchBooksQuery", "Making API call to searchBook")
+                Logger.d("SearchBooksQuery: Making API call to searchBook")
                 val response = ktorClient.searchBook(
                     query = query,
                     sort = sort,
@@ -44,7 +44,7 @@ class DefaultSearchBooksQueryKey @Inject constructor(
                     size = size,
                 )
 
-                Log.d("SearchBooksQuery", "API response received: ${response.documents.size} documents")
+                Logger.d("SearchBooksQuery: API response received: ${response.documents.size} documents")
 
                 response.documents.map { bookResponse ->
                     BookUiModel(
