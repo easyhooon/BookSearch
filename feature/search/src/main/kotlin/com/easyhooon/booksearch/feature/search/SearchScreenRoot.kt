@@ -57,51 +57,13 @@ fun SearchScreenRoot(
             state1 = favoriteIdsSubscription,
             state2 = searchInfiniteQuery,
             fallback = SoilFallback(
-                errorFallback = {
-                    val uiState = SearchPresenter(
-                        eventFlow = eventFlow,
-                        queryState = queryState,
-                        currentQuery = currentQuery,
-                        sortType = sortType,
-                        searchResults = persistentListOf(),
-                        hasNextPage = false,
-                        onQueryChange = { currentQuery = it },
-                        onSortChange = { sortType = it },
-                    )
-
-                    SearchScreen(
-                        innerPadding = innerPadding,
-                        queryState = queryState,
-                        uiState = uiState,
-                        onSearchClick = { query -> eventFlow.tryEmit(SearchScreenEvent.Search(query)) },
-                        onClearClick = { eventFlow.tryEmit(SearchScreenEvent.ClearSearch) },
-                        onSortClick = { eventFlow.tryEmit(SearchScreenEvent.ToggleSort) },
-                        onBookClick = onBookClick,
-                    )
+                errorFallback = { ctx ->
+                    SearchErrorContent(onRetry = { ctx.errorBoundaryContext.reset?.let { it() } })
                 },
                 suspenseFallback = {
-                    val uiState = SearchPresenter(
-                        eventFlow = eventFlow,
-                        queryState = queryState,
-                        currentQuery = currentQuery,
-                        sortType = sortType,
-                        searchResults = persistentListOf(),
-                        hasNextPage = false,
-                        onQueryChange = { currentQuery = it },
-                        onSortChange = { sortType = it },
-                    )
-
-                    SearchScreen(
-                        innerPadding = innerPadding,
-                        queryState = queryState,
-                        uiState = uiState,
-                        onSearchClick = { query -> eventFlow.tryEmit(SearchScreenEvent.Search(query)) },
-                        onClearClick = { eventFlow.tryEmit(SearchScreenEvent.ClearSearch) },
-                        onSortClick = { eventFlow.tryEmit(SearchScreenEvent.ToggleSort) },
-                        onBookClick = onBookClick,
-                    )
+                    SearchLoadingContent()
                 }
-            )
+            ),
         ) { favoriteBookIds, searchData ->
             Logger.d("Combine emitted - favoriteBookIds: $favoriteBookIds, searchData size: ${searchData.size}")
             // Soil infinite query의 searchData에서 실제 데이터 추출
@@ -147,51 +109,13 @@ fun SearchScreenRoot(
         SoilDataBoundary(
             state = favoriteIdsSubscription,
             fallback = SoilFallback(
-                errorFallback = {
-                    val uiState = SearchPresenter(
-                        eventFlow = eventFlow,
-                        queryState = queryState,
-                        currentQuery = currentQuery,
-                        sortType = sortType,
-                        searchResults = persistentListOf(),
-                        hasNextPage = false,
-                        onQueryChange = { currentQuery = it },
-                        onSortChange = { sortType = it },
-                    )
-
-                    SearchScreen(
-                        innerPadding = innerPadding,
-                        queryState = queryState,
-                        uiState = uiState,
-                        onSearchClick = { query -> eventFlow.tryEmit(SearchScreenEvent.Search(query)) },
-                        onClearClick = { eventFlow.tryEmit(SearchScreenEvent.ClearSearch) },
-                        onSortClick = { eventFlow.tryEmit(SearchScreenEvent.ToggleSort) },
-                        onBookClick = onBookClick,
-                    )
+                errorFallback = { ctx ->
+                    SearchErrorContent(onRetry = { ctx.errorBoundaryContext.reset?.let { it() } })
                 },
                 suspenseFallback = {
-                    val uiState = SearchPresenter(
-                        eventFlow = eventFlow,
-                        queryState = queryState,
-                        currentQuery = currentQuery,
-                        sortType = sortType,
-                        searchResults = persistentListOf(),
-                        hasNextPage = false,
-                        onQueryChange = { currentQuery = it },
-                        onSortChange = { sortType = it },
-                    )
-
-                    SearchScreen(
-                        innerPadding = innerPadding,
-                        queryState = queryState,
-                        uiState = uiState,
-                        onSearchClick = { query -> eventFlow.tryEmit(SearchScreenEvent.Search(query)) },
-                        onClearClick = { eventFlow.tryEmit(SearchScreenEvent.ClearSearch) },
-                        onSortClick = { eventFlow.tryEmit(SearchScreenEvent.ToggleSort) },
-                        onBookClick = onBookClick,
-                    )
+                    SearchLoadingContent()
                 }
-            )
+            ),
         ) { favoriteBookIds ->
             val uiState = SearchPresenter(
                 eventFlow = eventFlow,

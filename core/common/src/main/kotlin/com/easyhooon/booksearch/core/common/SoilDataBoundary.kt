@@ -121,8 +121,8 @@ internal class DefaultSoilErrorContext(
 
 // Fallback configurations
 data class SoilFallback(
-    val errorFallback: @Composable context(SoilErrorContext) BoxScope.() -> Unit,
-    val suspenseFallback: @Composable context(SoilSuspenseContext) BoxScope.() -> Unit,
+    val errorFallback: @Composable BoxScope.(SoilErrorContext) -> Unit,
+    val suspenseFallback: @Composable BoxScope.(SoilSuspenseContext) -> Unit,
 )
 
 object SoilFallbackDefaults {
@@ -149,15 +149,13 @@ object SoilFallbackDefaults {
 @Composable
 private fun ErrorBoundary(
     modifier: Modifier = Modifier,
-    fallback: @Composable context(SoilErrorContext) BoxScope.() -> Unit,
+    fallback: @Composable BoxScope.(SoilErrorContext) -> Unit,
     onReset: (() -> Unit)? = null,
     content: @Composable () -> Unit,
 ) {
     ErrorBoundary(
         fallback = {
-            with(DefaultSoilErrorContext(it)) {
-                fallback()
-            }
+            fallback(DefaultSoilErrorContext(it))
         },
         onReset = onReset,
         modifier = modifier,
@@ -167,14 +165,12 @@ private fun ErrorBoundary(
 
 @Composable
 private fun Suspense(
-    fallback: @Composable context(SoilSuspenseContext) BoxScope.() -> Unit,
+    fallback: @Composable BoxScope.(SoilSuspenseContext) -> Unit,
     content: @Composable () -> Unit,
 ) {
     Suspense(
         fallback = {
-            with(DefaultSoilSuspenseContext()) {
-                fallback()
-            }
+            fallback(DefaultSoilSuspenseContext())
         },
         content = content,
     )

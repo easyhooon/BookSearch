@@ -45,8 +45,6 @@ import com.easyhooon.booksearch.core.ui.component.BookSearchTopAppBar
 import com.easyhooon.booksearch.feature.search.presenter.SearchUiState
 import kotlinx.collections.immutable.ImmutableList
 import soil.plant.compose.lazy.LazyLoad
-import soil.plant.compose.reacty.ErrorBoundary
-import soil.plant.compose.reacty.Suspense
 import com.easyhooon.booksearch.core.designsystem.R as designR
 
 enum class SortType(val value: String, val displayName: String) {
@@ -89,25 +87,13 @@ internal fun SearchScreen(
         )
 
         if (uiState.currentQuery.isNotEmpty()) {
-            ErrorBoundary(
-                fallback = { context ->
-                    SearchErrorContent(onRetry = { context.reset?.invoke() })
-                }
-            ) {
-                Suspense(
-                    fallback = {
-                        SearchLoadingContent()
-                    }
-                ) {
-                    SearchContent(
-                        books = uiState.searchResults,
-                        hasNextPage = uiState.hasNextPage,
-                        onBookClick = onBookClick,
-                        loadMore = loadMore,
-                        loadMoreParam = loadMoreParam,
-                    )
-                }
-            }
+            SearchContent(
+                books = uiState.searchResults,
+                hasNextPage = uiState.hasNextPage,
+                onBookClick = onBookClick,
+                loadMore = loadMore,
+                loadMoreParam = loadMoreParam,
+            )
         } else {
             SearchIdleContent()
         }
@@ -231,7 +217,35 @@ internal fun SearchContent(
 }
 
 @Composable
-private fun SearchLoadingContent() {
+private fun SearchEmptyContent() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = stringResource(R.string.empty_results),
+            color = Black,
+            style = body1Medium,
+        )
+    }
+}
+
+@Composable
+private fun SearchIdleContent() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = stringResource(R.string.search_idle),
+            color = Black,
+            style = body1Medium,
+        )
+    }
+}
+
+@Composable
+internal fun SearchLoadingContent() {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
@@ -241,7 +255,7 @@ private fun SearchLoadingContent() {
 }
 
 @Composable
-private fun SearchErrorContent(onRetry: () -> Unit) {
+internal fun SearchErrorContent(onRetry: () -> Unit) {
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
@@ -267,34 +281,6 @@ private fun SearchErrorContent(onRetry: () -> Unit) {
                 style = body1SemiBold,
             )
         }
-    }
-}
-
-@Composable
-private fun SearchEmptyContent() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text = stringResource(R.string.empty_results),
-            color = Black,
-            style = body1Medium,
-        )
-    }
-}
-
-@Composable
-private fun SearchIdleContent() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text = stringResource(R.string.search_idle),
-            color = Black,
-            style = body1Medium,
-        )
     }
 }
 
