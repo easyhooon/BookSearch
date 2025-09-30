@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.booksearch.android.library)
     alias(libs.plugins.booksearch.android.retrofit)
     alias(libs.plugins.booksearch.android.hilt)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -15,7 +16,7 @@ android {
     }
 
     buildTypes {
-        debug {
+        all {
             buildConfigField("String", "KAKAO_API_BASE_URL", getLocalProperty("KAKAO_API_BASE_URL"))
             buildConfigField("String", "KAKAO_REST_API_KEY", getLocalProperty("KAKAO_REST_API_KEY"))
         }
@@ -24,6 +25,13 @@ android {
 
 dependencies {
     implementation(libs.logger)
+
+    implementation(libs.ktor.client.okhttp)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.client.logging)
+    implementation(libs.ktor.kotlinx.serialization.json)
+
+    implementation(libs.kotlinx.serialization.json)
 }
 
 fun getLocalProperty(propertyKey: String): String {

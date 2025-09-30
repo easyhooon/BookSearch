@@ -5,6 +5,10 @@ plugins {
 
 android {
     namespace = "com.easyhooon.booksearch.feature.main"
+
+    kotlinOptions {
+        freeCompilerArgs = listOf("-XXLanguage:+PropertyParamAnnotationDefaultTargetMode")
+    }
 }
 
 dependencies {
@@ -19,4 +23,6 @@ dependencies {
 
     implementation(libs.compose.keyboard.state)
     implementation(libs.logger)
+
+    implementation(libs.soil.query.compose)
 }

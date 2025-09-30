@@ -10,21 +10,14 @@ android {
     namespace = "com.easyhooon.booksearch"
 
     buildTypes {
-        getByName("debug") {
+        debug {
             isDebuggable = true
-            applicationIdSuffix = ".dev"
-            manifestPlaceholders += mapOf(
-                "appName" to "@string/app_name_dev",
-            )
         }
 
-        getByName("release") {
+        release {
             isDebuggable = false
             isMinifyEnabled = true
             isShrinkResources = true
-            manifestPlaceholders += mapOf(
-                "appName" to "@string/app_name",
-            )
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
@@ -47,7 +40,6 @@ dependencies {
     implementation(projects.core.common)
     implementation(projects.core.data)
     implementation(projects.core.designsystem)
-    implementation(projects.core.domain)
     implementation(projects.core.network)
 
     implementation(projects.feature.detail)
@@ -59,6 +51,8 @@ dependencies {
     implementation(libs.androidx.startup)
     implementation(libs.coil.compose)
     implementation(libs.logger)
+    implementation(libs.soil.query.core)
+    implementation(libs.soil.query.compose)
 }
 
 fun getApiKey(propertyKey: String): String {

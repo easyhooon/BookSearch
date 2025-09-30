@@ -1,6 +1,5 @@
 package com.easyhooon.booksearch.feature.favorites
 
-import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -16,22 +15,18 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.easyhooon.booksearch.core.common.ObserveAsEvents
 import com.easyhooon.booksearch.core.common.model.BookUiModel
 import com.easyhooon.booksearch.core.designsystem.DevicePreview
 import com.easyhooon.booksearch.core.designsystem.component.BookSearchTextField
@@ -45,47 +40,33 @@ import com.easyhooon.booksearch.core.designsystem.theme.body1Medium
 import com.easyhooon.booksearch.core.designsystem.theme.body1SemiBold
 import com.easyhooon.booksearch.core.ui.component.BookCard
 import com.easyhooon.booksearch.core.ui.component.BookSearchTopAppBar
-import com.easyhooon.booksearch.feature.favorites.viewmodel.FavoritesUiAction
-import com.easyhooon.booksearch.feature.favorites.viewmodel.FavoritesUiEvent
-import com.easyhooon.booksearch.feature.favorites.viewmodel.FavoritesUiState
-import com.easyhooon.booksearch.feature.favorites.viewmodel.FavoritesViewModel
+import com.easyhooon.booksearch.feature.favorites.presenter.FavoritesUiState
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
+import soil.plant.compose.reacty.ErrorBoundary
+import soil.plant.compose.reacty.Suspense
 import com.easyhooon.booksearch.core.designsystem.R as designR
 
-@Composable
-internal fun FavoritesRoute(
-    innerPadding: PaddingValues,
-    navigateToDetail: (BookUiModel) -> Unit,
-    viewModel: FavoritesViewModel = hiltViewModel(),
-) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val favoriteBooks by viewModel.favoriteBooks.collectAsStateWithLifecycle()
-    val context = LocalContext.current
+enum class FavoritesSortType(val value: String, val label: String) {
+    TITLE_ASC("TITLE_ASC", "제목 오름차순"),
+    TITLE_DESC("TITLE_DESC", "제목 내림차순");
 
-    ObserveAsEvents(flow = viewModel.uiEvent) { event ->
-        when (event) {
-            is FavoritesUiEvent.NavigateToDetail -> navigateToDetail(event.book)
-            is FavoritesUiEvent.ShowToast -> {
-                Toast.makeText(context, event.message.asString(context), Toast.LENGTH_SHORT).show()
-            }
-        }
+    fun next(): FavoritesSortType = when (this) {
+        TITLE_ASC -> TITLE_DESC
+        TITLE_DESC -> TITLE_ASC
     }
-
-    FavoritesScreen(
-        innerPadding = innerPadding,
-        uiState = uiState,
-        favoriteBooks = favoriteBooks,
-        onAction = viewModel::onAction,
-    )
 }
 
 @Composable
 internal fun FavoritesScreen(
     innerPadding: PaddingValues,
+    queryState: TextFieldState,
     uiState: FavoritesUiState,
-    favoriteBooks: ImmutableList<BookUiModel>,
-    onAction: (FavoritesUiAction) -> Unit,
+    onSearchClick: () -> Unit,
+    onClearClick: () -> Unit,
+    onFilterClick: () -> Unit,
+    onSortClick: () -> Unit,
+    onFavoriteToggle: (BookUiModel) -> Unit,
+    onBookClick: (BookUiModel) -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -94,16 +75,34 @@ internal fun FavoritesScreen(
             .background(Neutral100),
     ) {
         BookSearchTopAppBar(title = stringResource(id = designR.string.favorites_label))
+
         FavoritesHeader(
-            queryState = uiState.queryState,
+            queryState = queryState,
             sortLabel = uiState.sortType.label,
-            onAction = onAction,
+            onSearchClick = onSearchClick,
+            onClearClick = onClearClick,
+            onFilterClick = onFilterClick,
+            onSortClick = onSortClick,
         )
-        FavoritesContent(
-            favoriteBooks = favoriteBooks,
-            isPriceFilterEnabled = uiState.isPriceFilterEnabled,
-            onAction = onAction,
-        )
+
+        ErrorBoundary(
+            fallback = { context ->
+                FavoritesErrorContent(onRetry = { context.reset?.invoke() })
+            }
+        ) {
+            Suspense(
+                fallback = {
+                    FavoritesLoadingContent()
+                }
+            ) {
+                FavoritesContent(
+                    books = uiState.favoriteBooks,
+                    isPriceFilterEnabled = uiState.isPriceFilterEnabled,
+                    onBookClick = onBookClick,
+                    onFavoriteToggle = onFavoriteToggle,
+                )
+            }
+        }
     }
 }
 
@@ -111,7 +110,10 @@ internal fun FavoritesScreen(
 internal fun FavoritesHeader(
     queryState: TextFieldState,
     sortLabel: String,
-    onAction: (FavoritesUiAction) -> Unit,
+    onSearchClick: () -> Unit,
+    onClearClick: () -> Unit,
+    onFilterClick: () -> Unit,
+    onSortClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -120,12 +122,8 @@ internal fun FavoritesHeader(
         BookSearchTextField(
             queryState = queryState,
             queryHintRes = designR.string.search_book_hint,
-            onSearch = { query ->
-                onAction(FavoritesUiAction.OnSearchClick)
-            },
-            onClear = {
-                onAction(FavoritesUiAction.OnClearClick)
-            },
+            onSearch = { onSearchClick() },
+            onClear = onClearClick,
             modifier = Modifier.padding(horizontal = 20.dp),
             borderStroke = BorderStroke(width = 1.dp, color = Neutral500),
             searchIconTint = Neutral500,
@@ -144,7 +142,7 @@ internal fun FavoritesHeader(
             )
             Row {
                 OutlinedButton(
-                    onClick = { onAction(FavoritesUiAction.OnFilterClick) },
+                    onClick = onFilterClick,
                     colors = ButtonDefaults.outlinedButtonColors(
                         containerColor = White,
                         contentColor = Black,
@@ -169,7 +167,7 @@ internal fun FavoritesHeader(
                 }
                 Spacer(modifier = Modifier.width(4.dp))
                 OutlinedButton(
-                    onClick = { onAction(FavoritesUiAction.OnSortClick) },
+                    onClick = onSortClick,
                     colors = ButtonDefaults.outlinedButtonColors(
                         containerColor = White,
                         contentColor = Black,
@@ -199,44 +197,89 @@ internal fun FavoritesHeader(
 
 @Composable
 internal fun FavoritesContent(
-    favoriteBooks: ImmutableList<BookUiModel>,
+    books: ImmutableList<BookUiModel>,
     isPriceFilterEnabled: Boolean,
-    onAction: (FavoritesUiAction) -> Unit,
+    onBookClick: (BookUiModel) -> Unit,
+    onFavoriteToggle: (BookUiModel) -> Unit,
 ) {
-    if (favoriteBooks.isEmpty()) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(
-                text = stringResource(R.string.empty_favorites),
-                color = Black,
-                style = body1Medium,
-            )
-        }
+    if (books.isEmpty()) {
+        FavoritesEmptyContent()
     } else {
         LazyColumn(
-            modifier = Modifier
-                .fillMaxSize(),
+            modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             items(
-                count = favoriteBooks.size,
-                key = { index -> favoriteBooks[index].isbn },
+                count = books.size,
+                key = { index -> books[index].isbn },
             ) { index ->
                 BookCard(
-                    book = favoriteBooks[index],
+                    book = books[index],
                     onBookClick = { book ->
-                        onAction(FavoritesUiAction.OnBookClick(book))
+                        onBookClick(book)
                     },
                     isPriceFilterEnabled = isPriceFilterEnabled,
                     onFavoritesClick = { book ->
-                        onAction(FavoritesUiAction.OnFavoritesClick(book))
+                        onFavoriteToggle(book)
                     },
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun FavoritesLoadingContent() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center,
+    ) {
+        CircularProgressIndicator(color = Neutral500)
+    }
+}
+
+@Composable
+private fun FavoritesErrorContent(onRetry: () -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            text = "에러가 발생했습니다",
+            color = Black,
+            style = body1Medium,
+        )
+        Spacer(modifier = Modifier.padding(8.dp))
+        OutlinedButton(
+            onClick = onRetry,
+            colors = ButtonDefaults.outlinedButtonColors(
+                containerColor = White,
+                contentColor = Black,
+            ),
+            border = BorderStroke(width = 1.dp, color = Neutral200),
+        ) {
+            Text(
+                text = "다시 시도",
+                color = Black,
+                style = body1SemiBold,
+            )
+        }
+    }
+}
+
+@Composable
+private fun FavoritesEmptyContent() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = stringResource(R.string.empty_favorites),
+            color = Black,
+            style = body1Medium,
+        )
     }
 }
 
@@ -246,9 +289,14 @@ private fun FavoritesScreenPreview() {
     BookSearchTheme {
         FavoritesScreen(
             innerPadding = PaddingValues(),
+            queryState = TextFieldState(),
             uiState = FavoritesUiState(),
-            favoriteBooks = persistentListOf(),
-            onAction = {},
+            onSearchClick = {},
+            onClearClick = {},
+            onFilterClick = {},
+            onSortClick = {},
+            onFavoriteToggle = {},
+            onBookClick = {},
         )
     }
 }

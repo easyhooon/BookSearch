@@ -3,8 +3,8 @@
 android-gradle-plugin = "8.9.3"
 
 ## AndroidX
-androidx-core = "1.16.0"
-androidx-lifecycle = "2.9.2"
+androidx-core = "1.17.0"
+androidx-lifecycle = "2.9.3"
 androidx-activity-compose = "1.10.1"
 androidx-startup = "1.2.0"
 androidx-splash = "1.0.1"
@@ -12,15 +12,15 @@ androidx-room = "2.7.2"
 androidx-navigation = "2.9.3"
 
 ## Compose
-androidx-compose-bom = "2025.07.00"
-androidx-compose-material3 = "1.4.0-beta01"
-compose-stable-marker = "1.0.6"
+androidx-compose-bom = "2025.08.01"
+androidx-compose-material3 = "1.4.0-beta03"
+compose-stable-marker = "1.0.7"
 
 ## Kotlin Symbol Processing
-ksp = "2.2.0-2.0.2"
+ksp = "2.2.10-2.0.2"
 
 ## Kotlin
-kotlin = "2.2.0"
+kotlin = "2.2.10"
 kotlinx-coroutines = "1.10.2"
 kotlinx-serialization-json = "1.9.0"
 kotlinx-datetime = "0.7.1"
@@ -39,7 +39,7 @@ logger = "2.2.0"
 
 ## Image Load
 coil-compose = "2.7.0"
-landscapist = "2.5.1"
+landscapist = "2.5.2"
 
 ## Extension
 # https://github.com/taehwandev/ComposeExtensions
@@ -53,14 +53,22 @@ kotlin-ktlint-source = "0.50.0"
 ## Test
 junit = "4.13.2"
 androidx-junit = "1.2.1"
-androidx-test-ext-junit = "1.2.1"
-androidx-test-core = "1.6.1"
+androidx-test-ext-junit = "1.3.0"
+androidx-test-core = "1.7.0"
+
+ktor = "3.2.3"
+ktorfit = "2.6.4"
+
+soil = "1.0.0-alpha14"
+rin = "0.4.0"
+metro = "0.6.4"
 
 [libraries]
-gradle-android = { group = "com.android.tools.build", name = "gradle", version.ref = "android-gradle-plugin" }
-gradle-kotlin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
-gradle-androidx-room = { group = "androidx.room", name = "room-gradle-plugin", version.ref = "androidx-room" }
-gradle-compose-compiler = { group = "org.jetbrains.kotlin", name = "compose-compiler-gradle-plugin", version.ref = "kotlin" }
+android-gradle-plugin = { group = "com.android.tools.build", name = "gradle", version.ref = "android-gradle-plugin" }
+kotlin-gradle-plugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
+room-gradle-plugin = { group = "androidx.room", name = "room-gradle-plugin", version.ref = "androidx-room" }
+compose-compiler-gradle-plugin = { group = "org.jetbrains.kotlin", name = "compose-compiler-gradle-plugin", version.ref = "kotlin" }
+metro-gradle-plugin = { module = "dev.zacsweers.metro:dev.zacsweers.metro.gradle.plugin", version.ref = "metro" }
 
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "androidx-core" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "androidx-lifecycle" }
@@ -118,6 +126,22 @@ androidx-test-runner = { group = "androidx.test", name = "runner", version.ref =
 
 javax-inject = { group = "javax.inject", name = "javax.inject", version = "1" }
 
+ktor-client-okhttp = { group = "io.ktor", name = "ktor-client-okhttp", version.ref = "ktor" }
+ktor-client-darwin = { group = "io.ktor", name = "ktor-client-darwin", version.ref = "ktor" }
+ktor-client-content-negotiation = { group = "io.ktor", name = "ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-client-logging = { group = "io.ktor", name = "ktor-client-logging", version.ref = "ktor" }
+ktor-kotlinx-serialization-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }
+ktorfit-lib = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-lib", version.ref = "ktorfit" }
+
+soil-query-core = { group = "com.soil-kt.soil", name = "query-core", version.ref = "soil" }
+soil-query-compose = { group = "com.soil-kt.soil", name = "query-compose", version.ref = "soil" }
+soil-reacty = { group = "com.soil-kt.soil", name = "reacty", version.ref = "soil" }
+soil-form = { group = "com.soil-kt.soil", name = "form", version.ref = "soil" }
+soil-lazyload = { group = "com.soil-kt.soil", name = "lazyload", version.ref = "soil" }
+soil-optimistic-update = { group = "com.soil-kt.soil", name = "optimistic-update", version.ref = "soil" }
+
+rin = { group = "io.github.takahirom.rin", name = "rin", version.ref = "rin" }
+
 [plugins]
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
@@ -131,6 +155,9 @@ android-application = { id = "com.android.application", version.ref = "android-g
 android-library = { id = "com.android.library", version.ref = "android-gradle-plugin" }
 
 androidx-room = { id = "androidx.room", version.ref = "androidx-room" }
+
+ktorfit = { id = "de.jensklingenberg.ktorfit", version.ref = "ktorfit" }
+metro = { id = "dev.zacsweers.metro", version.ref = "metro" }
 
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }

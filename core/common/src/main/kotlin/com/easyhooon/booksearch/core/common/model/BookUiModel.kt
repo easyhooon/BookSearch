@@ -18,5 +18,5 @@ data class BookUiModel(
     val salePrice: String = "",
     val thumbnail: String = "",
     val status: String = "",
-    val isFavorites: Boolean = false,
+    val isFavorites: Boolean? = null,
 )

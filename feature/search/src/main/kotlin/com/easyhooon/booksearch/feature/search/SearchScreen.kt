@@ -12,7 +12,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -20,7 +22,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,9 +29,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.easyhooon.booksearch.core.common.ObserveAsEvents
 import com.easyhooon.booksearch.core.common.model.BookUiModel
 import com.easyhooon.booksearch.core.designsystem.DevicePreview
 import com.easyhooon.booksearch.core.designsystem.component.BookSearchTextField
@@ -44,46 +42,33 @@ import com.easyhooon.booksearch.core.designsystem.theme.body1Medium
 import com.easyhooon.booksearch.core.designsystem.theme.body1SemiBold
 import com.easyhooon.booksearch.core.ui.component.BookCard
 import com.easyhooon.booksearch.core.ui.component.BookSearchTopAppBar
-import com.easyhooon.booksearch.feature.search.component.InfinityLazyColumn
-import com.easyhooon.booksearch.feature.search.component.LoadStateFooter
-import com.easyhooon.booksearch.feature.search.viewmodel.SearchState
-import com.easyhooon.booksearch.feature.search.viewmodel.SearchUiAction
-import com.easyhooon.booksearch.feature.search.viewmodel.SearchUiEvent
-import com.easyhooon.booksearch.feature.search.viewmodel.SearchUiState
-import com.easyhooon.booksearch.feature.search.viewmodel.SearchViewModel
+import com.easyhooon.booksearch.feature.search.presenter.SearchUiState
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
+import soil.plant.compose.lazy.LazyLoad
 import com.easyhooon.booksearch.core.designsystem.R as designR
 
-@Composable
-internal fun SearchRoute(
-    innerPadding: PaddingValues,
-    navigateToDetail: (BookUiModel) -> Unit,
-    viewModel: SearchViewModel = hiltViewModel(),
-) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val searchBooks by viewModel.searchBooks.collectAsStateWithLifecycle()
+enum class SortType(val value: String, val displayName: String) {
+    ACCURACY("accuracy", "정확도순"),
+    LATEST("latest", "최신순");
 
-    ObserveAsEvents(flow = viewModel.uiEvent) { event ->
-        when (event) {
-            is SearchUiEvent.NavigateToDetail -> navigateToDetail(event.book)
-        }
+    fun toggle(): SortType = when (this) {
+        ACCURACY -> LATEST
+        LATEST -> ACCURACY
     }
-
-    SearchScreen(
-        innerPadding = innerPadding,
-        uiState = uiState,
-        searchBooks = searchBooks,
-        onAction = viewModel::onAction,
-    )
 }
+
 
 @Composable
 internal fun SearchScreen(
     innerPadding: PaddingValues,
+    queryState: TextFieldState,
     uiState: SearchUiState,
-    searchBooks: ImmutableList<BookUiModel>,
-    onAction: (SearchUiAction) -> Unit,
+    onSearchClick: (String) -> Unit,
+    onClearClick: () -> Unit,
+    onSortClick: () -> Unit,
+    onBookClick: (BookUiModel) -> Unit,
+    loadMore: suspend (Any) -> Unit = {},
+    loadMoreParam: Any? = null,
 ) {
     Column(
         modifier = Modifier
@@ -92,16 +77,26 @@ internal fun SearchScreen(
             .background(Neutral100),
     ) {
         BookSearchTopAppBar(title = stringResource(designR.string.search_label))
+
         SearchHeader(
-            queryState = uiState.queryState,
-            sortLabel = uiState.sortType.label,
-            onAction = onAction,
+            queryState = queryState,
+            sortLabel = uiState.sortType.displayName,
+            onSearchClick = onSearchClick,
+            onClearClick = onClearClick,
+            onSortClick = onSortClick,
         )
-        SearchContent(
-            uiState = uiState,
-            searchBooks = searchBooks,
-            onAction = onAction,
-        )
+
+        if (uiState.currentQuery.isNotEmpty()) {
+            SearchContent(
+                books = uiState.searchResults,
+                hasNextPage = uiState.hasNextPage,
+                onBookClick = onBookClick,
+                loadMore = loadMore,
+                loadMoreParam = loadMoreParam,
+            )
+        } else {
+            SearchIdleContent()
+        }
     }
 }
 
@@ -109,7 +104,9 @@ internal fun SearchScreen(
 internal fun SearchHeader(
     queryState: TextFieldState,
     sortLabel: String,
-    onAction: (SearchUiAction) -> Unit,
+    onSearchClick: (String) -> Unit,
+    onClearClick: () -> Unit,
+    onSortClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -118,12 +115,8 @@ internal fun SearchHeader(
         BookSearchTextField(
             queryState = queryState,
             queryHintRes = designR.string.search_book_hint,
-            onSearch = { query ->
-                onAction(SearchUiAction.OnSearchClick(query))
-            },
-            onClear = {
-                onAction(SearchUiAction.OnClearClick)
-            },
+            onSearch = onSearchClick,
+            onClear = onClearClick,
             modifier = Modifier.padding(horizontal = 20.dp),
             borderStroke = BorderStroke(width = 1.dp, color = Neutral500),
             searchIconTint = Neutral500,
@@ -141,7 +134,7 @@ internal fun SearchHeader(
                 style = body1SemiBold,
             )
             OutlinedButton(
-                onClick = { onAction(SearchUiAction.OnSortClick) },
+                onClick = onSortClick,
                 colors = ButtonDefaults.outlinedButtonColors(
                     containerColor = White,
                     contentColor = Black,
@@ -170,99 +163,123 @@ internal fun SearchHeader(
 
 @Composable
 internal fun SearchContent(
-    uiState: SearchUiState,
-    searchBooks: ImmutableList<BookUiModel>,
-    onAction: (SearchUiAction) -> Unit,
+    books: ImmutableList<BookUiModel>,
+    hasNextPage: Boolean,
+    onBookClick: (BookUiModel) -> Unit,
+    loadMore: suspend (Any) -> Unit = {},
+    loadMoreParam: Any? = null,
 ) {
-    when (uiState.searchState) {
-        is SearchState.Loading -> {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center,
-            ) {
-                CircularProgressIndicator(color = Neutral500)
-            }
-        }
+    if (books.isEmpty()) {
+        SearchEmptyContent()
+    } else {
+        val lazyListState = rememberLazyListState()
 
-        is SearchState.Error -> {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Text(
-                    text = stringResource(R.string.search_error),
-                    color = Black,
-                    style = body1Medium,
-                )
-                Spacer(modifier = Modifier.padding(8.dp))
-                OutlinedButton(
-                    onClick = { onAction(SearchUiAction.OnRetryClick) },
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        containerColor = White,
-                        contentColor = Black,
-                    ),
-                    border = BorderStroke(width = 1.dp, color = Neutral200),
-                ) {
-                    Text(
-                        text = stringResource(R.string.retry),
-                        color = Black,
-                        style = body1SemiBold,
-                    )
-                }
-            }
-        }
-
-        is SearchState.Idle -> {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = stringResource(R.string.search_idle),
-                    color = Black,
-                    style = body1Medium,
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            state = lazyListState,
+            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            items(
+                items = books,
+                key = { it.isbn },
+            ) { book ->
+                BookCard(
+                    book = book,
+                    onBookClick = { onBookClick(book) },
                 )
             }
-        }
 
-        is SearchState.Success -> {
-            if (uiState.isEmptySearchResult) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = stringResource(R.string.empty_results),
-                        color = Black,
-                        style = body1Medium,
-                    )
-                }
-            } else {
-                InfinityLazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    loadMore = { onAction(SearchUiAction.OnLoadMore) },
-                ) {
-                    items(
-                        items = searchBooks,
-                        key = { it.isbn },
-                    ) { book ->
-                        BookCard(
-                            book = book,
-                            onBookClick = { onAction(SearchUiAction.OnBookClick(book)) },
-                        )
-                    }
-
-                    item {
-                        LoadStateFooter(
-                            footerState = uiState.footerState,
-                            onRetryClick = { onAction(SearchUiAction.OnRetryClick) },
+            // Loading indicator for next page
+            if (books.isNotEmpty() && hasNextPage) {
+                item(contentType = "loading") {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(
+                            color = Neutral500,
+                            modifier = Modifier.padding(16.dp)
                         )
                     }
                 }
             }
+        }
+
+        LazyLoad(
+            state = lazyListState,
+            loadMore = { param -> loadMore(param) },
+            loadMoreParam = loadMoreParam
+        )
+    }
+}
+
+@Composable
+private fun SearchEmptyContent() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = stringResource(R.string.empty_results),
+            color = Black,
+            style = body1Medium,
+        )
+    }
+}
+
+@Composable
+private fun SearchIdleContent() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = stringResource(R.string.search_idle),
+            color = Black,
+            style = body1Medium,
+        )
+    }
+}
+
+@Composable
+internal fun SearchLoadingContent() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center,
+    ) {
+        CircularProgressIndicator(color = Neutral500)
+    }
+}
+
+@Composable
+internal fun SearchErrorContent(onRetry: () -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            text = stringResource(R.string.search_error),
+            color = Black,
+            style = body1Medium,
+        )
+        Spacer(modifier = Modifier.padding(8.dp))
+        OutlinedButton(
+            onClick = onRetry,
+            colors = ButtonDefaults.outlinedButtonColors(
+                containerColor = White,
+                contentColor = Black,
+            ),
+            border = BorderStroke(width = 1.dp, color = Neutral200),
+        ) {
+            Text(
+                text = stringResource(R.string.retry),
+                color = Black,
+                style = body1SemiBold,
+            )
         }
     }
 }
@@ -273,9 +290,12 @@ private fun SearchScreenPreview() {
     BookSearchTheme {
         SearchScreen(
             innerPadding = PaddingValues(),
+            queryState = TextFieldState(),
             uiState = SearchUiState(),
-            searchBooks = persistentListOf(),
-            onAction = {},
+            onSearchClick = {},
+            onClearClick = {},
+            onSortClick = {},
+            onBookClick = {},
         )
     }
 }

@@ -20,8 +20,8 @@ internal class AndroidFeatureConventionPlugin : Plugin<Project> {
 
             dependencies {
                 implementation(project(path = ":core:common"))
+                implementation(project(path = ":core:data"))
                 implementation(project(path = ":core:designsystem"))
-                implementation(project(path = ":core:domain"))
                 implementation(project(path = ":core:navigation"))
                 implementation(project(path = ":core:ui"))
 

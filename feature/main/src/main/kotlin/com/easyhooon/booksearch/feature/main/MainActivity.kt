@@ -5,8 +5,10 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.easyhooon.booksearch.core.common.SwrClientFactory
 import com.easyhooon.booksearch.core.designsystem.theme.BookSearchTheme
 import dagger.hilt.android.AndroidEntryPoint
+import soil.query.compose.SwrClientProvider
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -14,9 +16,12 @@ class MainActivity : ComponentActivity() {
         installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        val swrClientFactory = application as SwrClientFactory
         setContent {
-            BookSearchTheme {
-                MainScreen()
+            SwrClientProvider(client = swrClientFactory.queryClient) {
+                BookSearchTheme {
+                    MainScreen()
+                }
             }
         }
     }

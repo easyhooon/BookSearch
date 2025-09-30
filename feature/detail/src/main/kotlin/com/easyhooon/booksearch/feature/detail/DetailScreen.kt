@@ -1,7 +1,5 @@
 package com.easyhooon.booksearch.feature.detail
 
-import android.R.attr.text
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,23 +14,19 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.easyhooon.booksearch.core.common.ObserveAsEvents
 import com.easyhooon.booksearch.core.common.extensions.toFormattedDate
 import com.easyhooon.booksearch.core.common.extensions.toFormattedPrice
 import com.easyhooon.booksearch.core.common.model.BookUiModel
 import com.easyhooon.booksearch.core.designsystem.DevicePreview
+import com.easyhooon.booksearch.core.designsystem.R as designR
 import com.easyhooon.booksearch.core.designsystem.component.NetworkImage
 import com.easyhooon.booksearch.core.designsystem.theme.Black
 import com.easyhooon.booksearch.core.designsystem.theme.BookSearchTheme
@@ -41,42 +35,15 @@ import com.easyhooon.booksearch.core.designsystem.theme.Neutral600
 import com.easyhooon.booksearch.core.designsystem.theme.body1Medium
 import com.easyhooon.booksearch.core.designsystem.theme.heading1Bold
 import com.easyhooon.booksearch.core.ui.component.BookSearchTopAppBar
-import com.easyhooon.booksearch.feature.detail.viewmodel.DetailUiAction
-import com.easyhooon.booksearch.feature.detail.viewmodel.DetailUiEvent
-import com.easyhooon.booksearch.feature.detail.viewmodel.DetailUiState
-import com.easyhooon.booksearch.feature.detail.viewmodel.DetailViewModel
-import com.easyhooon.booksearch.core.designsystem.R as designR
-
-@Composable
-internal fun DetailRoute(
-    innerPadding: PaddingValues,
-    popBackStack: () -> Unit,
-    viewModel: DetailViewModel = hiltViewModel(),
-) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val context = LocalContext.current
-
-    ObserveAsEvents(flow = viewModel.uiEvent) { event ->
-        when (event) {
-            is DetailUiEvent.NavigateBack -> popBackStack()
-            is DetailUiEvent.ShowToast -> {
-                Toast.makeText(context, event.message.asString(context), Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
-
-    DetailScreen(
-        innerPadding = innerPadding,
-        uiState = uiState,
-        onAction = viewModel::onAction,
-    )
-}
+import com.easyhooon.booksearch.core.common.toast.UserMessageStateHolderImpl
+import com.easyhooon.booksearch.feature.detail.presenter.DetailUiState
 
 @Composable
 internal fun DetailScreen(
     innerPadding: PaddingValues,
     uiState: DetailUiState,
-    onAction: (DetailUiAction) -> Unit,
+    onFavoriteClick: () -> Unit,
+    onBackClick: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -85,14 +52,10 @@ internal fun DetailScreen(
     ) {
         BookSearchTopAppBar(
             startIconRes = designR.drawable.ic_chevron_left,
-            startIconOnClick = {
-                onAction(DetailUiAction.OnBackClick)
-            },
-            endIconRes = if (uiState.book.isFavorites) designR.drawable.ic_favorite_filled_red
+            startIconOnClick = onBackClick,
+            endIconRes = if (uiState.book.isFavorites == true) designR.drawable.ic_favorite_filled_red
             else designR.drawable.ic_selected_favorites,
-            endIconOnClick = {
-                onAction(DetailUiAction.OnFavoritesClick)
-            },
+            endIconOnClick = onFavoriteClick,
         )
         DetailContent(book = uiState.book)
     }
@@ -240,8 +203,12 @@ private fun DetailScreenPreview() {
     BookSearchTheme {
         DetailScreen(
             innerPadding = PaddingValues(),
-            uiState = DetailUiState(),
-            onAction = {},
+            uiState = DetailUiState(
+                book = BookUiModel(),
+                userMessageStateHolder = UserMessageStateHolderImpl(),
+            ),
+            onFavoriteClick = {},
+            onBackClick = {},
         )
     }
 }

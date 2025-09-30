@@ -1,0 +1,72 @@
+package com.easyhooon.booksearch.core.data.query
+
+import com.easyhooon.booksearch.core.common.model.BookUiModel
+import com.easyhooon.booksearch.core.database.FavoritesDao
+import kotlinx.coroutines.flow.first
+import soil.query.QueryId
+import soil.query.QueryKey
+import soil.query.buildQueryKey
+import javax.inject.Inject
+import javax.inject.Singleton
+
+typealias GetFavoriteBooksQueryKey = QueryKey<List<BookUiModel>>
+
+@Singleton
+class DefaultGetFavoriteBooksQueryKey @Inject constructor(
+    private val favoritesDao: FavoritesDao,
+) {
+    fun create(
+        query: String = "",
+        sortType: String = "LATEST",
+        isPriceFilterEnabled: Boolean = false,
+    ): GetFavoriteBooksQueryKey = buildQueryKey(
+        id = QueryId("favorite_books_${query}_${sortType}_$isPriceFilterEnabled"),
+        fetch = { fetchFavorites(query, sortType, isPriceFilterEnabled) },
+    )
+
+    private suspend fun fetchFavorites(
+        query: String,
+        sortType: String,
+        isPriceFilterEnabled: Boolean,
+    ): List<BookUiModel> {
+        return if (query.isNotEmpty()) {
+            favoritesDao.searchFavoritesByTitle(query).first()
+        } else {
+            favoritesDao.getAllFavorites().first()
+        }.let { books ->
+            var filteredBooks = books
+
+            // Apply price filter (if enabled, filter out books with price = 0 or empty)
+            if (isPriceFilterEnabled) {
+                filteredBooks = filteredBooks.filter {
+                    it.price.isNotEmpty() && it.price != "0"
+                }
+            }
+
+            // Apply sorting
+            when (sortType) {
+                "LATEST" -> filteredBooks.sortedByDescending { it.datetime }
+                "OLDEST" -> filteredBooks.sortedBy { it.datetime }
+                "PRICE_LOW_TO_HIGH" -> filteredBooks.sortedBy { it.price.toIntOrNull() ?: 0 }
+                "PRICE_HIGH_TO_LOW" -> filteredBooks.sortedByDescending { it.price.toIntOrNull() ?: 0 }
+                else -> filteredBooks
+            }
+        }.map { bookEntity ->
+            BookUiModel(
+                isbn = bookEntity.isbn,
+                title = bookEntity.title,
+                contents = bookEntity.contents,
+                url = bookEntity.url,
+                datetime = bookEntity.datetime,
+                authors = bookEntity.authors,
+                publisher = bookEntity.publisher,
+                translators = bookEntity.translators,
+                price = bookEntity.price,
+                salePrice = bookEntity.salePrice,
+                thumbnail = bookEntity.thumbnail,
+                status = bookEntity.status,
+                isFavorites = true, // All favorites are favorite by definition
+            )
+        }
+    }
+}

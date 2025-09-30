@@ -32,7 +32,7 @@ internal fun Project.configureCompose(
         tasks.withType<KotlinCompile>().configureEach {
             compilerOptions {
                 freeCompilerArgs.addAll(
-                    buildComposeMetricsParameters(),
+                    buildComposeMetricsParameters() + listOf("-Xcontext-parameters"),
                 )
             }
         }

@@ -117,7 +117,7 @@ fun BookCard(
                 )
             }
         }
-        if (book.isFavorites) {
+        if (book.isFavorites == true) {
             Icon(
                 imageVector = ImageVector.vectorResource(designR.drawable.ic_favorite_filled_red),
                 contentDescription = "Favorited book",

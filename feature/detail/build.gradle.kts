@@ -11,4 +11,10 @@ dependencies {
     implementation(libs.kotlinx.collections.immutable)
 
     implementation(libs.logger)
+
+    implementation(libs.soil.query.compose)
+    implementation(libs.soil.reacty)
+    implementation(libs.soil.optimistic.update)
+
+    implementation(libs.rin)
 }
