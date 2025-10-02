@@ -2,6 +2,7 @@ package com.easyhooon.booksearch.feature.favorites
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.clearText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -56,10 +57,19 @@ fun FavoritesScreenRoot(
         innerPadding = innerPadding,
         queryState = queryState,
         uiState = uiState,
-        onSearchClick = { eventFlow.tryEmit(FavoritesScreenEvent.Search) },
-        onClearClick = { eventFlow.tryEmit(FavoritesScreenEvent.ClearSearch) },
-        onFilterClick = { eventFlow.tryEmit(FavoritesScreenEvent.ToggleFilter) },
-        onSortClick = { eventFlow.tryEmit(FavoritesScreenEvent.ToggleSort) },
+        onSearchClick = {
+            searchQuery = queryState.text.toString()
+        },
+        onClearClick = {
+            queryState.clearText()
+            searchQuery = ""
+        },
+        onFilterClick = {
+            isPriceFilterEnabled = !isPriceFilterEnabled
+        },
+        onSortClick = {
+            sortType = sortType.next()
+        },
         onFavoriteToggle = { book -> eventFlow.tryEmit(FavoritesScreenEvent.ToggleFavorite(book)) },
         onBookClick = onBookClick,
     )

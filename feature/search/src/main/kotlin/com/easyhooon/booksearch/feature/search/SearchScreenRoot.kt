@@ -2,6 +2,7 @@ package com.easyhooon.booksearch.feature.search
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.clearText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -90,9 +91,18 @@ fun SearchScreenRoot(
                 innerPadding = innerPadding,
                 queryState = queryState,
                 uiState = uiState,
-                onSearchClick = { query -> eventFlow.tryEmit(SearchScreenEvent.Search(query)) },
-                onClearClick = { eventFlow.tryEmit(SearchScreenEvent.ClearSearch) },
-                onSortClick = { eventFlow.tryEmit(SearchScreenEvent.ToggleSort) },
+                onSearchClick = { query ->
+                    if (query.isNotBlank()) {
+                        currentQuery = query
+                    }
+                },
+                onClearClick = {
+                    queryState.clearText()
+                    currentQuery = ""
+                },
+                onSortClick = {
+                    sortType = sortType.toggle()
+                },
                 onBookClick = onBookClick,
                 loadMore = { param ->
                     searchInfiniteQuery.loadMore.let { loadMoreFn ->
@@ -132,9 +142,18 @@ fun SearchScreenRoot(
                 innerPadding = innerPadding,
                 queryState = queryState,
                 uiState = uiState,
-                onSearchClick = { query -> eventFlow.tryEmit(SearchScreenEvent.Search(query)) },
-                onClearClick = { eventFlow.tryEmit(SearchScreenEvent.ClearSearch) },
-                onSortClick = { eventFlow.tryEmit(SearchScreenEvent.ToggleSort) },
+                onSearchClick = { query ->
+                    if (query.isNotBlank()) {
+                        currentQuery = query
+                    }
+                },
+                onClearClick = {
+                    queryState.clearText()
+                    currentQuery = ""
+                },
+                onSortClick = {
+                    sortType = sortType.toggle()
+                },
                 onBookClick = onBookClick,
             )
         }
