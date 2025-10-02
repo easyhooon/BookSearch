@@ -10,7 +10,7 @@ import javax.inject.Inject
 class SearchScreenContext @Inject constructor(
     val searchBooksQueryKey: DefaultSearchBooksQueryKey,
     val bookRepository: BookRepository,
-) {}
+)
 
 @EntryPoint
 @InstallIn(SingletonComponent::class)
