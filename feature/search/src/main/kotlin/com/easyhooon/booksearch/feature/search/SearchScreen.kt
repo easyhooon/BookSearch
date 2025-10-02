@@ -190,9 +190,8 @@ internal fun SearchContent(
                 )
             }
 
-            // Loading indicator for next page
             if (books.isNotEmpty() && hasNextPage) {
-                item(contentType = "loading") {
+                item {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
