@@ -3,18 +3,20 @@ package com.easyhooon.booksearch.feature.favorites
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.easyhooon.booksearch.core.common.compose.rememberEventFlow
+import com.easyhooon.booksearch.core.common.mapper.toUiModel
 import com.easyhooon.booksearch.core.common.model.BookUiModel
 import com.easyhooon.booksearch.feature.favorites.presenter.FavoritesPresenter
 import com.easyhooon.booksearch.feature.favorites.presenter.FavoritesScreenEvent
 import io.github.takahirom.rin.rememberRetained
 import kotlinx.collections.immutable.toImmutableList
 import soil.query.annotation.ExperimentalSoilQueryApi
-import soil.query.compose.rememberSubscription
-import soil.query.core.getOrNull
 
 @OptIn(ExperimentalSoilQueryApi::class)
 context(context: FavoritesScreenContext)
@@ -30,15 +32,40 @@ fun FavoritesScreenRoot(
 
     val eventFlow = rememberEventFlow<FavoritesScreenEvent>()
 
-    val subscriptionState = rememberSubscription(
-        key = context.createFavoriteBooksSubscriptionKey(
-            query = searchQuery,
-            sortType = sortType.value,
-            isPriceFilterEnabled = isPriceFilterEnabled,
-        )
-    )
+    // Repository Flow 구독
+    val allFavoriteBooks by context.bookRepository.favoriteBooks
+        .collectAsStateWithLifecycle(initialValue = emptyList())
 
-    val favoriteBooks = subscriptionState.reply.getOrNull() ?: emptyList()
+    // 클라이언트 사이드에서 필터링/정렬 처리
+    val favoriteBooks by remember {
+        derivedStateOf {
+            allFavoriteBooks
+                .filter { book ->
+                    // 검색 쿼리 필터링
+                    if (searchQuery.isNotEmpty()) {
+                        book.title.contains(searchQuery, ignoreCase = true)
+                    } else {
+                        true
+                    }
+                }
+                .filter { book ->
+                    // 가격 필터링
+                    if (isPriceFilterEnabled) {
+                        book.price.isNotEmpty() && book.price != "0"
+                    } else {
+                        true
+                    }
+                }
+                .let { filteredBooks ->
+                    // 정렬
+                    when (sortType) {
+                        FavoritesSortType.TITLE_ASC -> filteredBooks.sortedBy { it.title }
+                        FavoritesSortType.TITLE_DESC -> filteredBooks.sortedByDescending { it.title }
+                    }
+                }
+                .map { it.toUiModel() }
+        }
+    }
 
     val uiState = FavoritesPresenter(
         eventFlow = eventFlow,

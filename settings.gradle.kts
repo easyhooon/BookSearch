@@ -30,6 +30,7 @@ include(
 
     ":core:network",
     ":core:database",
+    ":core:domain",
     ":core:data",
     ":core:common",
     ":core:designsystem",

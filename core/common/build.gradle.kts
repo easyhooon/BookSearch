@@ -12,6 +12,7 @@ android {
 dependencies {
     compileOnly(libs.compose.stable.marker)
 
+    implementation(projects.core.domain)
     implementation(projects.core.network)
 
     implementation(libs.logger)

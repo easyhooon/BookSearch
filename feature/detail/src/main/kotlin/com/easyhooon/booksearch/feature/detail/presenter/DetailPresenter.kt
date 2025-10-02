@@ -4,16 +4,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import com.easyhooon.booksearch.core.common.model.BookUiModel
 import com.easyhooon.booksearch.core.common.compose.EventEffect
 import com.easyhooon.booksearch.core.common.compose.EventFlow
 import com.easyhooon.booksearch.core.common.compose.providePresenterDefaults
+import com.easyhooon.booksearch.core.common.mapper.toModel
 import com.easyhooon.booksearch.core.common.toast.UserMessageStateHolder
 import com.easyhooon.booksearch.core.common.toast.UserMessageStateHolderImpl
 import com.easyhooon.booksearch.feature.detail.DetailScreenContext
 import io.github.takahirom.rin.rememberRetained
-import soil.query.compose.rememberMutation
+import kotlinx.coroutines.launch
 
 data class DetailUiState(
     val book: BookUiModel,
@@ -33,11 +35,7 @@ fun DetailPresenter(
 ): DetailUiState = providePresenterDefaults {
     var currentBook by rememberRetained { mutableStateOf(initialBook) }
     val userMessageStateHolder = remember { UserMessageStateHolderImpl() }
-
-    // 즐겨찾기 토글 Mutation - 현재 책으로 미리 생성
-    val toggleFavoriteMutation = rememberMutation(
-        key = context.createToggleFavoriteQueryKey(currentBook),
-    )
+    val coroutineScope = rememberCoroutineScope()
 
     EventEffect(eventFlow) { event ->
         when (event) {
@@ -46,8 +44,14 @@ fun DetailPresenter(
                 val newFavoriteStatus = !(currentBook.isFavorites ?: false)
                 currentBook = currentBook.copy(isFavorites = newFavoriteStatus)
 
-                // EventEffect에서 mutation 실행 (suspend 함수 지원)
-                toggleFavoriteMutation.mutate(Unit)
+                // Repository로 즐겨찾기 추가/삭제
+                coroutineScope.launch {
+                    if (newFavoriteStatus) {
+                        context.bookRepository.insertBook(currentBook.toModel())
+                    } else {
+                        context.bookRepository.deleteBook(currentBook.isbn)
+                    }
+                }
 
                 // Toast 메시지 표시
                 val message = if (newFavoriteStatus) {
