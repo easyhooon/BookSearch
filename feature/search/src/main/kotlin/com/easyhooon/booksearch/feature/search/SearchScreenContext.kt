@@ -13,13 +13,9 @@ import javax.inject.Inject
 class SearchScreenContext @Inject constructor(
     val searchBooksQueryKey: DefaultSearchBooksQueryKey,
     private val favoriteBookIdsSubscriptionKey: DefaultFavoriteBookIdsSubscriptionKey,
-    private val toggleFavoriteQueryKey: DefaultToggleFavoriteQueryKey,
 ) {
-    fun createFavoriteBookIdsSubscriptionKey(): FavoriteBookIdsSubscriptionKey = 
+    fun createFavoriteBookIdsSubscriptionKey(): FavoriteBookIdsSubscriptionKey =
         favoriteBookIdsSubscriptionKey.create()
-        
-    fun createToggleFavoriteQueryKey(book: com.easyhooon.booksearch.core.common.model.BookUiModel): ToggleFavoriteQueryKey =
-        toggleFavoriteQueryKey.create(book)
 }
 
 @EntryPoint
