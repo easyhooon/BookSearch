@@ -1,7 +1,8 @@
 package com.easyhooon.booksearch.feature.search
 
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.clearText
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,19 +31,16 @@ fun SearchScreenRoot(
     innerPadding: PaddingValues,
     onBookClick: (BookUiModel) -> Unit,
 ) {
-    val queryState = rememberRetained { TextFieldState() }
+    val queryState = rememberTextFieldState()
     val eventFlow = rememberEventFlow<SearchScreenEvent>()
 
-    // 검색 쿼리와 정렬 상태 관리 - 화면 이동 후에도 유지
     var currentQuery by rememberRetained { mutableStateOf("") }
     var sortType by remember { mutableStateOf(SortType.ACCURACY) }
 
-    // 즐겨찾기 구독 - Repository Flow 사용
     val favoriteBookIds by context.bookRepository.favoriteBooks
         .map { books -> books.map { it.isbn }.toSet() }
         .collectAsStateWithLifecycle(initialValue = emptySet())
 
-    // 검색 쿼리가 있을 때만 InfiniteQuery 생성
     val searchInfiniteQuery = if (currentQuery.isNotEmpty()) {
         rememberInfiniteQuery(
             key = context.searchBooksQueryKey.create(
@@ -92,9 +90,18 @@ fun SearchScreenRoot(
                 innerPadding = innerPadding,
                 queryState = queryState,
                 uiState = uiState,
-                onSearchClick = { query -> eventFlow.tryEmit(SearchScreenEvent.Search(query)) },
-                onClearClick = { eventFlow.tryEmit(SearchScreenEvent.ClearSearch) },
-                onSortClick = { eventFlow.tryEmit(SearchScreenEvent.ToggleSort) },
+                onSearchClick = { query ->
+                    if (query.isNotBlank()) {
+                        currentQuery = query
+                    }
+                },
+                onClearClick = {
+                    queryState.clearText()
+                    currentQuery = ""
+                },
+                onSortClick = {
+                    sortType = sortType.toggle()
+                },
                 onBookClick = onBookClick,
                 loadMore = { param ->
                     searchInfiniteQuery.loadMore.let { loadMoreFn ->
@@ -123,9 +130,18 @@ fun SearchScreenRoot(
             innerPadding = innerPadding,
             queryState = queryState,
             uiState = uiState,
-            onSearchClick = { query -> eventFlow.tryEmit(SearchScreenEvent.Search(query)) },
-            onClearClick = { eventFlow.tryEmit(SearchScreenEvent.ClearSearch) },
-            onSortClick = { eventFlow.tryEmit(SearchScreenEvent.ToggleSort) },
+            onSearchClick = { query ->
+                if (query.isNotBlank()) {
+                    currentQuery = query
+                }
+            },
+            onClearClick = {
+                queryState.clearText()
+                currentQuery = ""
+            },
+            onSortClick = {
+                sortType = sortType.toggle()
+            },
             onBookClick = onBookClick,
         )
     }

@@ -1,7 +1,8 @@
 package com.easyhooon.booksearch.feature.favorites
 
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.clearText
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -25,23 +26,20 @@ fun FavoritesScreenRoot(
     innerPadding: PaddingValues,
     onBookClick: (BookUiModel) -> Unit,
 ) {
-    val queryState = rememberRetained { TextFieldState() }
+    val queryState = rememberTextFieldState()
     var searchQuery by rememberRetained { mutableStateOf("") }
     var sortType by rememberRetained { mutableStateOf(FavoritesSortType.TITLE_ASC) }
     var isPriceFilterEnabled by rememberRetained { mutableStateOf(false) }
 
     val eventFlow = rememberEventFlow<FavoritesScreenEvent>()
 
-    // Repository Flow 구독
     val allFavoriteBooks by context.bookRepository.favoriteBooks
         .collectAsStateWithLifecycle(initialValue = emptyList())
 
-    // 클라이언트 사이드에서 필터링/정렬 처리
-    val favoriteBooks by remember {
+    val favoriteBooks by remember(searchQuery, sortType, isPriceFilterEnabled) {
         derivedStateOf {
             allFavoriteBooks
                 .filter { book ->
-                    // 검색 쿼리 필터링
                     if (searchQuery.isNotEmpty()) {
                         book.title.contains(searchQuery, ignoreCase = true)
                     } else {
@@ -63,7 +61,7 @@ fun FavoritesScreenRoot(
                         FavoritesSortType.TITLE_DESC -> filteredBooks.sortedByDescending { it.title }
                     }
                 }
-                .map { it.toUiModel() }
+                .map { it.toUiModel().copy(isFavorites = true) }
         }
     }
 
@@ -83,10 +81,19 @@ fun FavoritesScreenRoot(
         innerPadding = innerPadding,
         queryState = queryState,
         uiState = uiState,
-        onSearchClick = { eventFlow.tryEmit(FavoritesScreenEvent.Search) },
-        onClearClick = { eventFlow.tryEmit(FavoritesScreenEvent.ClearSearch) },
-        onFilterClick = { eventFlow.tryEmit(FavoritesScreenEvent.ToggleFilter) },
-        onSortClick = { eventFlow.tryEmit(FavoritesScreenEvent.ToggleSort) },
+        onSearchClick = {
+            searchQuery = queryState.text.toString()
+        },
+        onClearClick = {
+            queryState.clearText()
+            searchQuery = ""
+        },
+        onFilterClick = {
+            isPriceFilterEnabled = !isPriceFilterEnabled
+        },
+        onSortClick = {
+            sortType = sortType.next()
+        },
         onFavoriteToggle = { book -> eventFlow.tryEmit(FavoritesScreenEvent.ToggleFavorite(book)) },
         onBookClick = onBookClick,
     )
