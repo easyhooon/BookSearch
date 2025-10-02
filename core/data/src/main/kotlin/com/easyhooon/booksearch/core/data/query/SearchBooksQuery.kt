@@ -8,11 +8,7 @@ import javax.inject.Singleton
 import soil.query.InfiniteQueryId
 import soil.query.InfiniteQueryKey
 import soil.query.QueryChunks
-import soil.query.QueryOptionsOverride
 import soil.query.QueryReceiver
-import kotlin.time.Duration.Companion.minutes
-import kotlin.time.Duration.Companion.seconds
-import soil.query.copy
 
 data class SearchBooksPageParam(
     val page: Int,
@@ -73,12 +69,6 @@ class DefaultSearchBooksQueryKey @Inject constructor(
             } else {
                 null
             }
-        }
-        override fun onConfigureOptions(): QueryOptionsOverride = { options ->
-            options.copy(
-                staleTime = 30.seconds, // 30초간 fresh 상태 유지 (API 호출 안함)
-                gcTime = 10.minutes     // 10분간 메모리 캐시 유지
-            )
         }
     }
 }

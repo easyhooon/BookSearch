@@ -12,6 +12,8 @@ import soil.query.SwrCachePlusPolicy
 import soil.query.SwrCacheScope
 import soil.query.SwrClientPlus
 import soil.query.annotation.ExperimentalSoilQueryApi
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 
 @HiltAndroidApp
 class App : Application(), SwrClientFactory {
@@ -22,6 +24,8 @@ class App : Application(), SwrClientFactory {
             policy = SwrCachePlusPolicy(
                 coroutineScope = SwrCacheScope(),
                 queryOptions = QueryOptions(
+                    staleTime = 30.seconds,  // 30초간 fresh 상태 유지 (API 호출 안함)
+                    gcTime = 10.minutes,      // 10분간 메모리 캐시 유지
                     logger = { println(it) },
                 ),
                 memoryPressure = AndroidMemoryPressure(this),
