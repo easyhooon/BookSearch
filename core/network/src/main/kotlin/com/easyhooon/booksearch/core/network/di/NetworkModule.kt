@@ -2,9 +2,7 @@ package com.easyhooon.booksearch.core.network.di
 
 import android.util.Log
 import com.easyhooon.booksearch.core.network.BuildConfig
-import com.easyhooon.booksearch.core.network.TokenInterceptor
 import com.easyhooon.booksearch.core.network.client.BookSearchKtorClient
-import com.easyhooon.booksearch.core.network.service.BookSearchService
 import com.orhanobut.logger.AndroidLogAdapter
 import com.orhanobut.logger.PrettyFormatStrategy
 import dagger.Module
@@ -21,12 +19,6 @@ import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.request.header
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
-import retrofit2.Retrofit
-import retrofit2.converter.kotlinx.serialization.asConverterFactory
-import retrofit2.create
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
@@ -42,8 +34,6 @@ private val jsonRule = Json {
     // 엄격하지 않은 파싱 (따옴표 없는 키, 후행 쉼표 등 허용)
     isLenient = true
 }
-
-private val jsonConverterFactory = jsonRule.asConverterFactory("application/json".toMediaType())
 
 private val FILTERED_HEADERS = setOf(
     "transfer-encoding",
@@ -74,66 +64,6 @@ internal object NetworkModule {
             .build()
 
         return AndroidLogAdapter(networkFormatStrategy)
-    }
-
-    @Singleton
-    @Provides
-    internal fun provideHttpLoggingInterceptor(
-        networkLogAdapter: AndroidLogAdapter,
-    ): HttpLoggingInterceptor {
-        return HttpLoggingInterceptor { message ->
-            val shouldFilter = FILTERED_HEADERS.any { header ->
-                message.lowercase().contains("$header:")
-            }
-
-            val isDuplicateContentType = message.lowercase().contains("content-type: application/json") &&
-                !message.contains("charset")
-
-            if (!shouldFilter && !isDuplicateContentType) {
-                networkLogAdapter.log(Log.DEBUG, null, message)
-            }
-        }.apply {
-            level = if (BuildConfig.DEBUG) {
-                HttpLoggingInterceptor.Level.BODY
-            } else {
-                HttpLoggingInterceptor.Level.NONE
-            }
-        }
-    }
-
-    @Singleton
-    @Provides
-    internal fun provideOkHttpClient(
-        tokenInterceptor: TokenInterceptor,
-        httpLoggingInterceptor: HttpLoggingInterceptor,
-    ): OkHttpClient {
-        return OkHttpClient.Builder()
-            .connectTimeout(MaxTimeoutMillis, TimeUnit.MILLISECONDS)
-            .readTimeout(MaxTimeoutMillis, TimeUnit.MILLISECONDS)
-            .writeTimeout(MaxTimeoutMillis, TimeUnit.MILLISECONDS)
-            .addInterceptor(tokenInterceptor)
-            .addInterceptor(httpLoggingInterceptor)
-            .build()
-    }
-
-    @Singleton
-    @Provides
-    internal fun provideRetrofit(
-        okHttpClient: OkHttpClient,
-    ): Retrofit {
-        return Retrofit.Builder()
-            .baseUrl(BuildConfig.KAKAO_API_BASE_URL)
-            .client(okHttpClient)
-            .addConverterFactory(jsonConverterFactory)
-            .build()
-    }
-
-    @Singleton
-    @Provides
-    internal fun provideBookSearchService(
-        retrofit: Retrofit,
-    ): BookSearchService {
-        return retrofit.create()
     }
 
     @Singleton
